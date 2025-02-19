@@ -16,7 +16,7 @@ dotenv.config();
 export let total_url = process.env.DEV_URL || null
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const __dirname = path.resolve();
 const logDirectory = path.join(__dirname, 'logs');
 const infoLogStream = fs.createWriteStream(path.join(logDirectory, 'info.log'), { flags: 'a' });
