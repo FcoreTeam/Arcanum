@@ -1,0 +1,16 @@
+.navigation {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  z-index: 5;
+  height: 70px;
+  margin-bottom: 10px;
+  width: 95%;
+  margin: auto;
+  right: 2.5%;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  background: linear-gradient(to left, #1d1d22, #0a0a0c);
+}

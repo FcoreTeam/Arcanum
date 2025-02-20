@@ -1,0 +1,22 @@
+.button {
+  border: 0;
+  outline: none;
+  font-family: "mont";
+  &.buy__btn {
+    width: 49%;
+    height: 40px;
+    border-radius: 10px;
+    margin-top: 10px;
+    background: linear-gradient(to right, #de8a15b8, #463f3a39);
+    color: #fff;
+    font-size: 18px;
+  }
+  &.info__btn {
+    border: 2px solid #de8a15b8;
+    background: transparent;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    background-image: linear-gradient(to right, #f8c37b, #fff);
+  }
+}
