@@ -2,7 +2,9 @@
   border: 0;
   outline: none;
   font-family: "mont";
-  &.buy__btn {
+  &.buy__btn,
+  &.buy__btn__w,
+  &.buy__btn__s {
     width: 49%;
     height: 40px;
     border-radius: 10px;
@@ -10,6 +12,13 @@
     background: linear-gradient(to right, #de8a15b8, #463f3a39);
     color: #fff;
     font-size: 18px;
+  }
+  &.buy__btn__w {
+    width: 100%;
+  }
+  &.buy__btn__s {
+    width: 100%;
+    background: #de8a15b8
   }
   &.info__btn {
     border: 2px solid #de8a15b8;

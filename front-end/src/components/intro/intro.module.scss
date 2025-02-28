@@ -25,15 +25,17 @@
       z-index: 0;
     }
   }
-  .main__page {
+  .intro__page {
     width: 100vw;
     height: 100vh;
     position: absolute;
     display: flex;
     flex-flow: column;
-    justify-content: space-evenly;
-    overflow-y: scroll;
-
+    justify-content: space-between;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 20px;
+    padding-top: 220px;
     .main__title {
       font-size: 65px;
       font-weight: 500;
@@ -52,36 +54,23 @@
       color: #ffffff99;
       letter-spacing: 0.5px;
     }
-    .main__games {
+    .team__info {
       width: 100%;
-      height: 300px;
-
-      .games__controller {
-        width: 100%;
-        height: fit-content;
-        display: flex;
-        justify-content: space-evenly;
-        .controller {
-          width: 45%;
-          border: 2px solid #463f3a;
-          height: fit-content;
-          padding: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-          color: #463f3a;
-          border-radius: 20px;
-          backdrop-filter: blur(34px);
-          font-weight: 600;
-          transition: 0.5s;
-          &.active {
-            color: #fff;
-            backdrop-filter: blur(0px);
-            background: linear-gradient(to left, #463f3a, #312923);
-            font-weight: 400;
-          }
-        }
+      display: flex;
+      height: fit-content;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      .team__name {
+        color: #ffffff8f;
+        margin-right: 93px;
+        margin-top: 10px;
+      }
+      .team__logo {
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        margin-left: 93px;
       }
     }
   }

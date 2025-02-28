@@ -1,5 +1,7 @@
 import { useSelector } from "react-redux";
+import { Link } from "react-router";
 import userDefault from "../../img/userdef.svg";
+import clsx from "clsx";
 
 import styles from "./header.module.scss";
 
@@ -12,11 +14,15 @@ const Header = () => {
           <p className={styles.user__name}>{userName}</p>
           <p className={styles.user__pts}>{userPts} очков</p>
         </div>
-        <img
-          src={userAvatar === "" ? userDefault : userAvatar}
-          alt=""
-          className={styles.user__img}
-        />
+        <Link
+          to="/profile"
+          className={clsx(
+            styles.link__profile,
+            userAvatar === "" ? styles.user__def : ""
+          )}
+        >
+          {userAvatar !== "" ? <img src={userAvatar} alt="" className={styles.user__img} /> : <></>}
+        </Link>
       </div>
     </header>
   );
