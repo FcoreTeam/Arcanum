@@ -16,6 +16,9 @@
     "express": "^4.21.1",
     "morgan": "^1.10.0",
     "pg": "^8.13.0",
+    "socket": "^0.14.59",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "telegraf": "^4.16.3"
   },
   "devDependencies": {
