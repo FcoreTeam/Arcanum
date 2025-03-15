@@ -73,6 +73,7 @@ app.use(async (req, res) => {
     try {
         const games = await client.query(`SELECT * FROM games`);
         await games.rows.forEach(async (game) => {
+            if (new Date() < new Date(game.date+1)) return;
             const leaderboard = await client.query(
                 `SELECT * FROM leaderboard l 
                 LEFT JOIN users ON l.player_id = users.id
