@@ -1,0 +1,33 @@
+.image__uploader {
+    position: absolute;
+    width: 90%;
+    height: 60px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background: #4242429a;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    display: flex;
+    align-items: center;
+
+    .image__preview {
+        height: 35px;
+        width: 35px;
+        border-radius: 15px;
+
+    }
+
+    .image__info {
+        margin-left: 15px;
+
+        .image__name {
+            color: #fff;
+        }
+
+        .image__size {
+            color: #fff;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    }
+}

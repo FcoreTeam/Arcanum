@@ -5,7 +5,8 @@ import styles from "./input.module.scss";
 const Input = React.forwardRef(
   (
     { type, onChange, secondClass, isTextArea, value, style, placeholder },
-    ref
+    ref,
+    accept
   ) => {
     return (
       <>
@@ -21,6 +22,8 @@ const Input = React.forwardRef(
         ) : (
           <input
             type={type}
+            ref={ref}
+            accept={accept}
             placeholder={placeholder}
             onChange={onChange}
             className={clsx(styles.input, styles[secondClass])}

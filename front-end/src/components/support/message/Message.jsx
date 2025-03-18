@@ -1,8 +1,10 @@
+import clsx from "clsx";
+
 import styles from "./message.module.scss";
 
-const Message = ({ message }) => {
+const Message = ({ message, isUserMessage }) => {
   return (
-    <div className={styles.message}>
+    <div className={clsx(styles.message, isUserMessage ? styles.user : " ")}>
       <p className={styles.message__content}>{message}</p>
     </div>
   );

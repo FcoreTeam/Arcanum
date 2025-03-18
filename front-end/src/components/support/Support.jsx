@@ -6,12 +6,35 @@ import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
 
 import styles from "./support.module.scss";
+import ImageUploader from "./image-uploader/Image-uploader";
 
 const Support = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      isUserMessage: false,
+      message: "Текст сообщения",
+    },
+    {
+      id: 2,
+      isUserMessage: true,
+      message: "Здравствуйте!",
+    },
+  ]);
   const [inputValue, setInputValue] = useState("");
+  const [images, setImages] = useState([]); // Состояние для хранения загруженных изображений
   const textareaRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null); // Реф для input type="file"
 
+  // Автоматическая прокрутка вниз при изменении сообщений
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  // Автоматическое изменение высоты textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "45px";
@@ -22,14 +45,42 @@ const Support = () => {
     }
   }, []);
 
+  // Обработчик изменения текста в textarea
   const handleInputChange = (event) => {
     const { value } = event.target;
     setInputValue(value);
 
-    // Автоподстройка высоты
     event.target.style.height = "auto";
     const newHeight = Math.max(event.target.scrollHeight, 45);
     event.target.style.height = `${newHeight}px`;
+  };
+
+  // Обработчик загрузки изображений
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      setImages((prevImages) => [
+        ...prevImages,
+        {
+          fileName: file.name,
+          fileLink: fileURL,
+          fileSize: (file.size / 1024).toFixed(2),
+        },
+      ]);
+
+      event.target.value = null;
+    }
+  };
+
+  const sendMessage = (text) => {
+    const newMessage = {
+      id: messages.length + 1,
+      isUserMessage: true,
+      message: text,
+    };
+    setMessages([...messages, newMessage]);
+    setInputValue("");
   };
 
   return (
@@ -40,10 +91,25 @@ const Support = () => {
           <p className={styles.support__title}>Агент поддержки</p>
         </div>
         <section className={styles.body__messages}>
-          {messages.map((item, index) => (
-            <Message key={index} message={item} />
+          {messages.map((item) => (
+            <Message
+              key={item.id}
+              message={item.message}
+              isUserMessage={item.isUserMessage}
+            />
           ))}
+          <div ref={messagesEndRef} />
         </section>
+        <div className={styles.image__wrap}>
+          {images.map((item, index) => (
+            <ImageUploader
+              key={index}
+              name={item.fileName}
+              size={item.fileSize}
+              preview={item.fileLink}
+            />
+          ))}
+        </div>
 
         <div className={styles.support__footer}>
           <Input
@@ -55,13 +121,24 @@ const Support = () => {
             onChange={handleInputChange}
           />
           {inputValue.length !== 0 && (
-            <img src={sendImage} alt="" className={styles.send} />
+            <img
+              src={sendImage}
+              alt=""
+              className={styles.send}
+              onClick={() => sendMessage(inputValue)}
+            />
           )}
-          <Input type="file" secondClass="upload" />
+          <Input
+            type="file"
+            secondClass="upload"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
           <img src={clipImage} alt="" className={styles.clip} />
         </div>
       </div>
     </div>
   );
 };
+
 export default Support;

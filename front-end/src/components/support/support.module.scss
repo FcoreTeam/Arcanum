@@ -48,6 +48,21 @@
       padding-top: 15px;
       padding-left: 15px;
       padding-right: 15px;
+      display: flex;
+      flex-flow: column;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding-bottom: 10px;
+      overflow-x: hidden;
+    }
+
+    .image__wrap {
+      position: relative;
+      bottom: 60px;
+      display: flex;
+      justify-content: center;
+
     }
 
     .support__footer {
