@@ -29,3 +29,10 @@ export const setSettings = async (data) =>
   $api
     .put("/update_settings", data, { withCredentials: true })
     .catch((err) => console.log(err));
+
+export const socket = io("ws://localhost:3001", {
+  path: "/socket.io/",
+  extraHeaders: {
+    Authorization: `Bearer ${Cookies.get("accessToken")}`,
+  },
+});
