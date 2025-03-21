@@ -25,7 +25,7 @@ bot.start(async (ctx) => {
 addGameScene.enter(async (ctx) => {
     await ctx.reply('Введите ссылку на игру:');
     await console.log(ctx.session);
-    await ctx.scene.enter('addGame');
+    // await ctx.scene.enter('addGame');
 });
 
 bot.command('add_game', async (ctx) => {

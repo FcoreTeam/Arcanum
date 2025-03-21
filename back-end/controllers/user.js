@@ -1,3 +1,5 @@
+import { client } from "../config/database.js";
+
 export class UserController {
     static async updateEmailPhone(req, res) {
         try {   

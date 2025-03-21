@@ -58,6 +58,7 @@ if (!fs.existsSync(logDirectory)) {
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
+
 app.get('/chat', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'), (err) => {
         if (err) {
