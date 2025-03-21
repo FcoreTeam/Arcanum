@@ -1,7 +1,7 @@
 import pg from "pg";
 import dotenv from 'dotenv';
 
-await dotenv.config();
+dotenv.config();
 
 const {Client} = pg;
 
@@ -13,7 +13,7 @@ export const client = new Client({
     port: process.env.DB_PORT,
 });
 
-await client.connect().then(() => {
+client.connect().then(() => {
     console.log("Connected to database");
 }).catch((err) => {
     console.log(err);
