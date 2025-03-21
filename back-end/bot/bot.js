@@ -13,8 +13,16 @@ bot.use(session());
 // Initialize socket
 const socket = io('http://localhost:3000'); // Replace with your server URL
 
-const addGameScene = new Scenes.BaseScene("addGame");
-const stage = new Scenes.Stage([addGameScene]);
+const createGameScene = new Scenes.BaseScene("createGameScene");
+const testScene = new Scenes.BaseScene("testScene");
+const nameScene = new Scenes.BaseScene("nameScene");
+const dateScene = new Scenes.BaseScene("dateScene");
+const descriptionScene = new Scenes.BaseScene("descriptionScene");
+const priceScene = new Scenes.BaseScene("priceScene");
+const videoScene = new Scenes.BaseScene("videoScene");
+const afterVideoScene = new Scenes.BaseScene("afterVideoScene");
+const answerScene = new Scenes.BaseScene("answerScene");
+const stage = new Scenes.Stage([createGameScene, nameScene, testScene, dateScene, descriptionScene, priceScene, videoScene, afterVideoScene, answerScene]);
 bot.use(stage.middleware());
 
 // Command: /start
@@ -22,29 +30,120 @@ bot.start(async (ctx) => {
     await addUser(ctx);
 });
 
-addGameScene.enter(async (ctx) => {
-    await ctx.reply('Введите ссылку на игру:');
-    await console.log(ctx.session);
-    // await ctx.scene.enter('addGame');
+createGameScene.enter(async (ctx) => {
+    await ctx.scene.enter('testScene');
 });
 
-bot.command('add_game', async (ctx) => {
-    await ctx.scene.enter('addGame');
+testScene.enter(async (ctx) => {
+    await ctx.reply('Тестовая ли игра?', await Markup.keyboard([
+        [await Markup.button.text('Да'),
+        await Markup.button.text('Нет')],
+    ], ).resize());
 });
 
-bot.on('message', async (ctx) => {
-    await client.query('SELECT * FROM users WHERE tg_id = $1 and is_admin = true', [ctx.from.id]).then(async (data) => {
-        if (!data.rowCount) {
-            await ctx.reply('Ты не администратор!');
-            return;
-        }
-    });
+testScene.on('text', async (ctx) => {
+    if (ctx.message.text === 'Да') {
+        await ctx.scene.enter('nameScene');
+        ctx.session.game.is_test = true;
+    } else if (ctx.message.text === 'Нет') {
+        await ctx.scene.enter('nameScene');
+        ctx.session.game.is_test = false;
+    } else {
+        await ctx.reply('Неправильный ответ');
+        await ctx.scene.enter('testScene');
+    }
+    
+});
 
-    if (ctx.message.video) {
-        const fileId = ctx.message.video.file_id;
+nameScene.enter(async (ctx) => {
+    await ctx.reply('Введите название игры', Markup.removeKeyboard());
+});
 
-        const fileLink = await ctx.telegram.getFileLink(fileId);
+nameScene.on('text', async (ctx) => {
+    ctx.session.game.name = ctx.message.text;
+    await ctx.scene.enter('descriptionScene');
+    console.log(ctx.session);
+});
+
+descriptionScene.enter(async (ctx) => {
+    await ctx.reply('Введите описание игры');
+});
+
+descriptionScene.on('text', async (ctx) => {
+    ctx.session.game.description = ctx.message.text;
+    ctx.scene.enter('videoScene');
+});
+
+videoScene.enter(async (ctx) => {
+    await ctx.reply('Скиньте видео-превью игры');
+});
+
+videoScene.on('video', async (ctx) => {
+    const fileId = ctx.message.video.file_id;
+
+    const fileLink = await ctx.telegram.getFileLink(fileId);
+    ctx.session.game.video = fileLink;
+    ctx.scene.enter('afterVideoScene');
+});
+
+afterVideoScene.enter(async (ctx) => {
+    await ctx.reply('Скиньте видео игры');
+});
+
+afterVideoScene.on('video', async (ctx) => {
+    const fileId = ctx.message.video.file_id;
+
+    const fileLink = await ctx.telegram.getFileLink(fileId);
+    ctx.session.game.video_after = fileLink;
+    ctx.scene.enter('priceScene');
+});
+
+priceScene.enter(async (ctx) => {
+    await ctx.reply('Введите цену игры');
+});
+
+priceScene.on('text', async (ctx) => {
+    ctx.session.game.price = ctx.message.text;
+    ctx.scene.enter('dateScene');
+});
+
+dateScene.enter(async (ctx) => {
+    await ctx.reply('Введите дату проведения игры в формате DD.MM.YYYY');
+});
+
+dateScene.on('text', async (ctx) => {
+    const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/;
+    if (dateRegex.test(ctx.message.text)) {
+        ctx.session.game.date = ctx.message.text;
+        ctx.scene.enter('answerScene');
+    } else {
+        await ctx.reply('Неправильный формат даты. Попробуйте снова');
+        ctx.scene.enter('dateScene');
     }
 });
 
-bot.launch()
+answerScene.enter(async (ctx) => {
+    await ctx.reply('Введите ответ на игру');
+});
+
+answerScene.on('text', async (ctx) => {
+    ctx.session.game.answer = ctx.message.text;
+    const game = ctx.session.game;
+    try {
+        await client.query('INSERT INTO games (name, description, video_url, video_after_url, price, date, is_test, answer) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [game.name, game.description, game.video, game.video_after, game.price, game.date, game.is_test, game.answer]);
+        await ctx.reply('Игра успешно создана!');
+    } catch (error) {
+        await ctx.reply('Что-то пошло не так');
+        console.error(error);
+    }
+    ctx.scene.leave();
+});
+
+bot.command('create_game', async (ctx) => {
+    const user = await client.query('SELECT * FROM users where id = $1', [ctx.from.id])
+    ctx.session.game = {};
+    
+    ctx.scene.enter('createGameScene');
+});
+
+bot.launch();
