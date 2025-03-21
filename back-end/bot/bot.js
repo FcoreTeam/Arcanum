@@ -62,7 +62,6 @@ nameScene.enter(async (ctx) => {
 nameScene.on('text', async (ctx) => {
     ctx.session.game.name = ctx.message.text;
     await ctx.scene.enter('descriptionScene');
-    console.log(ctx.session);
 });
 
 descriptionScene.enter(async (ctx) => {
