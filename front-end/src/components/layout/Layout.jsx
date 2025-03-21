@@ -1,12 +1,15 @@
 import Header from "../header/Header";
 import Navigation from "../navigation/Navigation";
 import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Outlet } from "react-router-dom";
+import TipPopup from "../@popups/tip-popup/Tip-popup";
 
 import styles from "./layout.module.scss";
 
 const Layout = () => {
   const locate = useLocation();
+  const { isOpen, popupType } = useSelector((state) => state.popup.generalInfo);
 
   return (
     <div className={styles.layout}>
@@ -19,6 +22,7 @@ const Layout = () => {
       <div className={styles.nav__wrap}>
         {locate.pathname !== "/intro" ? <Navigation /> : ""}
       </div>
+      {isOpen && popupType === "tip" && <TipPopup />}
     </div>
   );
 };
