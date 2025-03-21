@@ -31,3 +31,5 @@ bot.on('message', async (ctx) => {
         const fileLink = await ctx.telegram.getFileLink(fileId);
     }
 });
+
+bot.launch()

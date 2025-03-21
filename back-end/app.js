@@ -67,8 +67,6 @@ app.get('/chat', (req, res) => {
     });
 });
 
-bot.launch();
-
 app.use('/games', game_router);
 app.use('/users', user_router);
 app.use('/leaderboard', leaderboard_router);
