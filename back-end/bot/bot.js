@@ -1,12 +1,13 @@
 import { Markup, Telegraf } from 'telegraf';
 import dotenv from 'dotenv';
-import { addUser } from './utils/adduser.js';
 import { io } from 'socket.io-client'; // Import socket.io-client
 import { client } from '../config/database.js';
+import { addUser } from './utils/adduser.js';
 
 dotenv.config();
 const token = process.env.TOKEN || null;
 export const bot = new Telegraf(token);
+const total_url = process.env.DEV_URL || null
 
 // Initialize socket
 const socket = io('http://localhost:3000'); // Replace with your server URL
