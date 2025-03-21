@@ -9,4 +9,26 @@ export class UserController {
             res.json({success: false, error: 'Error while update user'});
         }
     }
+    
+    static async userInfo(req, res) {
+        // GET
+        try {
+            const { user_id } = req.query;
+            const { rows } = await client.query('SELECT * FROM users WHERE id = $1', [user_id]);
+            res.json({success: true, user: rows[0]});
+        } catch (err) {
+            console.error(err);
+            res.json({success: false, error: 'Error while getting user info'});
+        }
+    }
+
+    static async usersInfo(req, res) {
+        try {
+            const { rows } = await client.query('SELECT * FROM users');
+            res.json({success: true, users: rows});
+        } catch (err) {
+            console.error(err);
+            res.json({success: false, error: 'Error while getting users info'});
+        }
+    }
 }

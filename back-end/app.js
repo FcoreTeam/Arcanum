@@ -34,8 +34,8 @@ const allowedOrigins = [
     process.env.CLIENT_URL
 ];
 
-ws_app.listen(3000, () => {
-    console.log(`Вебсокет пашет на ${3000} порте!`);
+ws_app.listen(5000, () => {
+    console.log(`Вебсокет пашет на ${5000} порте!`);
 });
 
 const io = new Server(ws_app, {
@@ -67,7 +67,9 @@ app.get('/chat', (req, res) => {
     });
 });
 
-bot.launch();
+app.use('/games', game_router);
+app.use('/users', user_router);
+app.use('/leaderboard', leaderboard_router);
 
 app.use(async (req, res) => {
     try {
@@ -89,13 +91,8 @@ app.use(async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 })
-
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 app.use(morgan('combined', { stream: infoLogStream }));
 app.use(cors());
-
-app.use('/game', game_router);
-app.use('/user', user_router);
-app.use('/leaderboard', leaderboard_router);

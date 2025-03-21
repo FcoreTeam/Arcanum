@@ -3,20 +3,10 @@ export const createUsers = `CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(255),
     username VARCHAR(255),
     balance DECIMAL(100,2) NOT NULL DEFAULT 0,
-    from_ref_id BIGINT,
     avatar_url VARCHAR(255),
-    is_admin BOOLEAN NOT NULL DEFAULT false
-    email VARCHAR(255),
-    phone VARCHAR(255)
-);`;
-
-export const createBuyingGames = `CREATE TABLE IF NOT EXISTS buying_games (
-    id SERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    game_id BIGINT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_game_id FOREIGN KEY (game_id) REFERENCES games(id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    email VARCHAR(255) UNIQUE,
+    phone VARCHAR(255) UNIQUE
 );`;
 
 export const createGames = `CREATE TABLE IF NOT EXISTS games(
@@ -30,6 +20,15 @@ export const createGames = `CREATE TABLE IF NOT EXISTS games(
     answer VARCHAR(255),
     is_test BOOLEAN NOT NULL DEFAULT false
 );`
+
+export const createBuyingGames = `CREATE TABLE IF NOT EXISTS buying_games (
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    game_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_game_id FOREIGN KEY (game_id) REFERENCES games(id),
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+);`;
 
 export const createLeaderboard = `CREATE TABLE IF NOT EXISTS leaderboard(
     id SERIAL PRIMARY KEY,
