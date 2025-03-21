@@ -1,14 +1,15 @@
 import { Cookies } from "js-cookie";
-import { io } from "socket.io"; // for chat
+import { io } from "socket.io";
 
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "http://localhost:3000/api/",
+  baseURL: "http://api.zoltansgametma.ru",
   timeout: 10000,
 });
 
-// jwt auth there
+export const getUserInfo = async () =>
+  $api.get("/user/user_info").catch((err) => console.log(err));
 
 export const getGames = async () =>
   $api.get("game/getgames").catch((err) => console.log(err));
