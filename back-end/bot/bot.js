@@ -1,4 +1,4 @@
-import { Markup, Telegraf } from 'telegraf';
+import { Markup, Scenes, session, Telegraf } from 'telegraf';
 import dotenv from 'dotenv';
 import { io } from 'socket.io-client'; // Import socket.io-client
 import { client } from '../config/database.js';
@@ -9,12 +9,27 @@ const token = process.env.TOKEN || null;
 export const bot = new Telegraf(token);
 const total_url = process.env.DEV_URL || null
 
+bot.use(session());
 // Initialize socket
 const socket = io('http://localhost:3000'); // Replace with your server URL
+
+const addGameScene = new Scenes.BaseScene("addGame");
+const stage = new Scenes.Stage([addGameScene]);
+bot.use(stage.middleware());
 
 // Command: /start
 bot.start(async (ctx) => {
     await addUser(ctx);
+});
+
+addGameScene.enter(async (ctx) => {
+    await ctx.reply('Введите ссылку на игру:');
+    await console.log(ctx.session);
+    await ctx.scene.enter('addGame');
+});
+
+bot.command('add_game', async (ctx) => {
+    await ctx.scene.enter('addGame');
 });
 
 bot.on('message', async (ctx) => {

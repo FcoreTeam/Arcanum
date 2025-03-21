@@ -8,5 +8,7 @@ const router = Router();
 router.post('/update_settings', UserController.updateEmailPhone);
 router.get('/get_success_game', GameController.successGame);
 router.get('/get_unsuccess_game', GameController.unsuccessGame);
+router.get('/user_info', UserController.userInfo);
+router.get('/users_info', UserController.usersInfo);
 
 export default router;
