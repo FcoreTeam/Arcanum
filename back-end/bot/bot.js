@@ -70,7 +70,7 @@ descriptionScene.enter(async (ctx) => {
 
 descriptionScene.on('text', async (ctx) => {
     ctx.session.game.description = ctx.message.text;
-    ctx.scene.enter('videoScene');
+    await ctx.scene.enter('videoScene');
 });
 
 videoScene.enter(async (ctx) => {
@@ -82,7 +82,7 @@ videoScene.on('video', async (ctx) => {
 
     const fileLink = await ctx.telegram.getFileLink(fileId);
     ctx.session.game.video = fileLink;
-    ctx.scene.enter('afterVideoScene');
+    await ctx.scene.enter('afterVideoScene');
 });
 
 afterVideoScene.enter(async (ctx) => {
@@ -94,7 +94,7 @@ afterVideoScene.on('video', async (ctx) => {
 
     const fileLink = await ctx.telegram.getFileLink(fileId);
     ctx.session.game.video_after = fileLink;
-    ctx.scene.enter('priceScene');
+    await ctx.scene.enter('priceScene');
 });
 
 priceScene.enter(async (ctx) => {
@@ -103,7 +103,7 @@ priceScene.enter(async (ctx) => {
 
 priceScene.on('text', async (ctx) => {
     ctx.session.game.price = ctx.message.text;
-    ctx.scene.enter('dateScene');
+    await ctx.scene.enter('dateScene');
 });
 
 dateScene.enter(async (ctx) => {
@@ -114,10 +114,10 @@ dateScene.on('text', async (ctx) => {
     const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/;
     if (dateRegex.test(ctx.message.text)) {
         ctx.session.game.date = ctx.message.text;
-        ctx.scene.enter('answerScene');
+        await ctx.scene.enter('answerScene');
     } else {
         await ctx.reply('Неправильный формат даты. Попробуйте снова');
-        ctx.scene.enter('dateScene');
+        await ctx.scene.enter('dateScene');
     }
 });
 
@@ -139,10 +139,14 @@ answerScene.on('text', async (ctx) => {
 });
 
 bot.command('create_game', async (ctx) => {
-    const user = await client.query('SELECT * FROM users where id = $1', [ctx.from.id])
+    const user = await client.query('SELECT * FROM users where id = $1', [ctx.from.id]);
+    if (!user.rows.is_admin) {
+        await ctx.reply('Вы не администратор');
+        return;
+    }
     ctx.session.game = {};
     
-    ctx.scene.enter('createGameScene');
+    await ctx.scene.enter('createGameScene');
 });
 
 bot.launch();
