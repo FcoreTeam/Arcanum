@@ -1,6 +1,7 @@
 import intro from "../../videos/intro.mp4";
 import Button from "../@ui/Button/Button";
 import fcore from "../../img/fcore.png";
+import { Link } from "react-router-dom";
 
 import styles from "./intro.module.scss";
 
@@ -21,13 +22,14 @@ const Intro = () => {
           </p>
         </div>
         <div className={styles.preview__wrap}>
-          <Button buttonClass="buy__btn__s" buttonContent="Начать" />
-
+          <Link to="/">
+            <Button buttonClass="buy__btn__s" buttonContent="Начать" />
+          </Link>
         </div>
         <div className={styles.team__info}>
-            <p className={styles.team__name}>Powered by</p>
-            <img src={fcore} alt="" className={styles.team__logo} />
-          </div>
+          <p className={styles.team__name}>Powered by</p>
+          <img src={fcore} alt="" className={styles.team__logo} />
+        </div>
       </div>
     </div>
   );

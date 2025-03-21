@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const userState = {
-  userName: "Пользователь 1",
+  userName: "username",
   userAvatar: "",
-  userPts: 1000,
+  userPts: 0,
   userPhone: "Телефон не привязан",
   userEmail: "Почта не привязана",
   userGames: [
@@ -23,7 +23,6 @@ const userState = {
       gamePreview: "",
       gamePrice: 0,
     },
-    
   ],
 };
 const userSlice = createSlice({
