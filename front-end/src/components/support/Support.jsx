@@ -73,20 +73,24 @@ const Support = () => {
     }
   };
 
+  const canSendMessage = !!inputValue.length || !!images.length;
+
   const sendMessage = (text) => {
-    if (!text.trim()) return;
+    if (!canSendMessage) return;
+
     const newMessage = {
       id: messages.length + 1,
       isUserMessage: true,
       message: text,
       images: [...images],
     };
+
     setMessages([...messages, newMessage]);
     setInputValue("");
-    setImages([])
+    setImages([]);
 
     if (textareaRef.current) {
-      textareaRef.current.style.height = "45px"; 
+      textareaRef.current.style.height = "45px";
     }
   };
 
@@ -128,7 +132,7 @@ const Support = () => {
             value={inputValue}
             onChange={handleInputChange}
           />
-          {inputValue.length !== 0 && (
+          {canSendMessage && (
             <img
               src={sendImage}
               alt=""
