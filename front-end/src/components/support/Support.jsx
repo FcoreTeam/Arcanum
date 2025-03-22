@@ -74,13 +74,20 @@ const Support = () => {
   };
 
   const sendMessage = (text) => {
+    if (!text.trim()) return;
     const newMessage = {
       id: messages.length + 1,
       isUserMessage: true,
       message: text,
+      images: [...images],
     };
     setMessages([...messages, newMessage]);
     setInputValue("");
+    setImages([])
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "45px"; 
+    }
   };
 
   return (
@@ -96,6 +103,7 @@ const Support = () => {
               key={item.id}
               message={item.message}
               isUserMessage={item.isUserMessage}
+              images={item.images}
             />
           ))}
           <div ref={messagesEndRef} />

@@ -1,11 +1,12 @@
 import intro from "../../videos/intro.mp4";
 import Button from "../@ui/Button/Button";
 import fcore from "../../img/fcore.png";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import styles from "./intro.module.scss";
 
 const Intro = () => {
+  const navigate = useNavigate()
   return (
     <div className={styles.main}>
       <div className={styles.video__background}>
@@ -22,9 +23,7 @@ const Intro = () => {
           </p>
         </div>
         <div className={styles.preview__wrap}>
-          <Link to="/">
-            <Button buttonClass="buy__btn__s" buttonContent="Начать" />
-          </Link>
+            <Button buttonClass="buy__btn__s" buttonContent="Начать" onClick={() => {navigate("/main")}}/>
         </div>
         <div className={styles.team__info}>
           <p className={styles.team__name}>Powered by</p>

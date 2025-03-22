@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import Main from "../main/Main";
@@ -15,13 +15,14 @@ const App = () => {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Main />} />
+        <Route path="/" element={<Navigate to="/intro" />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/support" element={<Support />} />
         <Route path="/intro" element={<Intro />} />
         <Route path="/game" element={<Game name={name} video={video} />} />
         <Route path="/lead" element={<Leads />} />
         <Route path="/info" element={<Instruction />} />
+        <Route path="/main" element={<Main />} />
       </Route>
     </Routes>
   );
