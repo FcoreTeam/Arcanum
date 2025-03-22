@@ -79,12 +79,12 @@ app.use(async (req, res) => {
             if (new Date() < new Date(game.date+1)) return;
             const leaderboard = await client.query(
                 `SELECT * FROM leaderboard l 
-                LEFT JOIN users ON l.player_id = users.id
+                LEFT JOIN users ON l.user_id = users.id
                 WHERE l.game_id = $1 ORDER BY l.created_at ASC limit 8`, [game.id]);
             for (let i = 10; i >= 3; i--) {
                 if (leaderboard.rows[10-i] == undefined || leaderboard.rows[10-i].is_rewarded) continue;
-                await client.query(`UPDATE users SET balance = balance + $1 WHERE id = $2`, [i, leaderboard.rows[10-i].player_id]);   
-                await client.query(`UPDATE leaderboard SET is_rewarded = true WHERE player_id = $1`, [leaderboard.rows[10-i].player_id]);             
+                await client.query(`UPDATE users SET balance = balance + $1 WHERE id = $2`, [i, leaderboard.rows[10-i].user_id]);   
+                await client.query(`UPDATE leaderboard SET is_rewarded = true WHERE user_id = $1`, [leaderboard.rows[10-i].user_id]);             
             }
         })
     } catch (error) {
