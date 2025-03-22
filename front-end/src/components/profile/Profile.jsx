@@ -44,7 +44,6 @@ const Profile = () => {
 
   return (
     <div className={styles.profile}>
-      <img src={blur} alt="" className={styles.blur__image} />
       <div className={styles.profile__info}>
         <div
           className={clsx(
