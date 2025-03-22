@@ -22,7 +22,9 @@ const priceScene = new Scenes.BaseScene("priceScene");
 const photoScene = new Scenes.BaseScene("photoScene");
 const afterVideoScene = new Scenes.BaseScene("afterVideoScene");
 const answerScene = new Scenes.BaseScene("answerScene");
-const stage = new Scenes.Stage([createGameScene, nameScene, testScene, dateScene, descriptionScene, priceScene, photoScene, afterVideoScene, answerScene]);
+const hipplesCountScene = new Scenes.BaseScene("hipplesCountScene");
+const hippleScene = new Scenes.BaseScene("hippleScene");
+const stage = new Scenes.Stage([createGameScene, hippleScene, hipplesCountScene, nameScene, testScene, dateScene, descriptionScene, priceScene, photoScene, afterVideoScene, answerScene]);
 bot.use(stage.middleware());
 
 // Command: /start
@@ -114,7 +116,7 @@ dateScene.on('text', async (ctx) => {
     const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/;
     if (dateRegex.test(ctx.message.text)) {
         ctx.session.game.date = ctx.message.text;
-        await ctx.scene.enter('answerScene');
+        await ctx.scene.enter('hipplesCountScene');
     } else {
         await ctx.reply('Неправильный формат даты. Попробуйте снова');
         await ctx.scene.enter('dateScene');
@@ -130,13 +132,43 @@ answerScene.on('text', async (ctx) => {
     const game = ctx.session.game;
     try {
         await client.query('INSERT INTO games (name, description, preview_url, video_after_url, price, date, is_test, answer) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [game.name, game.description, game.photo, game.video_after, game.price, game.date, game.is_test, game.answer]);
+        const game_info = await client.query('SELECT * FROM games where name = $1 and description = $2 and preview_url = $3 and video_after_url = $4 and price = $5 and date = $6 and is_test = $7 and answer = $8', [game.name, game.description, game.photo, game.video_after, game.price, game.date, game.is_test, game.answer]);
+        game.hipples.forEach(async (hipple) => {
+            await client.query('INSERT INTO hipples (game_id, description) VALUES ($1, $2)', [game_info.rows[0].id, hipple]);
+        });
         await ctx.reply('Игра успешно создана!');
     } catch (error) {
         await ctx.reply('Что-то пошло не так');
         console.error(error);
     }
-    ctx.scene.leave();
+    await ctx.scene.leave();
 });
+
+hipplesCountScene.enter(async (ctx) => {
+    await ctx.reply('Введите количество подсказок');
+});
+
+hipplesCountScene.on('text', async (ctx) => {
+    ctx.session.game.hipples = [];
+    ctx.session.game.hipplesCount = parseInt(ctx.message.text);
+    await ctx.scene.enter('hippleScene');
+});
+
+hippleScene.enter(async (ctx) => {
+    await ctx.reply('Введите описание подсказки');
+});
+
+hippleScene.on('text', async (ctx) => {
+    ctx.session.game.hipples.push(ctx.message.text);
+    if (ctx.session.game.hipples.length < ctx.session.game.hipplesCount) {
+        await ctx.scene.enter('hippleScene');
+    } else {
+        console.log(ctx.session.game.hipples);
+        await ctx.scene.enter('answerScene');
+    }
+});
+
+
 
 bot.command('create_game', async (ctx) => {
     const user = await client.query('SELECT * FROM users where id = $1 and is_admin = true', [ctx.from.id]);
