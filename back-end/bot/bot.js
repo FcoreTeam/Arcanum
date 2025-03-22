@@ -19,10 +19,10 @@ const nameScene = new Scenes.BaseScene("nameScene");
 const dateScene = new Scenes.BaseScene("dateScene");
 const descriptionScene = new Scenes.BaseScene("descriptionScene");
 const priceScene = new Scenes.BaseScene("priceScene");
-const videoScene = new Scenes.BaseScene("videoScene");
+const photoScene = new Scenes.BaseScene("photoScene");
 const afterVideoScene = new Scenes.BaseScene("afterVideoScene");
 const answerScene = new Scenes.BaseScene("answerScene");
-const stage = new Scenes.Stage([createGameScene, nameScene, testScene, dateScene, descriptionScene, priceScene, videoScene, afterVideoScene, answerScene]);
+const stage = new Scenes.Stage([createGameScene, nameScene, testScene, dateScene, descriptionScene, priceScene, photoScene, afterVideoScene, answerScene]);
 bot.use(stage.middleware());
 
 // Command: /start
@@ -70,18 +70,18 @@ descriptionScene.enter(async (ctx) => {
 
 descriptionScene.on('text', async (ctx) => {
     ctx.session.game.description = ctx.message.text;
-    await ctx.scene.enter('videoScene');
+    await ctx.scene.enter('photoScene');
 });
 
-videoScene.enter(async (ctx) => {
-    await ctx.reply('Скиньте видео-превью игры');
+photoScene.enter(async (ctx) => {
+    await ctx.reply('Скиньте фото-превью игры');
 });
 
-videoScene.on('video', async (ctx) => {
-    const fileId = ctx.message.video.file_id;
+photoScene.on('photo', async (ctx) => {
+    const fileId = ctx.message.photo[0].file_id;
 
     const fileLink = await ctx.telegram.getFileLink(fileId);
-    ctx.session.game.video = fileLink;
+    ctx.session.game.photo = fileLink;
     await ctx.scene.enter('afterVideoScene');
 });
 
@@ -129,7 +129,7 @@ answerScene.on('text', async (ctx) => {
     ctx.session.game.answer = ctx.message.text;
     const game = ctx.session.game;
     try {
-        await client.query('INSERT INTO games (name, description, video_url, video_after_url, price, date, is_test, answer) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [game.name, game.description, game.video, game.video_after, game.price, game.date, game.is_test, game.answer]);
+        await client.query('INSERT INTO games (name, description, preview_url, video_after_url, price, date, is_test, answer) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [game.name, game.description, game.photo, game.video_after, game.price, game.date, game.is_test, game.answer]);
         await ctx.reply('Игра успешно создана!');
     } catch (error) {
         await ctx.reply('Что-то пошло не так');
@@ -139,8 +139,8 @@ answerScene.on('text', async (ctx) => {
 });
 
 bot.command('create_game', async (ctx) => {
-    const user = await client.query('SELECT * FROM users where id = $1', [ctx.from.id]);
-    if (!user.rows.is_admin) {
+    const user = await client.query('SELECT * FROM users where id = $1 and is_admin = true', [ctx.from.id]);
+    if (user.rowCount == 0) {
         await ctx.reply('Вы не администратор');
         return;
     }

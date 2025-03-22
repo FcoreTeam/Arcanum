@@ -15,7 +15,7 @@ export const createGames = `CREATE TABLE IF NOT EXISTS games(
     description VARCHAR(255),
     date VARCHAR(255),
     price DECIMAL(100,2) NOT NULL DEFAULT 0,
-    video_url VARCHAR(255),
+    preview_url VARCHAR(255),
     video_after_url VARCHAR(255),
     answer VARCHAR(255),
     is_test BOOLEAN NOT NULL DEFAULT false
