@@ -1,0 +1,71 @@
+.game {
+    max-width: 100%;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-flow: column;
+    position: relative;
+    background: #030404;
+    padding-top: 80px;
+    align-items: center;
+    overflow: hidden;
+
+    .blur__image,
+    .blur__image__sec {
+        width: 360px;
+        position: absolute;
+        height: 800px;
+        left: -150px;
+        bottom: 50px;
+    }
+
+    .blur__image__sec {
+        left: 150px;
+        top: 190px;
+        rotate: 180deg;
+    }
+
+    .game__title {
+        color: #fff;
+        width: 100%;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .videoContainer {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        flex-flow: column;
+        position: relative;
+        align-items: center;
+
+        .video__subtitle {
+            margin-top: 20px;
+            color: #FFFFFF7D;
+            font-size: 12px;
+            text-align: center;
+            width: 70%;
+            letter-spacing: 1px;
+            font-weight: 400;
+            font-family: "mont";
+        }
+
+        .game__video {
+            margin-top: 20px;
+            width: 90%;
+            aspect-ratio: 16 / 9; // Сохраняем пропорции видео (16:9)
+            position: relative;
+            overflow: hidden; // Скрываем части видео, выходящие за пределы блока
+
+            video {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover; // Заполняем блок, сохраняя пропорции
+            }
+        }
+    }
+}

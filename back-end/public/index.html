@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash Game</title>
+    <style>
+        #result-display {
+            font-size: 20px;
+            margin-bottom: 10px;
+            display: none;
+            /* Скрываем блок по умолчанию */
+        }
+    </style>
+</head>
+
+<body>
+    <div>Messages</div>
+    <input type="text" id="message">
+    <button id="send">Send</button>
+
+    <div class="chat">
+        
+    </div>
+
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script>
+        const messageInput = document.getElementById('message');
+        const sendButton = document.getElementById('send');
+        const urlParams = new URLSearchParams(window.location.search);
+        const chat_id = urlParams.get('chat_id');
+        sendButton.addEventListener('click', () => {
+            const msg = messageInput.value;
+            socket.emit('private_message', { chat_id, msg });
+        });
+
+        const socket = io('http://localhost:3000', {
+            extraHeaders: {
+                // Authorization: `Bearer ${token}`
+            }
+        });
+
+        socket.on('private_message', (data) => {
+            console.log(data);
+            const msg = data;
+            const chat = document.querySelector('.chat');
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = msg;
+            chat.appendChild(messageDiv);
+        });
+
+        socket.on('connect', () => {
+            socket.emit('join_chat', chat_id);
+            console.log('Соединение с сервером установлено!');
+        });
+
+        socket.on('error', (error) => {
+            console.error('Произошла ошибка:', error);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Соединение с сервером разорвано!');
+        });
+    </script>
+</body>
+
+</html>

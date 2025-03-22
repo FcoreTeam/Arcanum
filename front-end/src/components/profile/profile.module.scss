@@ -1,0 +1,130 @@
+.profile {
+  max-width: 100%;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  position: relative;
+  background: #030404;
+   overflow-x: hidden;
+  .blur__image {
+    position: absolute;
+    height: 600px;
+    width: 600px;
+    top: 10%;
+    left: -50%;
+    z-index: 3;
+  }
+  .profile__info {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    padding-top: 50px;
+    overflow-y: scroll;
+    .profile__avatar {
+      width: 150px;
+      height: 150px;
+      background: #131313;
+      border-radius: 50%;
+      &.user__def {
+        background-image: url("../../img/userdef.svg");
+        background-repeat: no-repeat;
+        background-size: 90px 90px;
+        background-position: center;
+      }
+    }
+    .user__name {
+      color: #fff;
+      margin-top: 30px;
+      font-size: 22px;
+    }
+    .user__info {
+      width: 80%;
+      height: fit-content;
+      padding: 15px;
+      margin-top: 15px;
+      border: 2px solid rgb(26, 26, 26);
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #987b67;
+      font-size: 17px;
+      background: linear-gradient(to left, #000 -19%, #d9d9d91a);
+    }
+    .edit__btn {
+      width: 70%;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      background: #463f3a;
+      color: #ffffff80;
+      margin-top: 20px;
+      border-radius: 100px;
+      height: 50px;
+      .edit__img {
+        height: 20px;
+        width: 20px;
+      }
+    }
+    .games__title {
+      color: #fff;
+      margin-top: 20px;
+      width: 100%;
+      font-size: 22px;
+      text-align: center;
+    }
+    .games__controller {
+      width: 100%;
+      height: fit-content;
+      display: flex;
+      justify-content: space-evenly;
+      margin-top: 10px;
+      z-index: 3;
+      .controller {
+        width: 45%;
+        border: 2px solid #463f3a;
+        height: fit-content;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: #463f3a;
+        border-radius: 20px;
+        backdrop-filter: blur(34px);
+        font-weight: 600;
+        transition: 0.5s;
+        &.active {
+          color: #fff;
+          backdrop-filter: blur(0px);
+          background: linear-gradient(to left, #463f3a, #312923);
+          font-weight: 400;
+        }
+      }
+    }
+  }
+}
+
+.input {
+  width: 80%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 100px;
+  border: 2px solid #463f3a;
+  background: linear-gradient(to left, #000 -19%, #d9d9d91a);
+  color: #987b67;
+  text-align: center;
+}
+
+.save__btn {
+  width: 70%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 100px;
+  background: #463f3a;
+  color: #fff;
+  cursor: pointer;
+  text-align: center;
+}

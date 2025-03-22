@@ -1,0 +1,61 @@
+.message {
+  width: fit-content;
+  max-width: 70%;
+  height: fit-content;
+  border-radius: 20px;
+  padding: 15px;
+  background: #2d2d2d;
+  color: #ffffff99;
+  position: relative;
+  margin-top: 10px;
+  word-wrap: break-word;
+  /* Перенос текста на новую строку */
+  overflow-wrap: break-word;
+  /* Альтернатива для word-wrap */
+  white-space: normal;
+  /* Убедимся, что текст переносится */
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -10px;
+    height: 15px;
+    width: 30px;
+    background: #2d2d2d;
+
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+  }
+
+  &.user {
+    align-self: flex-end;
+    background: linear-gradient(280.64deg, #ffffff -32.6%, #feac39 89.94%);
+    color: #000000eb;
+    position: relative;
+    z-index: 1;
+
+    &::after {
+      display: block;
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 78%;
+      transform: translateX(10px); 
+      height: 15px;
+      width: 30px;
+      background: #FFE4C2;
+      border-top-right-radius: 10px; 
+      border-bottom-right-radius: 10px; 
+      z-index: 0;
+    }
+  }
+}
+
+.message_image {
+  max-width: 200px; 
+  max-height: 200px; 
+  width: auto;  
+  height: auto; 
+  border-radius: 8px; 
+}

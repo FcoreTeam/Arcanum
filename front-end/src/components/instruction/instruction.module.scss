@@ -1,0 +1,55 @@
+.instruction {
+    max-width: 100%;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-flow: column;
+
+    justify-content: center;
+    position: relative;
+    background: #030404;
+    padding-top: 50px;
+    padding-bottom: 90px;
+
+    .blur__image,
+    .blur__image__sec {
+        width: 360px;
+        position: absolute;
+        height: 600px;
+        left: -60px;
+        bottom: 50px;
+    }
+
+    .blur__image__sec {
+        left: 60px;
+        top: 0;
+        rotate: 180deg;
+    }
+
+    .body {
+        height: 100%;
+
+        .instruction__title {
+            color: #fff;
+            font-size: 22px;
+            width: 100%;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-top: 40px;
+        }
+
+        .instruction__text {
+            color: #7D7D7D;
+            margin-top: 20px;
+            padding-left: 20px;
+            padding-right: 20px;
+
+            span {
+                color: #F8C37B;
+                font-weight: 500;
+                text-decoration: underline;
+            }
+        }
+    }
+
+}
