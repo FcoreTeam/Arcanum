@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import clsx from "clsx";
-import blur from "../../img/blur__one.svg";
 import pencil from "../../img/pencil.svg";
 import Games from "../main/games/Games";
 import { api } from "../../api/api";
@@ -42,6 +41,13 @@ const Profile = () => {
     }
   };
 
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value) && value.length <= 11) {
+      setPhone(value);
+    }
+  };
+
   return (
     <div className={styles.profile}>
       <div className={styles.profile__info}>
@@ -60,16 +66,18 @@ const Profile = () => {
         {isEditing ? (
           <>
             <input
-              type="text"
+              type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               className={styles.input}
+              placeholder="Введите номер телефона"
             />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={styles.input}
+              placeholder="Введите email"
             />
             <button className={styles.save__btn} onClick={handleSave}>
               Сохранить
