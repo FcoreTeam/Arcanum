@@ -6,14 +6,16 @@ import clsx from "clsx";
 
 import styles from "./game-line.module.scss";
 
+const INITIAL_GAMES = [
+  { gameName: "Игра 1", isActive: false },
+  { gameName: "Игра 2", isActive: false },
+  { gameName: "Игра 3", isActive: false },
+  { gameName: "Игра 4", isActive: false },
+  { gameName: "Игра 5", isActive: true },
+]
+
 const GameLine = () => {
-  const [gameNav, setGameNav] = useState([
-    { gameName: "Игра 1", isActive: false },
-    { gameName: "Игра 2", isActive: false },
-    { gameName: "Игра 3", isActive: false },
-    { gameName: "Игра 4", isActive: false },
-    { gameName: "Игра 5", isActive: true },
-  ]);
+  const [gameNav, setGameNav] = useState(INITIAL_GAMES);
 
   const handleSlideClick = (index) => {
     const updatedGameNav = gameNav.map((item, i) => ({
