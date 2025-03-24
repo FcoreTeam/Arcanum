@@ -13,6 +13,7 @@ export async function addUser(ctx) {
     let query = `SELECT * FROM users WHERE id = ${ctx.from.id}`;
     let info = await client.query(query);
     if (info.rows.length == 0) {
+        console.log(info.rows)
         await client.query(`INSERT INTO users (id, username, first_name) VALUES ($1, $2, $3)`, [ctx.from.id, ctx.from.username, ctx.from.first_name]);
         await bot.telegram.getUserProfilePhotos(ctx.from.id).then(async (data) => {
             if (data.total_count == 0) return;
