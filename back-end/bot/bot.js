@@ -181,4 +181,37 @@ bot.command('create_game', async (ctx) => {
     await ctx.scene.enter('createGameScene');
 });
 
+bot.command('get_game_stats', async (ctx) => {
+    const user = await client.query('SELECT * FROM users where id = $1 and is_admin = true', [ctx.from.id]);
+    if (user.rowCount == 0) {
+        await ctx.reply('Вы не администратор');
+        return;
+    }
+    const game_id = ctx.message.text.split(' ')[1];
+    const game = await client.query('SELECT * FROM games where id = $1', [game_id]);
+    if (game.rowCount == 0){
+        await ctx.reply('Такой игры не существует');
+        return;
+    }
+    const stats = await client.query(`
+                            SELECT 
+                            leaderboard.*, 
+                            users.*, 
+                            games.*
+                            FROM leaderboard
+                            JOIN users ON leaderboard.user_id = users.id
+                            JOIN games ON leaderboard.game_id = games.id
+                            WHERE leaderboard.game_id = $1
+                            ORDER BY leaderboard.created_at ASC 
+                            LIMIT 10`, [game_id]);
+    if (stats.rowCount == 0){
+        await ctx.reply('Таблица лидеров пуста');
+        return;
+    }
+    await ctx.replyWithDocument({
+        source: Buffer.from(JSON.stringify(stats.rows, null, 2)),
+        filename: 'stats.json'
+    });
+});
+
 bot.launch();
