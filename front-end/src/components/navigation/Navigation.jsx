@@ -18,8 +18,8 @@ const Navigation = () => {
     },
     {
       routeIco: main_img,
-      routeLink: "/",
-      isActive: location.pathname === "/",
+      routeLink: "/main",
+      isActive: location.pathname === "/main",
     },
     {
       routeIco: leaders_img,
