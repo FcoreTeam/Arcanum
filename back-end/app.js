@@ -7,7 +7,6 @@ import leaderboard_router from './routes/leaderboard.router.js';
 import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
-import { bot } from './bot/bot.js';
 import { client } from './config/database.js';
 import { Server } from 'socket.io';
 import http from 'http';
@@ -24,14 +23,11 @@ const app = express();
 const ws_app = http.createServer(app);
 const PORT = process.env.PORT || 8000;
 const __dirname = path.resolve();
-const logDirectory = path.join(__dirname, 'logs');
-const infoLogStream = fs.createWriteStream(path.join(logDirectory, 'info.log'), { flags: 'a' });
-export const errorLogStream = fs.createWriteStream(path.join(logDirectory, 'error.log'), { flags: 'a' });
 const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:8000",
-    process.env.CLIENT_URL
+    "https://zoltansgametma.ru",
 ];
 
 ws_app.listen(5000, () => {
@@ -49,10 +45,6 @@ const io = new Server(ws_app, {
 io.on('connection', (socket) => {
     handleConnection(socket, io);
 });
-
-if (!fs.existsSync(logDirectory)) {
-    fs.mkdirSync(logDirectory);
-}
 
 
 app.listen(PORT, () => {
@@ -95,5 +87,4 @@ app.use(async (req, res) => {
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
-app.use(morgan('combined', { stream: infoLogStream }));
 app.use(cors());
