@@ -60,6 +60,13 @@ app.get('/chat', (req, res) => {
     });
 });
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+}));
 
 app.use('/games', game_router);
 app.use('/users', user_router);
@@ -85,10 +92,3 @@ app.use(async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 })
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.use(cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-}));
