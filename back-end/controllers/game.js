@@ -7,8 +7,8 @@ export class GameController {
     }
 
     static async getGame(req, res) {
-        const { id } = req.query;
-        const { rows } = await client.query(`SELECT * FROM games WHERE id = $1`, [id]);
+        const { game_id } = req.query;
+        const { rows } = await client.query(`SELECT * FROM games WHERE id = $1`, [game_id]);
         res.json(rows);
     }
 
