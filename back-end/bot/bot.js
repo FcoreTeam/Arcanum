@@ -182,17 +182,20 @@ bot.command('create_game', async (ctx) => {
 });
 
 bot.command('get_game_stats', async (ctx) => {
+    console.log('get_game_stats');
     const user = await client.query('SELECT * FROM users where id = $1 and is_admin = true', [ctx.from.id]);
     if (user.rowCount == 0) {
         await ctx.reply('Вы не администратор');
         return;
     }
+    console.log('is_admin');
     const game_id = ctx.message.text.split(' ')[1];
     const game = await client.query('SELECT * FROM games where id = $1', [game_id]);
     if (game.rowCount == 0){
         await ctx.reply('Такой игры не существует');
         return;
     }
+    console.log('game success');
     const stats = await client.query(`
                             SELECT 
                             leaderboard.*, 
@@ -208,10 +211,12 @@ bot.command('get_game_stats', async (ctx) => {
         await ctx.reply('Таблица лидеров пуста');
         return;
     }
+    console.log('stats success');
     await ctx.replyWithDocument({
         source: Buffer.from(JSON.stringify(stats.rows, null, 2)),
         filename: 'stats.json'
     });
+    console.log('send success');
 });
 
 bot.launch();
