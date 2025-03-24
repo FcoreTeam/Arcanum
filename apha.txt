@@ -1,0 +1,22 @@
+https://api.zoltansgametma.ru/games/getgame
+?game_id=[идентификатор игры]
+{"success":true,"game":{"id":1,"name":"Гейм","description":"фыва","date":"24.02.2200","price":"12000.00","preview_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_6.jpg\"","video_after_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/videos/file_7.mp4\"","answer":"Член","is_test":false}}
+
+
+https://api.zoltansgametma.ru/games/getgames
+{"success":true,"games":[{"id":1,"name":"Гейм","description":"фыва","date":"24.02.2200","price":"12000.00","preview_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_6.jpg\"","video_after_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/videos/file_7.mp4\"","answer":"Член","is_test":false}]}
+
+https://api.zoltansgametma.ru/games/answergame
+body: {
+    "game_id": [идентификатор игры],
+    "answer": [ответ],
+    "user_id": [идентификатор пользователя]
+}
+
+https://api.zoltansgametma.ru/games/buygame
+body: {
+    "game_id": [идентификатор игры],
+    "user_id": [идентификатор пользователя]
+}
+
+http://api.zoltansgametma.ru/leaderboard/getleaderboard
