@@ -3,13 +3,13 @@ import { client } from "../config/database.js";
 export class GameController {
     static async getGames(req, res) {
         const { rows } = await client.query(`SELECT * FROM games`);
-        res.json(rows);
+        res.json({success: true, games: rows});
     }
 
     static async getGame(req, res) {
         const { game_id } = req.query;
         const { rows } = await client.query(`SELECT * FROM games WHERE id = $1`, [game_id]);
-        res.json(rows);
+        res.json({success: true, game: rows[0]});
     }
 
     static async answerGame(req, res) {
