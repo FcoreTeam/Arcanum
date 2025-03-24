@@ -13,6 +13,7 @@ export class GameController {
     }
 
     static async answerGame(req, res) {
+        console.log(req.body);
         const { user_id, game_id, answer } = req.body;
         const true_answer = await client.query('SELECT answer FROM games WHERE id = $1', [game_id]);
         if (answer != true_answer.rows[0].answer) {
