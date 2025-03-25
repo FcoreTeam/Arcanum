@@ -47,3 +47,24 @@ export const createHipples = `CREATE TABLE IF NOT EXISTS hipples(
     game_id BIGINT NOT NULL,
     CONSTRAINT fk_game_id FOREIGN KEY (game_id) REFERENCES games(id)
 );`
+
+// сообщения
+export const createMessages = `CREATE TABLE IF NOT EXISTS messages(
+    id SERIAL PRIMARY KEY,
+    sender_id BIGINT NOT NULL,
+    receiver_id BIGINT NOT NULL,
+    msg VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sender_id FOREIGN KEY (sender_id) REFERENCES users(id),
+    CONSTRAINT fk_receiver_id FOREIGN KEY (receiver_id) REFERENCES users(id)
+);`
+
+// запросы
+export const createRequests = `CREATE TABLE IF NOT EXISTS requests(
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    admin_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_admin_id FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+);`

@@ -30,13 +30,13 @@
         const messageInput = document.getElementById('message');
         const sendButton = document.getElementById('send');
         const urlParams = new URLSearchParams(window.location.search);
-        const chat_id = urlParams.get('chat_id');
+        const chat_id = urlParams.get('user_id');
         sendButton.addEventListener('click', () => {
             const msg = messageInput.value;
-            socket.emit('private_message', { chat_id, msg });
+            socket.emit('private_message', JSON.stringify({ socket_id: socket.id, chat_id: chat_id, msg: msg }));
         });
 
-        const socket = io('http://localhost:3000', {
+        const socket = io('http://localhost:5000', {
             extraHeaders: {
                 // Authorization: `Bearer ${token}`
             }
@@ -44,7 +44,7 @@
 
         socket.on('private_message', (data) => {
             console.log(data);
-            const msg = data;
+            const msg = JSON.parse(data).msg;
             const chat = document.querySelector('.chat');
             const messageDiv = document.createElement('div');
             messageDiv.textContent = msg;

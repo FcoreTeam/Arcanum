@@ -9,6 +9,10 @@ export class GameController {
     static async getGame(req, res) {
         const { game_id } = req.query;
         const { rows } = await client.query(`SELECT * FROM games WHERE id = $1`, [game_id]);
+        if (rows.length === 0) {
+            res.json({success: false, error: 'Game not found'});
+            return;
+        }
         res.json({success: true, game: rows[0]});
     }
 

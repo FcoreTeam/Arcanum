@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import game_router from './routes/game.router.js';
 import user_router from './routes/user.router.js';
 import leaderboard_router from './routes/leaderboard.router.js';
-import fs from 'fs';
 import { bot } from './bot/bot.js';
 import path from 'path';
 import cors from 'cors';
@@ -29,13 +28,14 @@ const allowedOrigins = [
     "http://localhost:3001",
     "http://localhost:8000",
     "https://zoltansgametma.ru",
+    "*"
 ];
 
 ws_app.listen(5000, () => {
     console.log(`Вебсокет пашет на ${5000} порте!`);
 });
 
-const io = new Server(ws_app, {
+export const io = new Server(ws_app, {
     cors: {
         origin: allowedOrigins,
         methods: ["GET", "POST"],
