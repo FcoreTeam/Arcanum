@@ -11,7 +11,9 @@ export const bot = new Telegraf(token);
 const total_url = process.env.DEV_URL || null
 
 bot.use(session());
-const socket = io('http://localhost:5000');
+const socket = io(`wss://api.zoltansgametma.ru}`, {
+    path: '/socket.io/',
+})
 
 const createGameScene = new Scenes.BaseScene("createGameScene");
 const testScene = new Scenes.BaseScene("testScene");

@@ -20,7 +20,4 @@ export const api = {
 
 export const socket = io("wss://api.zoltansgametma.ru", {
   path: "/socket.io/",
-  extraHeaders: {
-    Authorization: `Bearer ${Cookies.get("accessToken")}`,
-  },
 });
