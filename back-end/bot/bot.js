@@ -281,7 +281,6 @@ bot.action(/^handle_request_(\d+)$/, async (ctx) => {
             SET admin_id = $1 
             WHERE user_id = $2
         `, [ctx.from.id, requestId]);
-        console.log(`Request ${requestId} accepted by admin ${ctx.from.id}`);
         socket.emit('join_chat', requestId);
 
         const user = await client.query('SELECT * FROM users WHERE id = $1', [requestId]);
