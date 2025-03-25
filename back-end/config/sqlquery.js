@@ -52,7 +52,7 @@ export const createHipples = `CREATE TABLE IF NOT EXISTS hipples(
 export const createMessages = `CREATE TABLE IF NOT EXISTS messages(
     id SERIAL PRIMARY KEY,
     sender_id BIGINT NOT NULL,
-    receiver_id BIGINT NOT NULL,
+    receiver_id BIGINT,
     msg VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_sender_id FOREIGN KEY (sender_id) REFERENCES users(id),

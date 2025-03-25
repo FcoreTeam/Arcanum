@@ -11,5 +11,6 @@ router.get('/get_unsuccess_game', GameController.unsuccessGame);
 router.get('/user_info', UserController.userInfo);
 router.get('/users_info', UserController.usersInfo);
 router.get('/get_messages', UserController.getMessages);
+router.post('/make_request', UserController.makeRequest);
 
 export default router;

@@ -48,4 +48,16 @@ export class UserController {
             res.json({success: false, error: 'Error while getting users info'});
         }
     }
+
+    static async makeRequest(req, res) {
+        try {
+            const { user_id, msg } = req.body;
+            await client.query('INSERT INTO messages (user_id, msg) VALUES ($1)', [user_id]);
+            await client.query('INSERT INTO requests (user_id) VALUES ($1)', [user_id]);
+            res.json({success: true, message: 'Заявка отправлена'});
+        } catch (err) {
+            console.error(err);
+            res.json({success: false, error: 'Error while make request'});
+        }
+    }
 }
