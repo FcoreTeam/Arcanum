@@ -11,9 +11,12 @@ export const bot = new Telegraf(token);
 const total_url = process.env.DEV_URL || null
 
 bot.use(session());
-const socket = io(`wss://api.zoltansgametma.ru}`, {
+const socket = io('wss://api.zoltansgametma.ru', {
     path: '/socket.io/',
-})
+    extraHeaders: {
+        // Authorization: `Bearer ${token}`
+    }
+});
 
 const createGameScene = new Scenes.BaseScene("createGameScene");
 const testScene = new Scenes.BaseScene("testScene");
@@ -278,6 +281,7 @@ bot.action(/^handle_request_(\d+)$/, async (ctx) => {
             SET admin_id = $1 
             WHERE user_id = $2
         `, [ctx.from.id, requestId]);
+        console.log(`Request ${requestId} accepted by admin ${ctx.from.id}`);
         socket.emit('join_chat', requestId);
 
         const user = await client.query('SELECT * FROM users WHERE id = $1', [requestId]);
