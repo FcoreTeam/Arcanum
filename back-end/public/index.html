@@ -36,7 +36,8 @@
             socket.emit('private_message', JSON.stringify({ socket_id: socket.id, chat_id: chat_id, msg: msg }));
         });
 
-        const socket = io('http://localhost:5000', {
+        const socket = io('wss://api.zoltansgametma.ru', {
+            path: '/socket.io/',
             extraHeaders: {
                 // Authorization: `Bearer ${token}`
             }

@@ -7,6 +7,7 @@ async function handleConnection(socket, io) {
     });
 
     socket.on('private_message', async (data) => {
+        console.log(data);
         const { socket_id, chat_id, msg } = JSON.parse(data);
         io.to(chat_id).emit('private_message', data);
     });
