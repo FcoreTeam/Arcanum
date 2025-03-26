@@ -10,6 +10,7 @@ export async function addUser(ctx) {
         return
     }
     const total_url = `${url}?user_id=${ctx.from.id}`;
+    console.log(total_url)
     let query = `SELECT * FROM users WHERE id = ${ctx.from.id}`;
     let info = await client.query(query);
     if (info.rows.length == 0) {
@@ -23,8 +24,7 @@ export async function addUser(ctx) {
         })
         await ctx.reply('Привет, ' + (ctx.from.username || ctx.from.first_name),
             await Markup.keyboard([
-                // await Markup.button.webApp('Let\'s go', total_url),
-                await Markup.button.webApp(`${total_url}`, total_url),
+                await Markup.button.webApp('Let\'s go', total_url),
             ], ).resize());
     } else {
         await client.query(`UPDATE users set username = $2, first_name = $3 WHERE id = $1`, [ctx.from.id, ctx.from.username, ctx.from.first_name]);
@@ -36,8 +36,7 @@ export async function addUser(ctx) {
         })
         await ctx.reply('Привет, ' + (ctx.from.username || ctx.from.first_name) + '. Еще раз!', 
             await Markup.keyboard([
-                // await Markup.button.webApp('Let\'s go', total_url),
-                await Markup.button.webApp(`${total_url}`, total_url),
+                await Markup.button.webApp('Let\'s go', total_url),
             ], ).resize());
     }
 };
