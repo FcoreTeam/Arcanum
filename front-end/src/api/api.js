@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "https://api.zoltansgametma.ru",
+  baseURL: "http://localhost:8000",
   timeout: 10000,
   withCredentials: true,
 });
@@ -15,9 +15,9 @@ export const api = {
   getGames: () => $api.get("/games/getgames"),
   sendAnswer: (data) => $api.post("/games/answergame", data),
   setSettings: (data) => $api.post("/users/update_settings", data),
-  getUserInfo: () => $api.get("/users/users_info"),
+  getUserInfo: (user_id) => $api.get(`/users/user_info?user_id=${user_id}`),
 };
 
-export const socket = io("wss://api.zoltansgametma.ru", {
+export const socket = io("ws://localhost:5000", {
   path: "/socket.io/",
 });

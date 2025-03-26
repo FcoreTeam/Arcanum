@@ -25,6 +25,7 @@
       z-index: 0;
     }
   }
+
   .main__page {
     width: 100vw;
     height: 100vh;
@@ -45,6 +46,7 @@
       background-clip: text;
       background-image: linear-gradient(to right, #de8a15b8, #fff);
     }
+
     .main__description {
       width: 100%;
       text-align: center;
@@ -52,6 +54,7 @@
       color: #ffffff99;
       letter-spacing: 0.5px;
     }
+
     .main__games {
       width: 100%;
       height: 300px;
@@ -61,6 +64,7 @@
         height: fit-content;
         display: flex;
         justify-content: space-evenly;
+
         .controller {
           width: 45%;
           border: 2px solid #463f3a;
@@ -75,6 +79,7 @@
           backdrop-filter: blur(34px);
           font-weight: 600;
           transition: 0.5s;
+
           &.active {
             color: #fff;
             backdrop-filter: blur(0px);

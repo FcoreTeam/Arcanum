@@ -9,18 +9,7 @@ import styles from "./support.module.scss";
 import ImageUploader from "./image-uploader/Image-uploader";
 
 const Support = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      isUserMessage: false,
-      message: "Текст сообщения",
-    },
-    {
-      id: 2,
-      isUserMessage: true,
-      message: "Здравствуйте!",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [images, setImages] = useState([]); // Состояние для хранения загруженных изображений
   const textareaRef = useRef(null);
@@ -98,8 +87,8 @@ const Support = () => {
     <div className={styles.support}>
       <div className={styles.support__body}>
         <div className={styles.support__header}>
-          <img src={supportAvatar} alt="" className={styles.header__avatar} />
-          <p className={styles.support__title}>Агент поддержки</p>
+          {/* <img src={supportAvatar} alt="" className={styles.header__avatar} /> */}
+          <p className={styles.support__title}>Вы не подключены к чату</p>
         </div>
         <section className={styles.body__messages}>
           {messages.map((item) => (

@@ -5,8 +5,8 @@ import clsx from "clsx";
 import styles from "./main.module.scss";
 
 const Main = () => {
-  const [currentController, setController] = useState("prev"); 
-  
+  const [currentController, setController] = useState("prev");
+
   return (
     <div className={styles.main}>
       <div className={styles.video__background}>

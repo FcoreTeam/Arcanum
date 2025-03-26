@@ -24,6 +24,7 @@ const Games = ({ category }) => {
           const cleanedGames = response.data.games.map((game) => ({
             ...game,
             preview_url: game.preview_url?.replace(/"/g, ""),
+            dateObj: new Date(game.date),
           }));
 
           setGames(cleanedGames);
@@ -40,12 +41,24 @@ const Games = ({ category }) => {
     fetchGames();
   }, []);
 
-  const filteredGames =
-    category === "all"
-      ? games
-      : games.filter((game) =>
-          category === "not_passed" ? !game.is_test : game.is_test
-        );
+  const now = new Date().getTime();
+
+  const filteredGames = games.filter((game) => {
+    if (category === "all") return true;
+    if (category === "test") return game.is_test;
+
+    console.log(game.date);
+    const [day, month, year] = game.date.split(".").map(Number);
+    const jsMonth = month - 1;
+
+    const date = new Date(year, jsMonth, day);
+    const unixTime = date.getTime();
+
+    const isPast = unixTime < now;
+    return category === "prev"
+      ? isPast && !game.is_test
+      : !isPast && !game.is_test;
+  });
 
   if (loading) return <div className={styles.loading}>Загрузка игр...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
@@ -73,7 +86,7 @@ const Games = ({ category }) => {
       }}
       speed={800}
       grabCursor={true}
-      className="my-swiper"
+      className={styles.game__swiper}
     >
       {filteredGames.map((game) => (
         <SwiperSlide className={styles.slide} key={game.id}>
@@ -82,27 +95,26 @@ const Games = ({ category }) => {
             <p className={styles.game__date}>Дата: {game.date}</p>
 
             {game.preview_url && (
-              // eslint-disable-next-line jsx-a11y/alt-text
-              <img src={game.preview_url} className={styles.game__preview} />
+              <img
+                src={game.preview_url}
+                className={styles.game__preview}
+                width="298"
+                height="198"
+                alt={game.name}
+              />
             )}
 
             <div className={styles.buttons}>
-              <Button
-                // className={category === "not_passed" ? styles.primary : styles.secondary}
-                buttonContent={game.price + " ₽"}
-                buttonClass="buy__btn"
-              >
-                {category === "not_passed" ? "Играть" : "Перепройти"}
+              <Button buttonContent={game.price + " ₽"} buttonClass="buy__btn">
+                {category === "prev" ? "Перепройти" : "Играть"}
               </Button>
-              {category === "passed" && (
-                <Button
-                  buttonClass="buy__btn"
-                  buttonContent="Инфо"
-                  secondClass="info__btn"
-                >
-                  Статистика
-                </Button>
-              )}
+              <Button
+                buttonClass="buy__btn"
+                buttonContent="Инфо"
+                secondClass="info__btn"
+              >
+                Описание игры
+              </Button>
             </div>
           </div>
         </SwiperSlide>

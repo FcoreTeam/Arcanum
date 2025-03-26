@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "../userSlice";
+import { updateUserData } from "../userSlice";
 
 export const useUser = () => {
-    const user = useSelector((state) => state.user);
-    const dispatch = useDispatch()
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
-    return {
-        ...user,
-        setUser: (user) => dispatch(setUser(user))
-    }
-}
+  return {
+    ...user,
+    setUser: (user) => dispatch(updateUserData(user)),
+  };
+};

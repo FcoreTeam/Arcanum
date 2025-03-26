@@ -3,6 +3,7 @@ import blur from "../../img/blur__one.svg";
 import video from "../../videos/intro.mp4";
 import styles from "./game.module.scss";
 import Controlls from "./controlls/Controlls";
+import Input from "../@ui/Input/Input";
 
 const Game = ({ name }) => {
   const videoRef = useRef(null);
@@ -158,6 +159,9 @@ const Game = ({ name }) => {
         <p className={styles.video__subtitle}>
           Если вы знаете финальный ответ, введите его в формате *******
         </p>
+      </div>
+      <div className={styles.game__controlls}>
+        <Input secondClass="answer__input" placeholder="Введите ответ" />
       </div>
     </div>
   );
