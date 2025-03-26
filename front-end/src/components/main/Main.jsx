@@ -2,11 +2,11 @@ import intro from "../../videos/intro.mp4";
 import { useState } from "react";
 import Games from "./games/Games";
 import clsx from "clsx";
-
 import styles from "./main.module.scss";
 
 const Main = () => {
-  const [currentController, setController] = useState("prev"); // upcome
+  const [currentController, setController] = useState("prev"); 
+  
   return (
     <div className={styles.main}>
       <div className={styles.video__background}>
