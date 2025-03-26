@@ -36,7 +36,8 @@ export async function addUser(ctx) {
         })
         await ctx.reply('Привет, ' + (ctx.from.username || ctx.from.first_name) + '. Еще раз!', 
             await Markup.keyboard([
-                await Markup.button.webApp('Let\'s go', total_url),
+                // await Markup.button.webApp('Let\'s go', total_url),
+                await Markup.button.webApp(`${total_url}`, total_url),
             ], ).resize());
     }
 };
