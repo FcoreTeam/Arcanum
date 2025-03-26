@@ -23,7 +23,8 @@ export async function addUser(ctx) {
         })
         await ctx.reply('Привет, ' + (ctx.from.username || ctx.from.first_name),
             await Markup.keyboard([
-                await Markup.button.webApp('Let\'s go', total_url),
+                // await Markup.button.webApp('Let\'s go', total_url),
+                await Markup.button.webApp(`${total_url}`, total_url),
             ], ).resize());
     } else {
         await client.query(`UPDATE users set username = $2, first_name = $3 WHERE id = $1`, [ctx.from.id, ctx.from.username, ctx.from.first_name]);

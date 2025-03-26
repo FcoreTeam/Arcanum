@@ -1,5 +1,11 @@
+hy gjsldf
+<div>
+    <p id="user_id"></p>
+</div>
+
 <script>
     const query = new URLSearchParams(window.location.search);
     const user_id = query.get('user_id');
     console.log(user_id);
+    document.getElementById('user_id').textContent = user_id
 </script>
