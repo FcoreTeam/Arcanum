@@ -1,22 +1,56 @@
+GET
 https://api.zoltansgametma.ru/games/getgame
 ?game_id=[идентификатор игры]
 {"success":true,"game":{"id":1,"name":"Гейм","description":"фыва","date":"24.02.2200","price":"12000.00","preview_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_6.jpg\"","video_after_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/videos/file_7.mp4\"","answer":"Член","is_test":false}}
 
-
+GET
 https://api.zoltansgametma.ru/games/getgames
 {"success":true,"games":[{"id":1,"name":"Гейм","description":"фыва","date":"24.02.2200","price":"12000.00","preview_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_6.jpg\"","video_after_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/videos/file_7.mp4\"","answer":"Член","is_test":false}]}
 
+POST
 https://api.zoltansgametma.ru/games/answergame
 body: {
     "game_id": [идентификатор игры],
     "answer": [ответ],
     "user_id": [идентификатор пользователя]
 }
+{success: true, message: 'Ответ сохранен'}
 
+POST
 https://api.zoltansgametma.ru/games/buygame
 body: {
     "game_id": [идентификатор игры],
     "user_id": [идентификатор пользователя]
 }
+{success: true, message: 'Игра куплена'}
 
-http://api.zoltansgametma.ru/leaderboard/getleaderboard
+GET
+https://api.zoltansgametma.ru/leaderboard/getleaderboard
+?game_id=[идентификатор игры]
+{"success":true,"leaderboard":[{"id":"5929549063","user_id":"5929549063","game_id":"3","is_rewarded":true,"created_at":"2025-03-24T13:45:43.490Z","first_name":"ㅤ","username":"mankokoina","balance":"19.00","avatar_url":"https://api.telegram.org/file/bot6034759582:AAFagtYvp-Bxq-IsGLrXxTNT5Dgv9CnlwA0/photos/file_7.jpg","is_admin":true,"email":null,"phone":null},{"id":"5929549063","user_id":"5929549063","game_id":"3","is_rewarded":true,"created_at":"2025-03-24T22:02:11.721Z","first_name":"ㅤ","username":"mankokoina","balance":"19.00","avatar_url":"https://api.telegram.org/file/bot6034759582:AAFagtYvp-Bxq-IsGLrXxTNT5Dgv9CnlwA0/photos/file_7.jpg","is_admin":true,"email":null,"phone":null}]}
+
+POST
+https://api.zoltansgametma.ru/users/update_settings
+body: {
+    "phone": [телефон],
+    "email": [почта],
+    "user_id": [идентификатор пользователя]
+}
+
+GET
+https://api.zoltansgametma.ru/users/get_success_game
+?user_id=[идентификатор пользователя]
+{"success":true,"rows":[{"id":1,"name":"Гейм","description":"фыва","date":"24.02.2200","price":"12000.00","preview_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_6.jpg\"","video_after_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/videos/file_7.mp4\"","answer":"Член","is_test":false}]}
+
+GET
+https://api.zoltansgametma.ru/users/get_unsuccess_game
+?user_id=[идентификатор пользователя]
+{"success":true,"rows":[{"id":1,"name":"Гейм","description":"фыва","date":"24.02.2200","price":"12000.00","preview_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_6.jpg\"","video_after_url":"\"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/videos/file_7.mp4\"","answer":"Член","is_test":false}]}
+
+GET
+https://api.zoltansgametma.ru/users/users_info
+{"success":true,"users":[{"id":"5929549063","first_name":"ㅤ","username":"mankokoina","balance":"0.00","avatar_url":"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_5.jpg","is_admin":true,"email":null,"phone":null},{"id":"5106326939","first_name":"icy","username":"krasnovB","balance":"0.00","avatar_url":null,"is_admin":true,"email":null,"phone":null},{"id":"2046130786","first_name":"A.","username":null,"balance":"0.00","avatar_url":null,"is_admin":false,"email":null,"phone":null}]}
+
+https://api.zoltansgametma.ru/users/user_info
+?user_id=[идентификатор пользователя]
+{"success":true,"users":[{"id":"5929549063","first_name":"ㅤ","username":"mankokoina","balance":"0.00","avatar_url":"https://api.telegram.org/file/bot7252738995:AAFJqAL5XR6skfwLQREEWzaKbNCiHyvooyA/photos/file_5.jpg","is_admin":true,"email":null,"phone":null},{"id":"5106326939","first_name":"icy","username":"krasnovB","balance":"0.00","avatar_url":null,"is_admin":true,"email":null,"phone":null},{"id":"2046130786","first_name":"A.","username":null,"balance":"0.00","avatar_url":null,"is_admin":false,"email":null,"phone":null}]}
