@@ -1,40 +1,36 @@
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
 import clsx from "clsx";
 import pencil from "../../img/pencil.svg";
 import Games from "../main/games/Games";
-import { api } from "../../api/api";
 import styles from "./profile.module.scss";
+import { useUser } from "../../store/slices/hooks/useUser";
 
 const Profile = () => {
-  const dispatch = useDispatch();
-  const { userAvatar, userName } = useSelector((state) => state.user);
+  const {
+    userName,
+    userAvatar,
+    userId,
+    setUser,
+    userPhone,
+    userEmail,
+    ...user
+  } = useUser();
+
   const [filter, setFilter] = useState("not_passed");
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    api
-      .getUserInfo()
-      .then(({ data }) => {
-        setPhone(data.userPhone);
-        setEmail(data.userEmail);
-        dispatch({
-          type: "SET_USER",
-          payload: data,
-        });
-      })
-      .catch((err) => console.error("Ошибка загрузки пользователя:", err));
-  }, [dispatch]);
+  const [phone, setPhone] = useState(String(userPhone));
+  const [email, setEmail] = useState(String(userEmail));
+  const [avatar, setAvatar] = useState("");
 
   const handleSave = async () => {
     try {
-      await api.setSettings({ userPhone: phone, userEmail: email });
-      dispatch({
-        type: "UPDATE_USER",
-        payload: { userPhone: phone, userEmail: email },
+      setUser({
+        ...user,
+        userPhone: phone,
+        userEmail: email,
+        userAvatar: avatar,
       });
+
       setIsEditing(false);
     } catch (err) {
       console.error("Ошибка сохранения настроек:", err);
@@ -43,6 +39,7 @@ const Profile = () => {
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
+
     if (/^\d*$/.test(value) && value.length <= 11) {
       setPhone(value);
     }
@@ -58,7 +55,7 @@ const Profile = () => {
           )}
         >
           {userAvatar && (
-            <img src={userAvatar} alt="" className={styles.user__img} />
+            <img src={userAvatar} alt="" className={styles.profile__avatar} />
           )}
         </div>
         <p className={styles.user__name}>{userName}</p>

@@ -24,7 +24,6 @@ const Leads = () => {
         setLoading(false);
       }
     };
-
     fetchLeaders();
   }, []);
 

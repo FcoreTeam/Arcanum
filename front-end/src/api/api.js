@@ -15,7 +15,7 @@ export const api = {
   getGames: () => $api.get("/games/getgames"),
   sendAnswer: (data) => $api.post("/games/answergame", data),
   setSettings: (data) => $api.post("/users/update_settings", data),
-  getUserInfo: () => $api.get("/users/user_info"),
+  getUserInfo: () => $api.get("/users/users_info"),
 };
 
 export const socket = io("wss://api.zoltansgametma.ru", {
