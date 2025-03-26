@@ -86,7 +86,7 @@ photoScene.enter(async (ctx) => {
 });
 
 photoScene.on('photo', async (ctx) => {
-    const fileId = ctx.message.photo[0].file_id;
+    const fileId = ctx.message.photo[-1].file_id;
 
     const fileLink = await ctx.telegram.getFileLink(fileId);
     ctx.session.game.photo = fileLink;
@@ -173,7 +173,6 @@ hippleScene.on('text', async (ctx) => {
         await ctx.scene.enter('answerScene');
     }
 });
-
 
 
 bot.command('create_game', async (ctx) => {

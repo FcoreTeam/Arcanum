@@ -10,6 +10,7 @@ export async function addUser(ctx) {
         return
     }
     const total_url = `${url}?user_id=${ctx.from.id}`;
+    console.log(total_url)
     let query = `SELECT * FROM users WHERE id = ${ctx.from.id}`;
     let info = await client.query(query);
     if (info.rows.length == 0) {
