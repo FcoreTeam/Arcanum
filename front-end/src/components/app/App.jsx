@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux"; // Import useDispatch
+import { useSelector } from "react-redux";
 
 import Main from "../main/Main";
 import Layout from "../layout/Layout";
@@ -10,10 +10,9 @@ import Leads from "../leads/Leads";
 import Instruction from "../instruction/Instruction";
 import Game from "../game/Game";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { api } from "../../api/api";
 import { useUser } from "../../store/slices/hooks/useUser";
-import { getIdFromAddress, getUserDataHelper } from "../../helpers/helpers"; // Import helper functions
+import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
 
 const App = () => {
   const { name, video } = useSelector((state) => state.game);
@@ -29,49 +28,43 @@ const App = () => {
     ...user
   } = useUser();
 
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     try {
-  //       const response = await api.getUserInfo();
-
-  //       if (response.data?.success && response.data.users?.length > 0) {
-  //         const currentUser =
-  //           response.data.users.find((u) => u.id === userId) ||
-  //           response.data.users[0];
-
-  //         setUser({
-  //           ...user,
-  //           userAvatar: currentUser.avatar_url,
-  //           userName:
-  //             currentUser.username || currentUser.first_name || "Пользователь",
-  //           userPhone: currentUser.phone,
-  //           userEmail: currentUser.email,
-  //           userPts: currentUser.balance
-  //         });
-  //       }
-  //     } catch (err) {
-  //       console.error("Ошибка загрузки пользователя:", err);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchUserData();
-  // }, []);
-
-  const dispatch = useDispatch();
-
   useEffect(() => {
-    const userId = getIdFromAddress();
-    if (userId !== null) {
-      localStorage.setItem("userId", userId);
-    }
-    getUserDataHelper(userId, dispatch);
+    const fetchUserData = async () => {
+      try {
+        const userId = getUserIdFromAddress();
+
+        console.log(userId)
+
+        const response = await api.getUserInfo(userId);
+
+        if (response.data?.success && response.data.users?.length > 0) {
+          const currentUser =
+            response.data.users.find((u) => u.id === userId) ||
+            response.data.users[0];
+
+          setUser({
+            ...user,
+            userAvatar: currentUser.avatar_url,
+            userName:
+              currentUser.username || currentUser.first_name || "Пользователь",
+            userPhone: currentUser.phone,
+            userEmail: currentUser.email,
+            userPts: currentUser.balance,
+          });
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки пользователя:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
-  // if (isLoading) {
-  //   return null;
-  // }
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <Routes>

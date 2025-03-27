@@ -1,7 +1,6 @@
 import clsx from "clsx";
 
 import styles from "./player.module.scss";
-import { useUser } from "../../../store/slices/hooks/useUser";
 
 
 const PLACE_STYLES = {
@@ -11,7 +10,6 @@ const PLACE_STYLES = {
 };
 
 const Player = ({ place, name, time, pts }) => {
-  const {...user} = useUser()
   return (
     <div className={clsx(styles.player, PLACE_STYLES[place])}>
       <p className={styles.place}>{place}</p>

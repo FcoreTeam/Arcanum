@@ -33,7 +33,6 @@ const Games = ({ category }) => {
         }
       } catch (err) {
         console.error("Ошибка загрузки:", err);
-        setError("Не удалось загрузить игры");
       } finally {
         setLoading(false);
       }
@@ -47,7 +46,6 @@ const Games = ({ category }) => {
     if (category === "all") return true;
     if (category === "test") return game.is_test;
 
-    console.log(game.date);
     const [day, month, year] = game.date.split(".").map(Number);
     const jsMonth = month - 1;
 
@@ -63,7 +61,7 @@ const Games = ({ category }) => {
   if (loading) return <div className={styles.loading}>Загрузка игр...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
   if (filteredGames.length === 0) {
-    return <div className={styles.empty}>Нет игр в этой категории</div>;
+    return <div className={styles.empty}></div>;
   }
 
   return (

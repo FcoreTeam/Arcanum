@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import pencil from "../../img/pencil.svg";
 import Games from "../main/games/Games";
 import styles from "./profile.module.scss";
 import { useUser } from "../../store/slices/hooks/useUser";
+import {api} from "../../api/api"
 
 const Profile = () => {
   const {
@@ -20,23 +21,32 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [phone, setPhone] = useState(String(userPhone));
   const [email, setEmail] = useState(String(userEmail));
-  const [avatar, setAvatar] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
+      await api.setSettings("/users/update_settings", {
+        userPhone: phone,
+        userEmail: email,
+      });
+
       setUser({
         ...user,
         userPhone: phone,
         userEmail: email,
-        userAvatar: avatar,
       });
 
       setIsEditing(false);
     } catch (err) {
-      console.error("Ошибка сохранения настроек:", err);
+      setError("Ошибка сохранения настроек");
+    } finally {
+      setLoading(false);
     }
   };
-
   const handlePhoneChange = (e) => {
     const value = e.target.value;
 
@@ -55,7 +65,7 @@ const Profile = () => {
           )}
         >
           {userAvatar && (
-            <img src={userAvatar} alt="" className={styles.profile__avatar} />
+            <img src={userAvatar} alt="" className={styles.profile__avatar} /> 
           )}
         </div>
         <p className={styles.user__name}>{userName}</p>
