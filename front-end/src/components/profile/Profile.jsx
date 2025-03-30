@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import clsx from "clsx";
 import pencil from "../../img/pencil.svg";
 import Games from "../main/games/Games";

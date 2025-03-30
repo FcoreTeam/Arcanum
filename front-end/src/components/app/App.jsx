@@ -1,5 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { api } from "../../api/api";
+import { useUser } from "../../store/slices/hooks/useUser";
+import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
 
 import Main from "../main/Main";
 import Layout from "../layout/Layout";
@@ -9,10 +13,6 @@ import Intro from "../intro/Intro";
 import Leads from "../leads/Leads";
 import Instruction from "../instruction/Instruction";
 import Game from "../game/Game";
-import { useEffect, useState } from "react";
-import { api } from "../../api/api";
-import { useUser } from "../../store/slices/hooks/useUser";
-import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
 
 const App = () => {
   const { name, video } = useSelector((state) => state.game);
@@ -20,7 +20,6 @@ const App = () => {
   const {
     userName,
     userAvatar,
-
     setUser,
     userPhone,
     userEmail,
@@ -32,15 +31,14 @@ const App = () => {
     const fetchUserData = async () => {
       try {
         const userId = getUserIdFromAddress();
-
-        console.log(userId)
-
+        if (!userId) {
+          console.error("Ошибка: Не удалось получить user_id из URL");
+          return;
+        }
         const response = await api.getUserInfo(userId);
 
-        if (response.data?.success && response.data.users?.length > 0) {
-          const currentUser =
-            response.data.users.find((u) => u.id === userId) ||
-            response.data.users[0];
+        if (response.data?.success && response.data.user) {
+          const currentUser = response.data.user;
 
           setUser({
             ...user,
@@ -51,6 +49,8 @@ const App = () => {
             userEmail: currentUser.email,
             userPts: currentUser.balance,
           });
+
+          sessionStorage.setItem("user_id", userId);
         }
       } catch (err) {
         console.error("Ошибка загрузки пользователя:", err);
