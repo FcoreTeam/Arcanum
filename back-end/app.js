@@ -28,7 +28,8 @@ const allowedOrigins = [
     "http://localhost:3001",
     "http://localhost:8000",
     "https://zoltansgametma.ru",
-    "*"
+    "*",
+    /^https:\/\/.*\.loca\.lt$/
 ];
 
 ws_app.listen(5000, () => {
