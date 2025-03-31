@@ -65,7 +65,6 @@ const Game = ({ name }) => {
     }
   };
 
-  // Функция для блокировки ориентации экрана
   const lockOrientation = (orientation) => {
     if (window.screen.orientation && window.screen.orientation.lock) {
       window.screen.orientation
@@ -79,7 +78,6 @@ const Game = ({ name }) => {
     }
   };
 
-  // Функция для разблокировки ориентации экрана
   const unlockOrientation = () => {
     if (window.screen.orientation && window.screen.orientation.unlock) {
       window.screen.orientation.unlock();
@@ -105,14 +103,12 @@ const Game = ({ name }) => {
           videoRef.current.requestFullscreen().catch((err) => {
             console.error("Ошибка при переходе в полноэкранный режим:", err);
           });
-          // Блокируем ориентацию в landscape
           lockOrientation("landscape");
         }
       } else {
         if (document.fullscreenElement) {
           document.exitFullscreen();
         }
-        // Блокируем ориентацию в portrait
         lockOrientation("portrait");
       }
     };
@@ -157,11 +153,12 @@ const Game = ({ name }) => {
           toggleMute={toggleMute}
         />
         <p className={styles.video__subtitle}>
-          Если вы знаете финальный ответ, введите его в формате *******
+          Если вы знаете финальный ответ, введите его.
         </p>
       </div>
       <div className={styles.game__controlls}>
         <Input secondClass="answer__input" placeholder="Введите ответ" />
+        <button className={styles.answer__button}>Ответить</button>
       </div>
     </div>
   );

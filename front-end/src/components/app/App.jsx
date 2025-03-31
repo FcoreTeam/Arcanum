@@ -24,7 +24,7 @@ const App = () => {
     userPhone,
     userEmail,
     UserPts,
-    ...user
+    ...user 
   } = useUser();
 
   useEffect(() => {
