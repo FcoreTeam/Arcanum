@@ -8,11 +8,17 @@ import Button from "../../@ui/Button/Button";
 import { api } from "../../../api/api";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Games = ({ category }) => {
+  const navigate = useNavigate();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleDemoClick = (gameId) => {
+    navigate(`/game?id=${gameId}`);
+  };
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -108,8 +114,9 @@ const Games = ({ category }) => {
               </Button>
               <Button
                 buttonClass="buy__btn"
-                buttonContent="Инфо"
+                buttonContent="Демо"
                 secondClass="info__btn"
+                onClick={() => handleDemoClick(game.id)}
               >
                 Описание игры
               </Button>

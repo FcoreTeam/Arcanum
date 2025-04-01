@@ -1,16 +1,60 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import blur from "../../img/blur__one.svg";
-import video from "../../videos/intro.mp4";
+import correct from "../../img/Correct.svg";
 import styles from "./game.module.scss";
 import Controlls from "./controlls/Controlls";
 import Input from "../@ui/Input/Input";
+import { api } from "../../api/api";
 
-const Game = ({ name }) => {
+const Game = ({ name, video }) => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const gameId = searchParams.get('id');
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   let [volume, setVolume] = useState(0.5);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [userAnswer, setUserAnswer] = useState("");
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [gameData, setGameData] = useState(null);
+
+  useEffect(() => {
+    const fetchGameData = async () => {
+      try {
+        const response = await api.getGames();
+        const game = response.data.games.find(g => g.id === parseInt(gameId));
+        if (game) {
+          setGameData(game);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке данных игры:', error);
+      }
+    };
+
+    if (gameId) {
+      fetchGameData();
+    }
+  }, [gameId]);
+
+  const handleAnswerChange = (e) => {
+    setUserAnswer(e.target.value);
+  };
+
+  const checkAnswer = () => {
+    if (!gameData?.answer) {
+      alert("Ошибка: ответ не определен");
+      return;
+    }
+
+    const isAnswerCorrect = userAnswer.toLowerCase().trim() === gameData.answer.toLowerCase().trim();
+    setIsCorrect(isAnswerCorrect);
+    
+    if (!isAnswerCorrect) {
+      alert("Неправильный ответ, попробуйте еще раз!");
+    }
+  };
 
   const toggleMute = () => {
     if (videoRef.current) {
@@ -131,7 +175,16 @@ const Game = ({ name }) => {
     <div className={styles.game}>
       <img src={blur} alt="" className={styles.blur__image} />
       <img src={blur} alt="" className={styles.blur__image__sec} />
-      <p className={styles.game__title}>{name}</p>
+      {isCorrect && (
+        <>
+          <div className={styles.game__blur} />
+          <div className={styles.game__correct}>
+            <img src={correct} alt="Правильный ответ" />
+            <p className={styles.correct_answer}>Верно!</p>
+          </div>
+        </>
+      )}
+      <p className={styles.game__title}>{gameData?.name || name}</p>
       <div className={styles.videoContainer}>
         <video
           ref={videoRef}
@@ -140,7 +193,7 @@ const Game = ({ name }) => {
           volume={volume}
           controls={false}
         >
-          <source src={video} type="video/mp4" />
+          <source src={gameData?.video_after_url || video} type="video/mp4" />
         </video>
         <Controlls
           handleVolumeChange={handleVolumeChange}
@@ -157,9 +210,29 @@ const Game = ({ name }) => {
         </p>
       </div>
       <div className={styles.game__controlls}>
-        <Input secondClass="answer__input" placeholder="Введите ответ" />
-        <button className={styles.answer__button}>Ответить</button>
+        <Input 
+          secondClass="answer__input" 
+          placeholder="Введите ответ"
+          value={userAnswer}
+          onChange={handleAnswerChange}
+        />
+        <button 
+          className={styles.answer__button}
+          onClick={checkAnswer}
+        >
+          Ответить
+        </button>
       </div>
+      {isCorrect && (
+        <div className={styles.back__container}>
+          <button 
+            className={styles.back_button}
+            onClick={() => navigate('/main')}
+          >
+            Вернуться
+          </button>
+        </div>
+      )}
     </div>
   );
 };

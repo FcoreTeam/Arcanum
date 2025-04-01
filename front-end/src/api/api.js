@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "https://api.zoltansgametma.ru",
   timeout: 10000,
   withCredentials: true,
 });
