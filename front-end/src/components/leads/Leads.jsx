@@ -3,20 +3,40 @@ import Player from "./player/Player";
 import GameLine from "./game-line/Game-line";
 import clsx from "clsx";
 import { api } from "../../api/api"
+import { useParams } from "react-router-dom";
 
 import styles from "./leads.module.scss";
 
+const formatTime = (dateString) => {
+  const date = new Date(dateString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
 
 const Leads = () => {
   const [leaders, setLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { gameId } = useParams();
+
+  console.log(gameId)
 
   useEffect(() => {
     const fetchLeaders = async () => {
       try {
-        const response = await api.getLeaders();
-        setLeaders(response.data.slice(0, 5));
+        if (!gameId) {
+          setError("ID игры не указан");
+          setLoading(false);
+          return;
+        }
+
+        const response = await api.getLeaders(gameId);
+        if (response.data?.success) {
+          setLeaders(response.data.leaderboard);
+        } else {
+          setError("Ошибка загрузки таблицы лидеров");
+        }
       } catch (err) {
         setError("Ошибка загрузки таблицы лидеров");
         console.error(err);
@@ -25,7 +45,7 @@ const Leads = () => {
       }
     };
     fetchLeaders();
-  }, []);
+  }, [gameId]);
 
   return (
     <div className={styles.leads}>
@@ -54,7 +74,15 @@ const Leads = () => {
             ) : error ? (
               <p className={styles.error}>{error}</p>
             ) : leaders.length > 0 ? (
-              leaders.map((item, index) => <Player key={index} {...item} />)
+              leaders.map((leader, index) => (
+                <Player 
+                  key={leader.id} 
+                  place={index + 1}
+                  name={leader.username || leader.first_name || "Игрок"}
+                  time={formatTime(leader.created_at)}
+                  points={leader.points || 0}
+                />
+              ))
             ) : (
               <div className={styles.leaders__empty}>Лидеров пока нет</div>
             )}
@@ -64,4 +92,5 @@ const Leads = () => {
     </div>
   );
 };
+
 export default Leads;

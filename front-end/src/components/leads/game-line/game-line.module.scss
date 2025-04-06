@@ -13,20 +13,36 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: transparent;
-        -webkit-background-clip: text;
-        background-clip: text;
-        background-image: linear-gradient(to right, #de8a15b8, #fff);
+        color: #ffffff7a;
         padding-top: 7px;
         padding-bottom: 7px;
         border: 1px solid #de8a15b8;
         border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
 
-        &.active {
-            color: #000;
-            scale: 1.1;
-            background: linear-gradient(to right, #ffbc5f, #e9e9e9) padding-box,
-                linear-gradient(to bottom, #ffbc5fdd, #99713977) border-box;
+        &:hover {
+            color: #fff;
+            border-color: #ffbc5f;
+            transform: scale(1.05);
         }
     }
+}
+
+.loading {
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+}
+
+.error {
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50px;
 }

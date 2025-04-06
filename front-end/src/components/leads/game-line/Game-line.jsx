@@ -1,29 +1,52 @@
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
+import { api } from "../../../api/api";
+import { useNavigate } from "react-router-dom";
 
 import styles from "./game-line.module.scss";
 
-const INITIAL_GAMES = [
-  { gameName: "Игра 1", isActive: false },
-  { gameName: "Игра 2", isActive: false },
-  { gameName: "Игра 3", isActive: false },
-  { gameName: "Игра 4", isActive: false },
-  { gameName: "Игра 5", isActive: true },
-]
-
 const GameLine = () => {
-  const [gameNav, setGameNav] = useState(INITIAL_GAMES);
+  const navigate = useNavigate();
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleSlideClick = (index) => {
-    const updatedGameNav = gameNav.map((item, i) => ({
-      ...item,
-      isActive: i === index,
-    }));
-    setGameNav(updatedGameNav);
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        setLoading(true);
+        const response = await api.getGames();
+
+        if (response.data?.success && Array.isArray(response.data.games)) {
+          const cleanedGames = response.data.games.map((game) => ({
+            ...game,
+            preview_url: game.preview_url?.replace(/"/g, ""),
+            dateObj: new Date(game.date),
+          }));
+
+          setGames(cleanedGames);
+        } else {
+          setError("Неверный формат данных");
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки:", err);
+        setError("Ошибка загрузки игр");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGames();
+  }, []);
+
+  const handleSlideClick = (gameId) => {
+    navigate(`/lead/${gameId}`);
   };
+
+  if (loading) return <div className={styles.loading}>Загрузка игр...</div>;
+  if (error) return <div className={styles.error}>{error}</div>;
 
   return (
     <Swiper
@@ -31,16 +54,15 @@ const GameLine = () => {
       slidesPerView="2"
       loop={true}
       scrollbar={{ draggable: true }}
-      onSwiper={(swiper) => console.log(swiper)}
       className={styles.game__swiper}
     >
-      {[...gameNav].reverse().map((item, index) => (
+      {games.map((game) => (
         <SwiperSlide
-          key={index}
-          className={clsx(styles.game, item.isActive ? styles.active : "")}
-          onClick={() => handleSlideClick(gameNav.length - 1 - index)}
+          key={game.id}
+          className={clsx(styles.game)}
+          onClick={() => handleSlideClick(game.id)}
         >
-          {item.gameName}
+          {game.name}
         </SwiperSlide>
       ))}
     </Swiper>

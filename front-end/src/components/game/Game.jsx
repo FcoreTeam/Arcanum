@@ -19,6 +19,10 @@ const Game = ({ name, video }) => {
   const [userAnswer, setUserAnswer] = useState("");
   const [isCorrect, setIsCorrect] = useState(null);
   const [gameData, setGameData] = useState(null);
+  const [time, setTime] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const timerRef = useRef(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     const fetchGameData = async () => {
@@ -38,6 +42,26 @@ const Game = ({ name, video }) => {
     }
   }, [gameId]);
 
+  useEffect(() => {
+    if (isTimerRunning) {
+      timerRef.current = setInterval(() => {
+        setTime(prevTime => prevTime + 1);
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+
+    return () => {
+      clearInterval(timerRef.current);
+    };
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   const handleAnswerChange = (e) => {
     setUserAnswer(e.target.value);
   };
@@ -50,6 +74,13 @@ const Game = ({ name, video }) => {
 
     const isAnswerCorrect = userAnswer.toLowerCase().trim() === gameData.answer.toLowerCase().trim();
     setIsCorrect(isAnswerCorrect);
+    if (isAnswerCorrect) {
+      setIsTimerRunning(false);
+      if (videoRef.current) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
     
     if (!isAnswerCorrect) {
       alert("Неправильный ответ, попробуйте еще раз!");
@@ -68,15 +99,24 @@ const Game = ({ name, video }) => {
     }
   };
 
-  const togglePlayPause = () => {
-    if (videoRef.current) {
+  const togglePlayPause = async () => {
+    if (!videoRef.current) return;
+
+    try {
       if (videoRef.current.paused) {
-        videoRef.current.play();
+        if (!hasStartedRef.current) {
+          setIsTimerRunning(true);
+          hasStartedRef.current = true;
+        }
         setIsPlaying(true);
+        await videoRef.current.play();
       } else {
         videoRef.current.pause();
         setIsPlaying(false);
       }
+    } catch (error) {
+      console.error("Ошибка воспроизведения:", error);
+      setIsPlaying(false);
     }
   };
 
@@ -177,14 +217,19 @@ const Game = ({ name, video }) => {
       <img src={blur} alt="" className={styles.blur__image__sec} />
       {isCorrect && (
         <>
-          <div className={styles.game__blur} />
-          <div className={styles.game__correct}>
+          <div className={`${styles.game__blur} ${styles.active}`} />
+          <div className={`${styles.game__correct} ${styles.active}`}>
             <img src={correct} alt="Правильный ответ" />
             <p className={styles.correct_answer}>Верно!</p>
           </div>
         </>
       )}
-      <p className={styles.game__title}>{gameData?.name || name}</p>
+      <div className={`${styles.game__header} ${isCorrect ? styles.hidden : ''}`}>
+        <h3 className={styles.game__title}>{gameData?.name || name}</h3>
+        <div className={styles.timer}>
+          <p>{formatTime(time)}</p>
+        </div>
+      </div>
       <div className={styles.videoContainer}>
         <video
           ref={videoRef}
@@ -209,7 +254,7 @@ const Game = ({ name, video }) => {
           Если вы знаете финальный ответ, введите его.
         </p>
       </div>
-      <div className={styles.game__controlls}>
+      <div className={`${styles.game__controlls} ${isCorrect ? styles.hidden : ''}`}>
         <Input 
           secondClass="answer__input" 
           placeholder="Введите ответ"
@@ -224,7 +269,7 @@ const Game = ({ name, video }) => {
         </button>
       </div>
       {isCorrect && (
-        <div className={styles.back__container}>
+        <div className={`${styles.back__container} ${styles.active}`}>
           <button 
             className={styles.back_button}
             onClick={() => navigate('/main')}
@@ -238,3 +283,4 @@ const Game = ({ name, video }) => {
 };
 
 export default Game;
+

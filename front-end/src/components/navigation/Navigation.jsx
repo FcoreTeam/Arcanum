@@ -1,4 +1,5 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import LinkNav from "./link-nav/Link-nav";
 import chat_img from "../../img/chat.svg";
@@ -10,6 +11,18 @@ import styles from "./navigation.module.scss";
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const gameId = searchParams.get('id');
+
+  const handleLeadersClick = () => {
+    if (gameId) {
+      navigate(`/lead/${gameId}`);
+    } else {
+      navigate('/lead/1'); // или какое-то значение по умолчанию
+    }
+  };
+
   const routes = [
     {
       routeIco: chat_img,
@@ -23,8 +36,9 @@ const Navigation = () => {
     },
     {
       routeIco: leaders_img,
-      routeLink: "/lead",
-      isActive: location.pathname === "/lead",
+      routeLink: gameId ? `/lead/${gameId}` : "/lead/1",
+      isActive: location.pathname.startsWith("/lead"),
+      onClick: handleLeadersClick
     },
     {
       routeIco: info_img,

@@ -73,7 +73,7 @@ const Games = ({ category }) => {
   return (
     <Swiper
       modules={[Navigation, Pagination, Autoplay]}
-      slidesPerView={1}
+      slidesPerView={2}
       spaceBetween={30}
       loop={true}
       navigation={{
@@ -83,14 +83,21 @@ const Games = ({ category }) => {
       pagination={{
         clickable: true,
         dynamicBullets: true,
+        renderBullet: function (index, className) {
+          return '<span class="' + className + '"></span>';
+        },
       }}
       breakpoints={{
-        768: { slidesPerView: 2 },
-        1024: { slidesPerView: 3 },
+        320: { slidesPerView: 2 },
+        768: { slidesPerView: 3 },
+        1024: { slidesPerView: 4 },
       }}
       speed={800}
       grabCursor={true}
       className={styles.game__swiper}
+      watchSlidesProgress={true}
+      observer={true}
+      observeParents={true}
     >
       {filteredGames.map((game) => (
         <SwiperSlide className={styles.slide} key={game.id}>
@@ -105,6 +112,7 @@ const Games = ({ category }) => {
                 width="298"
                 height="198"
                 alt={game.name}
+                loading="lazy"
               />
             )}
 

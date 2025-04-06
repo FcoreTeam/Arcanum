@@ -77,11 +77,40 @@
         rotate: 180deg;
     }
 
+    .game__header {
+        width: 90%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        z-index: 1;
+        transition: opacity 0.3s ease-in-out;
+
+        &.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+
     .game__title {
         color: #fff;
-        width: 100%;
         font-size: 20px;
-        text-align: center;
+        font-family: "mont";
+        margin: 0;
+    }
+
+    .timer {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 20px;
+        border-radius: 20px;
+        color: #fff;
+        font-family: "mont";
+        font-size: 18px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 188, 95, 0.3);
+        box-shadow: 0 0 10px rgba(255, 188, 95, 0.2);
+        pointer-events: none;
+        user-select: none;
     }
 
     .videoContainer {

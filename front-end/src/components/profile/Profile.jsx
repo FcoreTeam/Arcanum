@@ -19,8 +19,8 @@ const Profile = () => {
 
   const [filter, setFilter] = useState("not_passed");
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState(String(userPhone));
-  const [email, setEmail] = useState(String(userEmail));
+  const [phone, setPhone] = useState(userPhone || "");
+  const [email, setEmail] = useState(userEmail || "");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -29,15 +29,15 @@ const Profile = () => {
     setError(null);
 
     try {
-      await api.setSettings("/users/update_settings", {
-        userPhone: phone,
-        userEmail: email,
+      await api.setSettings({
+        userPhone: phone || null,
+        userEmail: email || null,
       });
 
       setUser({
         ...user,
-        userPhone: phone,
-        userEmail: email,
+        userPhone: phone || null,
+        userEmail: email || null,
       });
 
       setIsEditing(false);
@@ -47,6 +47,7 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
   const handlePhoneChange = (e) => {
     const value = e.target.value;
 
@@ -92,8 +93,8 @@ const Profile = () => {
           </>
         ) : (
           <>
-            <div className={styles.user__info}>{phone}</div>
-            <div className={styles.user__info}>{email}</div>
+            <div className={styles.user__info}>{phone || "Номер не указан"}</div>
+            <div className={styles.user__info}>{email || "Email не указан"}</div>
           </>
         )}
 

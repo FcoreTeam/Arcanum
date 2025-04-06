@@ -48,6 +48,7 @@ const App = () => {
             userPhone: currentUser.phone,
             userEmail: currentUser.email,
             userPts: currentUser.balance,
+            userId: userId
           });
 
           sessionStorage.setItem("user_id", userId);
@@ -74,7 +75,7 @@ const App = () => {
         <Route path="/support" element={<Support />} />
         <Route path="/intro" element={<Intro />} />
         <Route path="/game" element={<Game name={name} video={video} />} />
-        <Route path="/lead" element={<Leads />} />
+        <Route path="/lead/:gameId" element={<Leads />} />
         <Route path="/info" element={<Instruction />} />
         <Route path="/main" element={<Main />} />
       </Route>

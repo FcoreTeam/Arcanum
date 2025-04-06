@@ -4,26 +4,53 @@ import Input from "../@ui/Input/Input";
 import sendImage from "../../img/send.svg";
 import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
-
 import styles from "./support.module.scss";
 import ImageUploader from "./image-uploader/Image-uploader";
+import { api } from "../../api/api";
+import { useUser } from "../../store/slices/hooks/useUser";
 
 const Support = () => {
+  const { userId } = useUser();
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [images, setImages] = useState([]); // Состояние для хранения загруженных изображений
+  const [images, setImages] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null); // Реф для input type="file"
+  const fileInputRef = useRef(null);
 
-  // Автоматическая прокрутка вниз при изменении сообщений
+  useEffect(() => {
+    if (userId) {
+      fetchMessages();
+      const interval = setInterval(fetchMessages, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [userId]);
+
+  const fetchMessages = async () => {
+    if (!userId) return;
+    
+    try {
+      const response = await api.getMessages(userId);
+      if (response.data.success) {
+        setMessages(response.data.messages);
+        setIsConnected(true);
+      }
+    } catch (error) {
+      console.error("Ошибка при получении сообщений:", error);
+      setIsConnected(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // Автоматическое изменение высоты textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "45px";
@@ -34,7 +61,6 @@ const Support = () => {
     }
   }, []);
 
-  // Обработчик изменения текста в textarea
   const handleInputChange = (event) => {
     const { value } = event.target;
     setInputValue(value);
@@ -44,7 +70,6 @@ const Support = () => {
     event.target.style.height = `${newHeight}px`;
   };
 
-  // Обработчик загрузки изображений
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -55,6 +80,7 @@ const Support = () => {
           fileName: file.name,
           fileLink: fileURL,
           fileSize: (file.size / 1024).toFixed(2),
+          file: file
         },
       ]);
 
@@ -64,22 +90,32 @@ const Support = () => {
 
   const canSendMessage = !!inputValue.length || !!images.length;
 
-  const sendMessage = (text) => {
-    if (!canSendMessage) return;
+  const sendMessage = async () => {
+    if (!canSendMessage || !userId) return;
 
-    const newMessage = {
-      id: messages.length + 1,
-      isUserMessage: true,
-      message: text,
-      images: [...images],
-    };
+    try {
+      const formData = new FormData();
+      formData.append('user_id', userId);
+      formData.append('msg', inputValue);
+      
+      if (images.length > 0) {
+        images.forEach((image, index) => {
+          formData.append(`image${index}`, image.file);
+        });
+      }
 
-    setMessages([...messages, newMessage]);
-    setInputValue("");
-    setImages([]);
+      await api.makeRequest(formData);
+      
+      setInputValue("");
+      setImages([]);
+      
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "45px";
+      }
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "45px";
+      fetchMessages();
+    } catch (error) {
+      console.error("Ошибка при отправке сообщения:", error);
     }
   };
 
@@ -87,8 +123,10 @@ const Support = () => {
     <div className={styles.support}>
       <div className={styles.support__body}>
         <div className={styles.support__header}>
-          {/* <img src={supportAvatar} alt="" className={styles.header__avatar} /> */}
-          <p className={styles.support__title}>Вы не подключены к чату</p>
+          <img src={supportAvatar} alt="" className={styles.header__avatar} />
+          <p className={styles.support__title}>
+            {isLoading ? "Загрузка..." : isConnected ? "Агент поддержки" : "Вы не подключены к чату"}
+          </p>
         </div>
         <section className={styles.body__messages}>
           {messages.map((item) => (
@@ -126,7 +164,7 @@ const Support = () => {
               src={sendImage}
               alt=""
               className={styles.send}
-              onClick={() => sendMessage(inputValue)}
+              onClick={sendMessage}
             />
           )}
           <Input
