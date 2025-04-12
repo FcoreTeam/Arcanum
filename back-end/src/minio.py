@@ -7,7 +7,7 @@ async def get_minio_instance(config: BaseConfig) -> Minio:
         access_key=config.MINIO_ACCESS_KEY,
         secret_key=config.MINIO_SECRET_KEY,
         secure=False,
-        server_url="http://0.0.0.0:9000"
+        server_url=config.MINIO_SERVER_URL
     )
     if not await minio.bucket_exists("videos"):
         await minio.make_bucket("videos")

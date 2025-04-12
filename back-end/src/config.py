@@ -13,6 +13,7 @@ class BaseConfig:
     MINIO_HOST: str = environ.get("MINIO_HOST")
     MINIO_PORT: int = environ.get("MINIO_PORT")
     MINIO_CONSOLE_PORT: int = environ.get("MINIO_CONSOLE_PORT")
+    MINIO_SERVER_URL: str = environ.get("MINIO_SERVER_URL")
 
 class TelegramBotConfig(BaseConfig):
     TELEGRAM_TOKEN: Optional[str] = environ.get("TELEGRAM_TOKEN")
