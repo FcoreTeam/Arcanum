@@ -34,25 +34,3 @@ services:
     restart: always
     env_file:
       - .env
-  web:
-    image: nginx
-    volumes:
-      - ./conf/nginx.conf:/etc/nginx/nginx.conf
-      - ./etc/letsencrypt:/etc/letsencrypt:ro  
-      - ./certbot/data:/var/www/certbot
-    depends_on:
-      - app
-    ports:
-      - "80:80"
-      - "443:443"
-  certbot:
-    image: certbot/certbot
-    depends_on:
-      - web
-    command: >-
-             certonly --reinstall --webroot --webroot-path=/var/www/certbot
-             --agree-tos --no-eff-email
-             -d ${DOMAIN} 
-    volumes:
-      - ./etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/data:/var/www/certbot
