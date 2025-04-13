@@ -8,6 +8,7 @@ from database import init_db
 from fastapi import FastAPI, APIRouter
 
 from games.router import games_api_router
+from auth.router import auth_api_router
 
 import asyncio
 
@@ -20,5 +21,6 @@ async def on_startup():
 app = FastAPI(on_startup=[on_startup])
 api_router = APIRouter(prefix="/api")
 api_router.include_router(games_api_router)
+api_router.include_router(auth_api_router)
 app.include_router(api_router)
 
