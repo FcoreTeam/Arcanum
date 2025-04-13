@@ -18,7 +18,7 @@ async def on_startup():
     asyncio.ensure_future(start_telegram_bot(TelegramBotConfig()))
 
 app = FastAPI(on_startup=[on_startup], docs_url="/api/docs")
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter()
 api_router.include_router(games_api_router)
 api_router.include_router(auth_api_router)
 app.include_router(api_router)
