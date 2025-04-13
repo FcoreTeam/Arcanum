@@ -14,7 +14,9 @@ import asyncio
 
 async def on_startup():
     config = DevConfig()
-    app = FastAPI()
+    app = FastAPI(
+        docs_url="/api/docs"
+    )
     await init_db(f"asyncpg://{config.PGSQL_USER}:{config.PGSQL_PASSWORD}@{config.PGSQL_HOST}:{config.PGSQL_PORT}/{config.PGSQL_NAME}")
     asyncio.ensure_future(start_telegram_bot(TelegramBotConfig()))
 
