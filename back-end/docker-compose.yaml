@@ -6,6 +6,7 @@ services:
       - POSTGRES_DB=${PGSQL_NAME}
       - POSTGRES_USER=${PGSQL_USER}
       - POSTGRES_PASSWORD=${PGSQL_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
       - ${PGSQL_PORT}:5432
     volumes:
