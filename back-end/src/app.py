@@ -17,7 +17,7 @@ async def on_startup():
     await init_db(f"asyncpg://{config.PGSQL_USER}:{config.PGSQL_PASSWORD}@{config.PGSQL_HOST}:{config.PGSQL_PORT}/{config.PGSQL_NAME}")
     asyncio.ensure_future(start_telegram_bot(TelegramBotConfig()))
 
-app = FastAPI(on_startup=[on_startup], docs_url="/api/docs")
+app = FastAPI(on_startup=[on_startup], root_path="/api")
 api_router = APIRouter()
 api_router.include_router(games_api_router)
 api_router.include_router(auth_api_router)
