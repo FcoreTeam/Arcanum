@@ -4,7 +4,7 @@ from typing import Annotated
 from aiogram.utils.web_app import check_webapp_signature, parse_webapp_init_data, WebAppUser
 from json import JSONDecodeError
 
-from config import TelegramBotConfig
+from config import TelegramSettings
 
 async def user_init_data_validate(
     initdata: Annotated[str | None, Header()] = None,
@@ -12,7 +12,7 @@ async def user_init_data_validate(
     if not initdata:
         raise HTTPException(status_code=400, detail="Please set Initdata header.")
     try:
-        token = TelegramBotConfig().TELEGRAM_TOKEN
+        token = TelegramSettings.telegram_token
         result = check_webapp_signature(token=token, init_data=initdata)
         return result
     except JSONDecodeError:

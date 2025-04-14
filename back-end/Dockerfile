@@ -8,5 +8,5 @@ COPY src/ src/
 
 WORKDIR src/
 
-#CMD ["uvicorn", "--port", "8000", "--host", "0.0.0.0", "app:app"]
-CMD ["fastapi", "dev", "app.py", "--host", "0.0.0.0"]
+CMD ["uvicorn", "--port", "8000", "--host", "0.0.0.0", "app:app"]
+#CMD ["fastapi", "dev", "app.py", "--host", "0.0.0.0"]

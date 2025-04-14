@@ -1,13 +1,13 @@
-from config import BaseConfig
+from config import MinioSettings
 from miniopy_async import Minio
 
-async def get_minio_instance(config: BaseConfig) -> Minio:
+async def get_minio_instance() -> Minio:
     minio = Minio(
-            f"{config.MINIO_HOST}:{config.MINIO_PORT}",
-        access_key=config.MINIO_ACCESS_KEY,
-        secret_key=config.MINIO_SECRET_KEY,
-        secure=False,
-        server_url=config.MINIO_SERVER_URL
+        f"{MinioSettings.host}:{MinioSettings.port}",
+        access_key=MinioSettings.access_key,
+        secret_key=MinioSettings.minio_secret_key, 
+        secure=MinioSettings.server_url.startswith("https://"),
+        server_url=MinioSettings.server_url
     )
     if not await minio.bucket_exists("videos"):
         await minio.make_bucket("videos")

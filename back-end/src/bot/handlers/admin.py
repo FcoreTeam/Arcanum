@@ -13,7 +13,7 @@ from aiogram.fsm.context import FSMContext
 
 from auth.models import User
 
-from config import TelegramBotConfig
+from config import TelegramSettings
 
 from ..mtproto_provider import send_photo_to_minio, send_video_to_minio
 
@@ -82,7 +82,7 @@ async def description_handler(message: Message, state: FSMContext):
     await state.set_state(GameCreateStates.preview_photo)
     await message.answer(response, reply_markup=game_create_cancel())
 
-async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext, config: TelegramBotConfig):
+async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext):
     file = await bot.get_file(message.photo[0].file_id)
     filename = file.file_path.split("/")[-1]
     extension = filename.split(".")[-1]
@@ -90,8 +90,7 @@ async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext, c
         message.from_user.id, 
         message.message_id, 
         f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "image/" + extension, 
-        config
+        "image/" + extension
     )
     await state.update_data({"photo_message_id":message.message_id})
     response = (
@@ -102,7 +101,7 @@ async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext, c
     await state.set_state(GameCreateStates.video)
     await message.answer(response, reply_markup=game_create_cancel())
 
-async def video_handler(message: Message, state: FSMContext, config: TelegramBotConfig): 
+async def video_handler(message: Message, state: FSMContext): 
     await message.answer("⏳ Загружаю видео...")
     filename = message.video.file_name
     extension = filename.split(".")[-1]
@@ -110,8 +109,7 @@ async def video_handler(message: Message, state: FSMContext, config: TelegramBot
         message.from_user.id, 
         message.message_id, 
         f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "video/" + extension, 
-        config
+        "video/" + extension
     )
     await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
     await state.update_data({"video_message_id":message.message_id})

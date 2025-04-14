@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Header, Depends
-from aiogram.utils.web_app import parse_webapp_init_data, check_webapp_signature, WebAppUser
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Annotated
-from config import TelegramBotConfig
 
 from .schemas import UserResponse, UserUpdateRequest
+
+from aiogram.utils.web_app import WebAppUser
 
 from .models import User
 

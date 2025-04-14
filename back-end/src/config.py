@@ -1,34 +1,49 @@
-from os import environ
-from dotenv import load_dotenv
-from typing import Optional
+from pydantic import BaseModel
 
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class BaseConfig:
-    DEBUG: bool = bool(environ.get("DEBUG"))
 
-    MINIO_ACCESS_KEY: str = environ.get("MINIO_ACCESS_KEY")
-    MINIO_SECRET_KEY: str = environ.get("MINIO_SECRET_KEY")
+class _MinioSettings(BaseSettings):
+    """
+    Contains minio secrets and server url for presigned getting.
+    """
+    access_key: str
+    secret_key: str
 
-    MINIO_HOST: str = environ.get("MINIO_HOST")
-    MINIO_PORT: int = environ.get("MINIO_PORT")
-    MINIO_CONSOLE_PORT: int = environ.get("MINIO_CONSOLE_PORT")
-    MINIO_SERVER_URL: str = environ.get("MINIO_SERVER_URL")
+    host: str
+    port: int
+    console_port: int
 
-class TelegramBotConfig(BaseConfig):
-    TELEGRAM_TOKEN: Optional[str] = environ.get("TELEGRAM_TOKEN")
-    TELEGRAM_PARSE_MODE: Optional[str] = environ.get("TELEGRAM_PARSE_MODE")  
-    
-    APP_URL: Optional[str] = environ.get("APP_URL")
+    server_url: str
 
-    API_ID: Optional[str] = environ.get("API_ID")
-    API_HASH: Optional[str] = environ.get("API_HASH")
+    model_config = SettingsConfigDict(
+        env_nested_delimiter="_", env_nested_max_split=1, env_prefix="MINIO_"
+    )
 
-class DevConfig(BaseConfig):
-    APP_URL: Optional[str] = environ.get("API_URL")
-    # Database Postgresql
-    PGSQL_USER: Optional[str] = environ.get("PGSQL_USER")
-    PGSQL_NAME: Optional[str] = environ.get("PGSQL_NAME")
-    PGSQL_PASSWORD: Optional[str] = environ.get("PGSQL_PASSWORD")
-    PGSQL_HOST: Optional[str] = environ.get("PGSQL_HOST")
-    PGSQL_PORT: Optional[int] = int(environ.get("PGSQL_PORT"))
+class _Settings(BaseSettings):
+    """
+    Default settings
+    """
+    debug: bool
+
+    app_url: str
+ 
+    pgsql_user: str
+    pgsql_name: str
+    pgsql_host: str
+    pgsql_password: str
+    pgsql_port: int
+
+class _TelegramSettings(_Settings):
+    """
+    Telegram tokens and api's secrets for mtproto
+    """
+    telegram_token: str
+    telegram_parse_mode: str
+
+    api_id: str
+    api_hash: str
+
+Settings = _Settings()
+TelegramSettings = _TelegramSettings()
+MinioSettings = _MinioSettings()

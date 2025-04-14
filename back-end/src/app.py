@@ -1,7 +1,6 @@
 from bot.main import start_telegram_bot
-from dotenv import load_dotenv
 
-from config import TelegramBotConfig, DevConfig
+from config import Settings
 
 from database import init_db
 
@@ -13,9 +12,15 @@ from auth.router import auth_api_router
 import asyncio
 
 async def on_startup():
-    config = DevConfig()
-    await init_db(f"asyncpg://{config.PGSQL_USER}:{config.PGSQL_PASSWORD}@{config.PGSQL_HOST}:{config.PGSQL_PORT}/{config.PGSQL_NAME}")
-    asyncio.ensure_future(start_telegram_bot(TelegramBotConfig()))
+    pgsql_url = "asyncpg://{}:{}@{}:{}/{}".format(
+        Settings.pgsql_user,
+        Settings.pgsql_password,
+        Settings.pgsql_host,
+        Settings.pgsql_port,
+        Settings.pgsql_name,
+    )
+    await init_db(pgsql_url)
+    asyncio.ensure_future(start_telegram_bot())
 
 app = FastAPI(on_startup=[on_startup], root_path="/api")
 api_router = APIRouter()
