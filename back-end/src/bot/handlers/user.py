@@ -9,7 +9,7 @@ from config import TelegramSettings
 
 async def start(message: Message):
     builder = InlineKeyboardBuilder()
-    builder.button(text="Начать! 🧩", web_app=WebAppInfo(url=TelegramSettigns.app_url))
+    builder.button(text="Начать! 🧩", web_app=WebAppInfo(url=TelegramSettings.app_url))
     response = (
         "👋 Привествую в боте Золтана!\n"
         "_Нажмите на кнопку чтобы начать!_"

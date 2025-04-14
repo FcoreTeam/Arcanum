@@ -15,8 +15,8 @@ WebAppUserDep = Annotated[WebAppUser, Depends(get_user_by_init_data)]
 
 @auth_api_router.get("/me", response_model=UserResponse)
 async def read_user(webapp_user: WebAppUserDep):
-    user = await User.get(telegram_id=webapp_user.id)
-    return User
+    return await User.get(telegram_id=webapp_user.id)
+    
 
 @auth_api_router.patch("/me/sync", response_model=UserResponse)
 async def sync_user(webapp_user: WebAppUserDep):

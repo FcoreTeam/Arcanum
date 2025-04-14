@@ -15,3 +15,6 @@ class UserResponse(BaseModel):
     is_admin: bool
     avatar_url: Optional[str]
 
+    class Config:
+        from_attributes: True
+
