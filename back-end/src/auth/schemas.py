@@ -2,6 +2,7 @@ from pydantic import BaseModel, UUID4
 from typing import Optional
 
 class UserUpdateRequest(BaseModel):
+    user_id: int
     email: str
     phone: str | None = None
 

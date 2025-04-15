@@ -5,6 +5,7 @@ from config import Settings
 from database import init_db
 
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 
 from games.router import games_api_router
 from auth.router import auth_api_router
@@ -23,6 +24,14 @@ async def on_startup():
     asyncio.ensure_future(start_telegram_bot())
 
 app = FastAPI(on_startup=[on_startup], root_path="/api")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 api_router = APIRouter()
 api_router.include_router(games_api_router)
 api_router.include_router(auth_api_router)
