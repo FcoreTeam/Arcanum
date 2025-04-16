@@ -1,7 +1,7 @@
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F, Bot
 
-from ..filters.callback_data import YesNoAction, TipAction
+from ..filters.callback_data import YesNoAction, TipAction, ChatAction
 from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb
 
 from aiogram.filters.command import Command
@@ -14,6 +14,8 @@ from aiogram.fsm.context import FSMContext
 from auth.models import User
 
 from config import TelegramSettings
+
+from realtime.chat import sio, chats
 
 from ..mtproto_provider import send_photo_to_minio, send_video_to_minio
 
@@ -34,6 +36,9 @@ class GameCreateStates(StatesGroup):
     tip = State()
     date = State()
     answer = State()
+
+class ChatState(StatesGroup):
+    chat = State()
 
 async def cancel(callback_query: CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
@@ -199,6 +204,25 @@ async def answer_handler(message: Message, state: FSMContext, user: User):
     await message.answer(response)
     await state.clear()
 
+async def chat(callback_query: CallbackQuery, callback_data: ChatAction, state: FSMContext, user: User):
+    await callback_query.message.answer("Вы успешно начали чат с юзером. Просто отправьте сообщение.\nЧтобы остановить чат пропишите *exit*")
+    await state.set_state(ChatState.chat)
+    await state.set_data({"sid":callback_data.sid})
+    chats.update({callback_data.sid:user})
+    await sio.emit("chat-started", to=callback_data.sid)
+    await callback_query.message.delete()
+
+async def chat_message(message: Message, state: FSMContext):
+    data = await state.get_data()
+    text = message.text
+    if text == "exit":
+        await message.answer("Вы остановили чат.")
+        chats.pop(data["sid"])
+        await state.clear()
+        return await sio.emit("chat-ended", to=data["sid"])
+    logging.critical(data["sid"])
+    await sio.emit("chat-message", {"content":text}, to=data["sid"])
+
 async def admin(message: Message):
     response = (
         "👋 Привет! Все команды: \n"
@@ -220,5 +244,5 @@ def register_admin_handlers(router: Router):
     router.message.register(tip_handler, GameCreateStates.tip)
     router.message.register(date_handler, GameCreateStates.date)
     router.message.register(answer_handler, GameCreateStates.answer)
-    
-    
+    router.callback_query.register(chat, ChatAction.filter()) 
+    router.message.register(chat_message, ChatState.chat)

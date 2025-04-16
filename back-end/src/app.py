@@ -1,6 +1,6 @@
 from bot.main import start_telegram_bot
 
-from config import Settings
+from config import Settings, TelegramSettings
 
 from database import init_db
 
@@ -9,6 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from games.router import games_api_router
 from auth.router import auth_api_router
+
+from realtime.chat import socket_app
+
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
 
 import asyncio
 
@@ -24,6 +29,8 @@ async def on_startup():
     asyncio.ensure_future(start_telegram_bot())
 
 app = FastAPI(on_startup=[on_startup], root_path="/api")
+
+app.mount("/", socket_app)
 
 api_router = APIRouter()
 api_router.include_router(games_api_router)

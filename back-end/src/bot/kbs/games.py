@@ -1,6 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup
-from ..filters.callback_data import YesNoAction, TipAction
+from ..filters.callback_data import YesNoAction, TipAction, ChatAction
 
 def is_test_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -19,3 +19,7 @@ def cancel() -> InlineKeyboardMarkup:
     builder.button(text="Отменить создание игры ☁️", callback_data="cancel")
     return builder.as_markup()
 
+def chat(sid) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="Принять", callback_data=ChatAction(sid=sid))
+    return builder.as_markup()
