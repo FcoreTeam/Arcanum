@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
 import pencil from "../../img/pencil.svg";
 import Games from "../main/games/Games";
 import styles from "./profile.module.scss";
 import { useUser } from "../../store/slices/hooks/useUser";
-import {api} from "../../api/api"
+import { api } from "../../api/api";
 
 const Profile = () => {
   const {
@@ -24,14 +24,37 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.getCurrentUser();
+        if (response.data) {
+          setUser({
+            ...user,
+            userPhone: response.data.phone || null,
+            userEmail: response.data.email || null,
+            userAvatar: response.data.avatar_url || null,
+            userName: response.data.first_name || response.data.username || "Пользователь"
+          });
+          setPhone(response.data.phone || "");
+          setEmail(response.data.email || "");
+        }
+      } catch (err) {
+        console.error("Ошибка при загрузке данных пользователя:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleSave = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      await api.setSettings({
-        userPhone: phone || null,
-        userEmail: email || null,
+      await api.updateUser({
+        phone: phone || null,
+        email: email || null,
       });
 
       setUser({

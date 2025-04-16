@@ -6,7 +6,7 @@ import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
 import styles from "./support.module.scss";
 import ImageUploader from "./image-uploader/Image-uploader";
-import { api } from "../../api/api";
+import { api, chatApi } from "../../api/api";
 import { useUser } from "../../store/slices/hooks/useUser";
 
 const Support = () => {
@@ -16,30 +16,53 @@ const Support = () => {
   const [images, setImages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (userId) {
+      setupChat();
       fetchMessages();
-      const interval = setInterval(fetchMessages, 5000);
-      return () => clearInterval(interval);
     }
+    return () => {
+      chatApi.disconnect();
+    };
   }, [userId]);
+
+  const setupChat = () => {
+    chatApi.connect(userId);
+
+    chatApi.onConnect(() => {
+      setIsConnected(true);
+      setError(null);
+    });
+
+    chatApi.onDisconnect(() => {
+      setIsConnected(false);
+      setError("Соединение с чатом потеряно");
+    });
+
+    chatApi.onMessage((message) => {
+      setMessages(prev => [...prev, message]);
+    });
+  };
 
   const fetchMessages = async () => {
     if (!userId) return;
     
     try {
       const response = await api.getMessages(userId);
-      if (response.data.success) {
-        setMessages(response.data.messages);
+      if (response.data) {
+        setMessages(response.data);
         setIsConnected(true);
+        setError(null);
       }
     } catch (error) {
       console.error("Ошибка при получении сообщений:", error);
       setIsConnected(false);
+      setError("Ошибка при загрузке сообщений");
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +111,10 @@ const Support = () => {
     }
   };
 
+  const handleDeleteImage = (index) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
+  };
+
   const canSendMessage = !!inputValue.length || !!images.length;
 
   const sendMessage = async () => {
@@ -96,26 +123,29 @@ const Support = () => {
     try {
       const formData = new FormData();
       formData.append('user_id', userId);
-      formData.append('msg', inputValue);
+      formData.append('message', inputValue);
       
       if (images.length > 0) {
         images.forEach((image, index) => {
-          formData.append(`image${index}`, image.file);
+          formData.append(`attachments[${index}]`, image.file);
         });
       }
 
       await api.makeRequest(formData);
       
+      // Отправляем сообщение через WebSocket
+      chatApi.sendMessage(inputValue);
+      
       setInputValue("");
       setImages([]);
+      setError(null);
       
       if (textareaRef.current) {
         textareaRef.current.style.height = "45px";
       }
-
-      fetchMessages();
     } catch (error) {
       console.error("Ошибка при отправке сообщения:", error);
+      setError("Ошибка при отправке сообщения");
     }
   };
 
@@ -128,13 +158,14 @@ const Support = () => {
             {isLoading ? "Загрузка..." : isConnected ? "Агент поддержки" : "Вы не подключены к чату"}
           </p>
         </div>
+        {error && <p className={styles.error}>{error}</p>}
         <section className={styles.body__messages}>
           {messages.map((item) => (
             <Message
               key={item.id}
               message={item.message}
-              isUserMessage={item.isUserMessage}
-              images={item.images}
+              isUserMessage={item.is_user_message}
+              images={item.attachments}
             />
           ))}
           <div ref={messagesEndRef} />
@@ -146,6 +177,7 @@ const Support = () => {
               name={item.fileName}
               size={item.fileSize}
               preview={item.fileLink}
+              onDelete={() => handleDeleteImage(index)}
             />
           ))}
         </div>

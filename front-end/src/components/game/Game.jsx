@@ -6,10 +6,12 @@ import styles from "./game.module.scss";
 import Controlls from "./controlls/Controlls";
 import Input from "../@ui/Input/Input";
 import { api } from "../../api/api";
+import { useUser } from "../../store/slices/hooks/useUser";
 
 const Game = ({ name, video }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { userId } = useUser();
   const gameId = searchParams.get('id');
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -21,25 +23,30 @@ const Game = ({ name, video }) => {
   const [gameData, setGameData] = useState(null);
   const [time, setTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [error, setError] = useState(null);
   const timerRef = useRef(null);
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
     const fetchGameData = async () => {
       try {
-        const response = await api.getGames();
-        const game = response.data.games.find(g => g.id === parseInt(gameId));
-        if (game) {
-          setGameData(game);
+        if (!gameId) {
+          setError("ID игры не указан");
+          return;
+        }
+
+        const response = await api.getGame(gameId);
+        if (response.data) {
+          setGameData(response.data);
+          setError(null);
         }
       } catch (error) {
         console.error('Ошибка при загрузке данных игры:', error);
+        setError("Ошибка при загрузке игры");
       }
     };
 
-    if (gameId) {
-      fetchGameData();
-    }
+    fetchGameData();
   }, [gameId]);
 
   useEffect(() => {
@@ -66,24 +73,47 @@ const Game = ({ name, video }) => {
     setUserAnswer(e.target.value);
   };
 
-  const checkAnswer = () => {
+  const checkAnswer = async () => {
+    console.log('Начало checkAnswer');
+    console.log('gameId:', gameId);
+    console.log('userId:', userId);
+    console.log('userAnswer:', userAnswer);
+
     if (!gameData?.answer) {
-      alert("Ошибка: ответ не определен");
+      console.log('Ошибка: ответ не определен');
+      setError("Ошибка: ответ не определен");
       return;
     }
-
-    const isAnswerCorrect = userAnswer.toLowerCase().trim() === gameData.answer.toLowerCase().trim();
-    setIsCorrect(isAnswerCorrect);
-    if (isAnswerCorrect) {
-      setIsTimerRunning(false);
-      if (videoRef.current) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
+    if (!userId) {
+      console.log('Ошибка: пользователь не авторизован');
+      setError("Ошибка: пользователь не авторизован");
+      return;
     }
-    
-    if (!isAnswerCorrect) {
-      alert("Неправильный ответ, попробуйте еще раз!");
+    try {
+      console.log('Отправка ответа...');
+      const response = await api.sendAnswer({
+        game_id: gameId,
+        answer: userAnswer,
+        telegram_id: userId
+      });
+      console.log('Ответ от API:', response);
+
+      if (response?.data?.success) {
+        console.log('Правильный ответ');
+        setIsCorrect(true);
+        setIsTimerRunning(false);
+        if (videoRef.current) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        }
+        setError(null);
+      } else {
+        console.log('Неправильный ответ');
+        setError("Неправильный ответ, попробуйте еще раз!");
+      }
+    } catch (error) {
+      console.error('Ошибка при отправке ответа:', error);
+      setError("Ошибка при отправке ответа");
     }
   };
 
@@ -238,7 +268,7 @@ const Game = ({ name, video }) => {
           volume={volume}
           controls={false}
         >
-          <source src={gameData?.video_after_url || video} type="video/mp4" />
+          <source src={gameData?.video_url || video} type="video/mp4" />
         </video>
         <Controlls
           handleVolumeChange={handleVolumeChange}
@@ -250,31 +280,26 @@ const Game = ({ name, video }) => {
           togglePlayPause={togglePlayPause}
           toggleMute={toggleMute}
         />
-        <p className={styles.video__subtitle}>
-          Если вы знаете финальный ответ, введите его.
-        </p>
       </div>
-      <div className={`${styles.game__controlls} ${isCorrect ? styles.hidden : ''}`}>
-        <Input 
-          secondClass="answer__input" 
-          placeholder="Введите ответ"
-          value={userAnswer}
-          onChange={handleAnswerChange}
-        />
-        <button 
-          className={styles.answer__button}
-          onClick={checkAnswer}
-        >
-          Ответить
-        </button>
-      </div>
-      {isCorrect && (
-        <div className={`${styles.back__container} ${styles.active}`}>
-          <button 
-            className={styles.back_button}
-            onClick={() => navigate('/main')}
+      {!isCorrect && (
+        <div className={styles.answerContainer}>
+          {error && <div className={styles.error}>{error}</div>}
+          <Input
+            type="text"
+            placeholder="Введите ответ"
+            value={userAnswer}
+            onChange={handleAnswerChange}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                checkAnswer();
+              }
+            }}
+          />
+          <button
+            className={styles.submitButton}
+            onClick={checkAnswer}
           >
-            Вернуться
+            Ответить
           </button>
         </div>
       )}

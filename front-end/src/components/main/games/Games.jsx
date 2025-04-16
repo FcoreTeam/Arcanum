@@ -26,10 +26,10 @@ const Games = ({ category }) => {
         setLoading(true);
         const response = await api.getGames();
 
-        if (response.data?.success && Array.isArray(response.data.games)) {
-          const cleanedGames = response.data.games.map((game) => ({
+        if (Array.isArray(response.data)) {
+          const cleanedGames = response.data.map((game) => ({
             ...game,
-            preview_url: game.preview_url?.replace(/"/g, ""),
+            preview_url: game.photo_url,
             dateObj: new Date(game.date),
           }));
 
@@ -39,6 +39,7 @@ const Games = ({ category }) => {
         }
       } catch (err) {
         console.error("Ошибка загрузки:", err);
+        setError("Ошибка при загрузке игр");
       } finally {
         setLoading(false);
       }
@@ -52,10 +53,7 @@ const Games = ({ category }) => {
     if (category === "all") return true;
     if (category === "test") return game.is_test;
 
-    const [day, month, year] = game.date.split(".").map(Number);
-    const jsMonth = month - 1;
-
-    const date = new Date(year, jsMonth, day);
+    const date = new Date(game.date);
     const unixTime = date.getTime();
 
     const isPast = unixTime < now;
@@ -103,7 +101,7 @@ const Games = ({ category }) => {
         <SwiperSlide className={styles.slide} key={game.id}>
           <div className={styles.game}>
             <h3 className={styles.game__name}>{game.name}</h3>
-            <p className={styles.game__date}>Дата: {game.date}</p>
+            <p className={styles.game__date}>Дата: {new Date(game.date).toLocaleDateString()}</p>
 
             {game.preview_url && (
               <img

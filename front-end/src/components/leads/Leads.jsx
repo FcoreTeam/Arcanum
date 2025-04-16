@@ -20,8 +20,6 @@ const Leads = () => {
   const [error, setError] = useState("");
   const { gameId } = useParams();
 
-  console.log(gameId)
-
   useEffect(() => {
     const fetchLeaders = async () => {
       try {
@@ -32,10 +30,10 @@ const Leads = () => {
         }
 
         const response = await api.getLeaders(gameId);
-        if (response.data?.success) {
-          setLeaders(response.data.leaderboard);
+        if (response.data) {
+          setLeaders(response.data);
         } else {
-          setError("Ошибка загрузки таблицы лидеров");
+          setError("Таблица лидеров пуста");
         }
       } catch (err) {
         setError("Ошибка загрузки таблицы лидеров");
@@ -46,6 +44,11 @@ const Leads = () => {
     };
     fetchLeaders();
   }, [gameId]);
+
+  const getUserName = (leader) => {
+    if (!leader?.user) return "Игрок";
+    return leader.user.first_name || leader.user.username || "Игрок";
+  };
 
   return (
     <div className={styles.leads}>
@@ -74,11 +77,11 @@ const Leads = () => {
             ) : error ? (
               <p className={styles.error}>{error}</p>
             ) : leaders.length > 0 ? (
-              leaders.map((leader, index) => (
+              leaders.map((leader) => (
                 <Player 
                   key={leader.id} 
-                  place={index + 1}
-                  name={leader.username || leader.first_name || "Игрок"}
+                  place={leader.place || 0}
+                  name={getUserName(leader)}
                   time={formatTime(leader.created_at)}
                   points={leader.points || 0}
                 />

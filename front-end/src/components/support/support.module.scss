@@ -58,10 +58,13 @@
 
     .image__wrap {
       position: relative;
-      bottom: 60px;
       display: flex;
-      justify-content: center;
-
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
     }
 
     .support__footer {
