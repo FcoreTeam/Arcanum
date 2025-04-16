@@ -13,6 +13,7 @@ class User(Model):
     first_name = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=255, null=True)
     games: fields.ReverseRelation["Game"]
+    results: fields.ReverseRelation["GameResult"]
 
     class Meta:
         table = "users"

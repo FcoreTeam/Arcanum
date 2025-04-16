@@ -19,6 +19,29 @@ class BaseTip(BaseModel):
         from_attributes = True
 
 class FullGameResponse(BaseGame):
-    photo_url: Optional[str]
-    video_url: Optional[str]
-    tips: List[BaseTip] 
+    tips: List[BaseTip]
+    photo_url: str | None = None
+    video_url: str | None = None
+
+class AnswerIn(BaseModel):
+    telegram_id: int
+    answer: str
+
+class AnswerOut(BaseModel):
+    success: bool
+    place: int | None = None
+    points: int | None = None
+
+class GameResultUserOut(BaseModel):
+    first_name: str
+    username: str
+    avatar_url: str
+
+class GameResultOut(BaseModel):
+    id: UUID4
+    place: int
+    points: int
+    user: GameResultUserOut
+
+    class Config:
+        from_attributes = True
