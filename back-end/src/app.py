@@ -30,6 +30,11 @@ async def on_startup():
 
 app = FastAPI(on_startup=[on_startup], root_path="/api")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+)
+
 api_router = APIRouter()
 api_router.include_router(games_api_router)
 api_router.include_router(auth_api_router)

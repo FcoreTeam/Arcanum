@@ -7,7 +7,7 @@ from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb
 from aiogram.filters.command import Command
 
 from games.models import Game, GameTip
-
+from aiogram.filters.command import CommandObject
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
@@ -223,16 +223,38 @@ async def chat_message(message: Message, state: FSMContext):
     logging.critical(data["sid"])
     await sio.emit("chat-message", {"content":text}, to=data["sid"])
 
+async def check_game(message: Message, command: CommandObject):
+    game_id = command.args
+    if not game_id:
+        return await message.answer("Укажите уникальный индетификатор игры: /craetegame :game_id:")
+    game = await Game.get_or_none(id=game_id).prefetch_related("results", "owner")
+    if not game:
+        return await message.answer("Такой игры не существует.")
+    response = (
+        f"🧩 Игра: {game.name}\n"
+        f"👥 Всего игроков: {len(game.results)}\n"
+        f"📅 Дата: {game.date.strftime('%d.%m.%Y')}\n"
+        f"👤 Создатель: @{game.owner.username}\n"
+        "🏆 Лидерборд:"
+    )
+    results = game.results
+    for result in results[:9]:
+        user = await result.user.first()
+        response += f"\n{result.place}. @{user.username} - {result.points} очков"
+    await message.answer(response)
+
 async def admin(message: Message):
     response = (
         "👋 Привет! Все команды: \n"
-        "/creategame - создание игры"
+        "/creategame - создание игры\n"
+        "/checkgame :game_id: - информация про игру "
     )
     await message.reply(response)
 
 def register_admin_handlers(router: Router):
     router.message.register(admin, Command("admin"))
     router.message.register(create_game, Command("creategame"))
+    router.message.register(check_game, Command("checkgame"))
     router.callback_query.register(cancel, F.data == "cancel")
     router.callback_query.register(is_test_handler, GameCreateStates.is_test, YesNoAction.filter())
     router.callback_query.register(tip_is_continue_handler, TipAction.filter())
