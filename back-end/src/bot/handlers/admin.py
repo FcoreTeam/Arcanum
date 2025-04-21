@@ -1,15 +1,17 @@
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineQuery
 
 from aiogram import Router, F, Bot
 
-from ..filters.callback_data import YesNoAction, TipAction, ChatAction
-from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb
+from ..filters.callback_data import YesNoAction, TipAction, ChatAction, StagePosition
+from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb, demo_game_kb, stage_position_choose, DEMO_GAME_STAGE_ADD, CANCEL
 from aiogram.filters.command import Command
 
-from games.models import Game, GameTip
+from games.models import Game, GameTip, DemoGame, Stage
 from aiogram.filters.command import CommandObject
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
+
+from .commands.create_demo import register_create_demo_command
 
 from auth.models import User
 
@@ -17,7 +19,8 @@ from config import TelegramSettings
 
 from realtime.chat import sio, chats
 
-from ..mtproto_provider import send_photo_to_minio, send_video_to_minio
+from minio import PHOTOS_BUCKET, VIDEOS_BUCKET
+from ..mtproto import download_media_to_minio
 
 from datetime import datetime
 
@@ -91,13 +94,15 @@ async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext):
     file = await bot.get_file(message.photo[0].file_id)
     filename = file.file_path.split("/")[-1]
     extension = filename.split(".")[-1]
-    url = await send_photo_to_minio(
+    minio_filename = f"{message.from_user.id}-{message.message_id}.{extension}"
+    url = await download_media_to_minio(
+        PHOTOS_BUCKET,
         message.from_user.id, 
         message.message_id, 
-        f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "image/png"
+        minio_filename,
+        "image/" + extension,
     )
-    await state.update_data({"photo_message_id":message.message_id})
+    await state.update_data({"photo_path":minio_filename})
     response = (
         "🎞 *Отправьте видео игры*\n"
         "_Чтобы отменить создание игры нажмите на кнопку снизу_"
@@ -110,14 +115,16 @@ async def video_handler(message: Message, state: FSMContext):
     await message.answer("⏳ Загружаю видео...")
     filename = message.video.file_name
     extension = filename.split(".")[-1]
-    url = await send_video_to_minio(
+    minio_filename = f"{message.from_user.id}-{message.message_id}.{extension}"
+    url = await download_media_to_minio(
+        VIDEOS_BUCKET,
         message.from_user.id, 
         message.message_id, 
-        f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "video/mp4"
+        minio_filename,
+        "video/" + extension,
     )
     await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
-    await state.update_data({"video_message_id":message.message_id})
+    await state.update_data({"video_path":minio_filename})
     response = (
         "💸 *Отправьте цену игры*\n"
         "_Чтобы отменить создание игры нажмите на кнопку снизу_"
@@ -159,7 +166,7 @@ async def tip_is_continue_handler(callback_query: CallbackQuery, callback_data: 
     if current_state == GameCreateStates.tip and not callback_data.is_continue:
         response = (
             "📅 *Отправьте дату игры*\n"
-            "_В формате xx.xx.xxxx (10.10.2010)_\n"
+            "_В формате xx.xx.xxxx xx:xx (10.10.2010 06:48)_\n"
             "_Чтобы отменить создание игры нажмите на кнопку снизу_"
         )
         await state.set_state(GameCreateStates.date)
@@ -175,7 +182,7 @@ async def tip_is_continue_handler(callback_query: CallbackQuery, callback_data: 
  
 async def date_handler(message: Message, state: FSMContext):
     try:
-        date = datetime.strptime(message.text, "%d.%m.%Y")
+        date = datetime.strptime(message.text, "%d.%m.%Y %H:%M")
         if date < datetime.now():
             return await message.answer("Вы не можете указать прошлое время.")
     except ValueError:
@@ -192,11 +199,12 @@ async def answer_handler(message: Message, state: FSMContext, user: User):
     answer = message.text
     await state.update_data({"answer":answer})
     data = await state.get_data() 
-    tips = data["tips"]
-    data.pop("tips")
+    tips = data.get("tips")
+    if tips: data.pop("tips")
     game = await Game.create(owner=user,**data)
-    for tip in tips:
-        await GameTip.create(content=tip["content"], game=game)
+    if tips:
+        for tip in tips:
+            await GameTip.create(content=tip["content"], game=game)
     response = (
         "🎉 *Вы успешно создали игру!*\n"
         f"ID: {game.id}"
@@ -226,7 +234,7 @@ async def chat_message(message: Message, state: FSMContext):
 async def check_game(message: Message, command: CommandObject):
     game_id = command.args
     if not game_id:
-        return await message.answer("Укажите уникальный индетификатор игры: /craetegame :game_id:")
+        return await message.answer("Укажите уникальный индетификатор игры: /checkgame :game_id:")
     game = await Game.get_or_none(id=game_id).prefetch_related("results", "owner")
     if not game:
         return await message.answer("Такой игры не существует.")
@@ -245,19 +253,20 @@ async def check_game(message: Message, command: CommandObject):
 
 async def admin(message: Message):
     response = (
-        "👋 Привет! Все команды: \n"
+        "👋 Привет! Админ панель:\n"
         "/creategame - создание игры\n"
-        "/checkgame :game_id: - информация про игру "
+        "/createdemo - создание демо игры\n"
+        "/checkgame <game-id> - просмотр статистики игры"
     )
-    await message.reply(response)
+    await message.answer(response)
 
 def register_admin_handlers(router: Router):
-    router.message.register(admin, Command("admin"))
-    router.message.register(create_game, Command("creategame"))
     router.message.register(check_game, Command("checkgame"))
-    router.callback_query.register(cancel, F.data == "cancel")
+    router.message.register(create_game, Command("creategame")) 
+    router.message.register(admin, Command("admin"))
+    router.callback_query.register(cancel, F.data == CANCEL)
     router.callback_query.register(is_test_handler, GameCreateStates.is_test, YesNoAction.filter())
-    router.callback_query.register(tip_is_continue_handler, TipAction.filter())
+    router.callback_query.register(tip_is_continue_handler, GameCreateStates.tip, TipAction.filter())
     router.message.register(name_handler, GameCreateStates.name)
     router.message.register(description_handler, GameCreateStates.description)
     router.message.register(preview_photo_handler, GameCreateStates.preview_photo, F.photo)
@@ -268,3 +277,4 @@ def register_admin_handlers(router: Router):
     router.message.register(answer_handler, GameCreateStates.answer)
     router.callback_query.register(chat, ChatAction.filter()) 
     router.message.register(chat_message, ChatState.chat)
+    register_create_demo_command(router)

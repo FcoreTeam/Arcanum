@@ -1,16 +1,15 @@
-from fastapi import APIRouter, Header, HTTPException
-from .models import Game, GameResult
+from fastapi import APIRouter, Header, HTTPException, Path, Query, Body
+from .models import Game, GameResult, DemoGame, Stage
 from auth.models import User
 from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
-from typing import List
+from typing import List, Annotated
 from tortoise import Tortoise
-from .schemas import BaseGame, FullGameResponse, AnswerIn, AnswerOut, GameResultOut
-
+from .schemas import BaseGame, FullGame, AnswerInBase, AnswerOut, GameResultOut, BaseDemo, FullDemo, FullStage, UUID4, AnswerIn
+from .services import build_game_response, build_full_game_response
 from datetime import datetime
 
-from minio import get_minio_instance
-
-from datetime import datetime
+import asyncio
+import logging
 
 games_api_router = APIRouter(prefix="/games")
 
@@ -21,38 +20,51 @@ def _get_points_by_place(place: int) -> int:
     if place <= 20: return 10
     return 5
 
-@games_api_router.get("/")
-async def read_games(until_today: bool = False, limit: int = 50) -> List[BaseGame]:
-    if until_today:
-        return await Game.filter(date__lte=datetime.now()).limit(limit)
-    minio = await get_minio_instance()
-    games = await Game.all().limit(limit).prefetch_related("owner")
-    response = list()
-    for game in games:
-        basegame = BaseGame.from_orm(game)
-        basegame.photo_url = await minio.presigned_get_object("photos", f"{game.owner.telegram_id}-{game.photo_message_id}.png")
-        response.append(basegame)
-    return response
+@games_api_router.get("/demo/{game_id}", response_model=FullDemo)
+async def read_demo_game(
+    game_id: Annotated[UUID4, Path(description="ID from the demo.")]
+) -> FullDemo:
+    game = await DemoGame.get_or_none(id=game_id).prefetch_related("stages")
+    if not game:
+        raise HTTPException(status_code=404, detail="Demo game not found!")
+    stages = [
+        FullStage(
+            id=stage.id,
+            video_url=await stage.get_video_url(),
+            tips=await stage.tips.all(),
+            next_correct_answer=await stage.next_true.first(),
+            next_wrong_answer=await stage.next_false.first(),
+            end=stage.end,
+            start=stage.start,
+        ) for stage in game.stages
+    ]
+    return FullDemo(id=game.id,stages=stages)
 
-@games_api_router.get("/{game_id}", response_model=FullGameResponse)
-async def read_game(game_id: str):
-    minio = await get_minio_instance()
-    game = await Game.get(id=game_id).prefetch_related("owner", "tips")
-    response = FullGameResponse.from_orm(game)
-    response = response.model_dump()
-    response.update({"photo_url":await minio.presigned_get_object("photos", f"{game.owner.telegram_id}-{game.photo_message_id}.png")})
-    response.update({"video_url":await minio.presigned_get_object("videos", f"{game.owner.telegram_id}-{game.video_message_id}.mp4")})
-    return response
+@games_api_router.get("/", response_model=List[BaseGame], description="Returns all games")
+async def read_games(
+    until_today: Annotated[bool, Query(description="All games until today.")] = False,    
+):
+    query = Game.filter(date__lte=datetime.now()) if until_today else Game.all()
+    games = await query.prefetch_related("owner", "demo")
+    return await asyncio.gather(*[build_game_response(game) for game in games])
+
+@games_api_router.get("/{game_id}", response_model=FullGame)
+async def read_game(game_id: Annotated[UUID4, Path(description="ID from the game.")]):
+    game = await Game.get(id=game_id).prefetch_related("owner", "tips", "demo")
+    return await build_full_game_response(game)
 
 @games_api_router.post("/{game_id}/answer", response_model=AnswerOut)
-async def answer(game_id: str, answer: AnswerIn):
-    game = await Game.get(id=game_id)
+async def answer(
+    game_id: Annotated[UUID4, Path(description="ID from the game.")], 
+    answer: Annotated[AnswerIn, Body(description="Payload for the game, contains 'telegram_id', 'answer'")]
+):
+    game = await Game.get_or_none(id=game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game doesn't exists")
-    if game.answer == answer.answer:
+    if game.answer.lower() == answer.answer.lower():
         user = await User.get_or_none(telegram_id=answer.telegram_id)
         if not user:
-            raise HTTPException(status_code=404, detail="User doesn't exists.")
+            raise HTTPException(status_code=401, detail="User doesn't exists.")
         result = await GameResult.get_or_none(user=user, game=game)
         if result:
             raise HTTPException(status_code=403, detail="The user has already responded to the game")
@@ -63,8 +75,21 @@ async def answer(game_id: str, answer: AnswerIn):
         return AnswerOut(success=True, place=place, points=_get_points_by_place(place))
     return AnswerOut(success=False)
 
+@games_api_router.post("/stage/{stage_id}/answer", response_model=AnswerOut)
+async def answer_stage(
+    stage_id: Annotated[UUID4, Path(description="ID from the stage.")], 
+    answer: Annotated[AnswerInBase, Body(description="Payload for the answer, contains 'answer'")]
+):
+    stage = await Stage.get_or_none(id=stage_id)
+    if not stage:
+        raise HTTPException(status_code=404, detail="Stage not found.")
+    if stage.answer.lower() == answer.answer.lower(): return AnswerOut(success=True)
+    return AnswerOut(success=False)
+
 @games_api_router.get("/{game_id}/leaderboard")
-async def read_game_leaderboard(game_id: str) -> List[GameResultOut]:
+async def read_game_leaderboard(
+    game_id: Annotated[UUID4, Path(description="ID from the game.")]
+) -> List[GameResultOut]:
     game = await Game.get_or_none(id=game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game doesn't exists")

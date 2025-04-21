@@ -1,6 +1,31 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup
-from ..filters.callback_data import YesNoAction, TipAction, ChatAction
+from ..filters.callback_data import YesNoAction, TipAction, ChatAction, StagePosition
+
+DEMO_GAME_STAGE_ADD = "demo_game_stage_add"
+
+STAGE_PREV_TRUE = "stage_prev_true"
+STAGE_PREV_FALSE = "stage_prev_false"
+STAGE_LAST = "stage_last"
+
+CANCEL = "cancel"
+
+def demo_game_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="➕ Добавить стадию", callback_data=DEMO_GAME_STAGE_ADD)
+    builder.button(text="❌ Отменить создание демо игры", callback_data=CANCEL)
+    builder.adjust(1)
+    return builder.as_markup()
+
+def stage_position_choose() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⤵️ Идет после правильного ответа", callback_data=StagePosition(answer=True))
+    builder.button(text="⤴️ Идет после не правильного ответа", callback_data=StagePosition(answer=False))
+    builder.button(text="🔚 Это последняя стадия", callback_data=StagePosition(end=True))
+    builder.button(text="↪️ Продолжить", callback_data=StagePosition(is_continue=True))
+    builder.button(text="❌ Отменить создание демо игры", callback_data=CANCEL)
+    builder.adjust(1)
+    return builder.as_markup()
 
 def is_test_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -16,7 +41,7 @@ def tip_kb() -> InlineKeyboardMarkup:
 
 def cancel() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="Отменить создание игры ☁️", callback_data="cancel")
+    builder.button(text="Отменить создание игры ☁️", callback_data=CANCEL)
     return builder.as_markup()
 
 def chat(sid) -> InlineKeyboardMarkup:

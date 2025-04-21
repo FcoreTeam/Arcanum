@@ -26,6 +26,8 @@ class _Settings(BaseSettings):
     """
     debug: bool
 
+    allowed_origins: str
+
     app_url: str
  
     pgsql_user: str
