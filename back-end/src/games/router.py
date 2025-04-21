@@ -5,7 +5,7 @@ from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_
 from typing import List, Annotated
 from tortoise import Tortoise
 from .schemas import BaseGame, FullGame, AnswerInBase, AnswerOut, GameResultOut, BaseDemo, FullDemo, FullStage, UUID4, AnswerIn
-from .services import build_game_response, build_full_game_response
+from .services import build_game_response, build_full_game_response, build_demo_game_response
 from datetime import datetime
 
 import asyncio
@@ -19,6 +19,11 @@ def _get_points_by_place(place: int) -> int:
     if place == 3: return 25
     if place <= 20: return 10
     return 5
+
+@games_api_router.get("/demo", response_model=List[BaseDemo])
+async def read_demo_games() -> List[BaseDemo]:
+    games = await DemoGame.all()
+    return await asyncio.gather(*[build_demo_game_response(game) for game in games])
 
 @games_api_router.get("/demo/{game_id}", response_model=FullDemo)
 async def read_demo_game(
@@ -45,12 +50,12 @@ async def read_games(
     until_today: Annotated[bool, Query(description="All games until today.")] = False,    
 ):
     query = Game.filter(date__lte=datetime.now()) if until_today else Game.all()
-    games = await query.prefetch_related("owner", "demo")
+    games = await query.prefetch_related("owner")
     return await asyncio.gather(*[build_game_response(game) for game in games])
 
 @games_api_router.get("/{game_id}", response_model=FullGame)
 async def read_game(game_id: Annotated[UUID4, Path(description="ID from the game.")]):
-    game = await Game.get(id=game_id).prefetch_related("owner", "tips", "demo")
+    game = await Game.get(id=game_id).prefetch_related("owner", "tips")
     return await build_full_game_response(game)
 
 @games_api_router.post("/{game_id}/answer", response_model=AnswerOut)

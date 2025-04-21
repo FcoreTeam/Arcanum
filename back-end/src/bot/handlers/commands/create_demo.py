@@ -1,5 +1,5 @@
 from aiogram.types import Message, CallbackQuery
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from ...filters.callback_data import TipAction, StagePosition
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -13,7 +13,9 @@ from minio import VIDEOS_BUCKET, PHOTOS_BUCKET
 import logging
 
 class DemoGameCreateStates(StatesGroup):
-    game_id = State()
+    name = State()
+    description = State()
+    photo = State()
     video = State()
     tips = State()
     answer = State()
@@ -37,18 +39,48 @@ async def main_menu(message: Message, state: FSMContext) -> str:
     
 async def create_demo_game(message: Message, state: FSMContext):
     response = (
-        "🛍️ *Введите айди основной игры*\n"
-        "_Айди игры выдается после того как вы ее создали_"
+        "📝 *Отправьте название игры*\n"
+        "_Чтобы отменить создание игры нажмите кнопку снизу_"
     )
-    await state.set_state(DemoGameCreateStates.game_id)
+    await state.set_state(DemoGameCreateStates.name)
     await message.answer(response, reply_markup=game_create_cancel())
 
-async def handle_game_id(message: Message, state: FSMContext):
-    game = await Game.get_or_none(id=message.text)
-    demo_game = (await DemoGame.get_or_create(game=game))[0]
-    await state.update_data({"game":demo_game})
-    if not game:
-        return await message.answer("Такой игры не существует!")
+async def demo_name_handler(message: Message, state: FSMContext):
+    name = message.text
+    await state.update_data({"name":name})
+    response = (
+        "📄 *Отправьте описание игры*\n"
+        "_Чтобы отменить создание игры нажмите на кнопку снизу_"
+    )
+    await state.set_state(DemoGameCreateStates.description)
+    await message.answer(response, reply_markup=game_create_cancel())
+
+async def demo_description_handler(message: Message, state: FSMContext):
+    description = message.text
+    await state.update_data({"description":description})
+    response = (
+        "📸 *Отправьте превью фото игры*\n"
+        "_Чтобы отменить создание игры нажмите на кнопку снизу_"
+    )
+    await state.set_state(DemoGameCreateStates.photo)
+    await message.answer(response, reply_markup=game_create_cancel())
+
+async def demo_preview_photo_handler(message: Message, bot: Bot, state: FSMContext):
+    file = await bot.get_file(message.photo[0].file_id)
+    filename = file.file_path.split("/")[-1]
+    extension = filename.split(".")[-1]
+    minio_filename = f"{message.from_user.id}-{message.message_id}.{extension}"
+    url = await download_media_to_minio(
+        PHOTOS_BUCKET,
+        message.from_user.id, 
+        message.message_id, 
+        minio_filename,
+        "image/" + extension,
+    )
+    await state.update_data({"photo_path":minio_filename})
+    data = await state.get_data()
+    game = await DemoGame.create(**data)
+    await state.set_data({"game":game})
     await main_menu(message, state)
 
 async def add_demo_stage(callback_query: CallbackQuery, state: FSMContext):
@@ -169,8 +201,10 @@ async def stage_position_handler(message: Message, state: FSMContext):
 
 def register_create_demo_command(router: Router) -> None:
     router.message.register(create_demo_game, Command("createdemo"))
+    router.message.register(demo_name_handler, DemoGameCreateStates.name)
+    router.message.register(demo_preview_photo_handler, DemoGameCreateStates.photo)
+    router.message.register(demo_description_handler, DemoGameCreateStates.description)
     router.callback_query.register(tip_demo_is_continue_handler, DemoGameCreateStates.tips, TipAction.filter())
-    router.message.register(handle_game_id, DemoGameCreateStates.game_id)
     router.message.register(answer_demo_handler, DemoGameCreateStates.answer)
     router.message.register(handle_demo_video, DemoGameCreateStates.video)
     router.message.register(tip_demo_handler, DemoGameCreateStates.tips)

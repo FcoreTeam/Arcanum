@@ -1,5 +1,5 @@
-from .schemas import BaseGame, FullGame
-from .models import Game
+from .schemas import BaseGame, FullGame, BaseDemo
+from .models import Game, DemoGame
  
 async def build_game_response(game: Game) -> BaseGame:
     """
@@ -8,6 +8,14 @@ async def build_game_response(game: Game) -> BaseGame:
     url = await game.get_photo_url()
     basegame = BaseGame.from_orm(game)
     return basegame.copy(update={"photo_url":url})
+
+async def build_demo_game_response(game: DemoGame) -> BaseDemo:
+    """
+    Helper for response building Demo Game
+    """
+    url = await game.get_photo_url()
+    basedemo = BaseDemo.from_orm(game)
+    return basedemo.copy(update={"photo_url":url})
 
 async def build_full_game_response(game: Game) -> FullGame:
     """

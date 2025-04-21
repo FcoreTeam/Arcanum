@@ -22,7 +22,6 @@ class Game(Model):
     owner: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="games")
     tips: fields.ReverseRelation["GameTip"]
     results: fields.ReverseRelation["GameResult"]
-    demo: fields.ReverseRelation["DemoGame"]
 
     async def get_photo_url(self) -> str:
         """
@@ -78,8 +77,18 @@ class Stage(Model):
 
 class DemoGame(Model):
     id = fields.UUIDField(default=uuid4, primary_key=True)
+    name = fields.CharField(max_length=255)
+    description = fields.CharField(max_length=255)
+    photo_path = fields.CharField(max_length=255)
     stages: fields.ReverseRelation["Stage"]
-    game: fields.OneToOneNullableRelation["Game"] = fields.OneToOneField("models.Game", related_name="demo", null=True)
+
+    async def get_photo_url(self) -> str:
+        """
+        Generates http url for photo this game.
+        :return: - http url to minio
+        """
+        minio = await get_minio_instance()
+        return await minio.presigned_get_object(PHOTOS_BUCKET, self.photo_path)
 
 class GameResult(Model):
     id = fields.UUIDField(default=uuid4, primary_key=True)

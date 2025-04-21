@@ -12,6 +12,9 @@ class BaseStage(BaseORMModel):
 
 class BaseDemo(BaseORMModel):
     id: UUID4
+    name: str
+    description: str
+    photo_url: HttpUrl | None = None
 
 class BaseTip(BaseORMModel):
     id: UUID4
@@ -34,7 +37,6 @@ class BaseGame(BaseORMModel):
     description: str
     date: datetime
     price: Decimal
-    demo: BaseDemo | None = None
     photo_url: HttpUrl | None = None
 
 class FullGame(BaseGame):
