@@ -95,7 +95,7 @@ async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext):
         message.from_user.id, 
         message.message_id, 
         f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "image/png"
+        "image/" + extension
     )
     await state.update_data({"photo_message_id":message.message_id})
     response = (
@@ -114,7 +114,7 @@ async def video_handler(message: Message, state: FSMContext):
         message.from_user.id, 
         message.message_id, 
         f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "video/mp4"
+        "video/" + extension
     )
     await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
     await state.update_data({"video_message_id":message.message_id})

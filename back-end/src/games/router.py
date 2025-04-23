@@ -25,14 +25,7 @@ def _get_points_by_place(place: int) -> int:
 async def read_games(until_today: bool = False, limit: int = 50) -> List[BaseGame]:
     if until_today:
         return await Game.filter(date__lte=datetime.now()).limit(limit)
-    minio = await get_minio_instance()
-    games = await Game.all().limit(limit).prefetch_related("owner")
-    response = list()
-    for game in games:
-        basegame = BaseGame.from_orm(game)
-        basegame.photo_url = await minio.presigned_get_object("photos", f"{game.owner.telegram_id}-{game.photo_message_id}.png")
-        response.append(basegame)
-    return response
+    return await Game.all().limit(limit)
 
 @games_api_router.get("/{game_id}", response_model=FullGameResponse)
 async def read_game(game_id: str):

@@ -22,6 +22,7 @@ class BaseTip(BaseModel):
 
 class FullGameResponse(BaseGame):
     tips: List[BaseTip]
+    photo_url: str | None = None
     video_url: str | None = None
 
 class AnswerIn(BaseModel):
