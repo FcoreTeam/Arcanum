@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import blur from "../../img/blur__one.svg";
 import correct from "../../img/Correct.svg";
 import styles from "./game.module.scss";
@@ -10,7 +10,6 @@ import { useUser } from "../../store/slices/hooks/useUser";
 
 const Game = ({ name, video }) => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { userId } = useUser();
   const gameId = searchParams.get('id');
   const videoRef = useRef(null);
@@ -24,6 +23,8 @@ const Game = ({ name, video }) => {
   const [time, setTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [error, setError] = useState(null);
+  const [isTipOpen, setIsTipOpen] = useState(false);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const timerRef = useRef(null);
   const hasStartedRef = useRef(false);
 
@@ -50,6 +51,12 @@ const Game = ({ name, video }) => {
   }, [gameId]);
 
   useEffect(() => {
+    if (videoRef.current && gameData?.video_url) {
+      videoRef.current.load();
+    }
+  }, [gameData?.video_url]);
+
+  useEffect(() => {
     if (isTimerRunning) {
       timerRef.current = setInterval(() => {
         setTime(prevTime => prevTime + 1);
@@ -74,32 +81,27 @@ const Game = ({ name, video }) => {
   };
 
   const checkAnswer = async () => {
-    console.log('Начало checkAnswer');
-    console.log('gameId:', gameId);
-    console.log('userId:', userId);
-    console.log('userAnswer:', userAnswer);
-
-    if (!gameData?.answer) {
-      console.log('Ошибка: ответ не определен');
-      setError("Ошибка: ответ не определен");
+    if (!gameId) {
+      setError("ID игры не указан");
       return;
     }
     if (!userId) {
-      console.log('Ошибка: пользователь не авторизован');
       setError("Ошибка: пользователь не авторизован");
       return;
     }
+    if (!userAnswer) {
+      setError("Введите ответ");
+      return;
+    }
+
     try {
-      console.log('Отправка ответа...');
       const response = await api.sendAnswer({
         game_id: gameId,
         answer: userAnswer,
         telegram_id: userId
       });
-      console.log('Ответ от API:', response);
 
       if (response?.data?.success) {
-        console.log('Правильный ответ');
         setIsCorrect(true);
         setIsTimerRunning(false);
         if (videoRef.current) {
@@ -108,7 +110,6 @@ const Game = ({ name, video }) => {
         }
         setError(null);
       } else {
-        console.log('Неправильный ответ');
         setError("Неправильный ответ, попробуйте еще раз!");
       }
     } catch (error) {
@@ -241,6 +242,23 @@ const Game = ({ name, video }) => {
     };
   }, []);
 
+  const handleTipClick = () => {
+    setIsTipOpen(true);
+    setCurrentTipIndex(0);
+  };
+
+  const handleNextTip = () => {
+    if (gameData?.tips && currentTipIndex < gameData.tips.length - 1) {
+      setCurrentTipIndex(prev => prev + 1);
+    } else {
+      setIsTipOpen(false);
+    }
+  };
+
+  const handleCloseTip = () => {
+    setIsTipOpen(false);
+  };
+
   return (
     <div className={styles.game}>
       <img src={blur} alt="" className={styles.blur__image} />
@@ -267,6 +285,19 @@ const Game = ({ name, video }) => {
           muted={isMuted}
           volume={volume}
           controls={false}
+          preload="auto"
+          playsInline
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="true"
+          x5-video-orientation="portraint"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            backgroundColor: '#000'
+          }}
         >
           <source src={gameData?.video_url || video} type="video/mp4" />
         </video>
@@ -295,12 +326,45 @@ const Game = ({ name, video }) => {
               }
             }}
           />
-          <button
-            className={styles.submitButton}
-            onClick={checkAnswer}
-          >
-            Ответить
-          </button>
+          <div className={styles.buttons}>
+            <button
+              className={styles.submitButton}
+              onClick={checkAnswer}
+            >
+              Ответить
+            </button>
+            <button
+              className={styles.tipButton}
+              onClick={handleTipClick}
+            >
+              Об игре
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isTipOpen && (
+        <div className={styles.tipOverlay}>
+          <div className={styles.tipPopup}>
+            <h3 className={styles.tipTitle}>Подсказка</h3>
+            <p className={styles.tipContent}>
+              {gameData?.tips?.[currentTipIndex]?.content}
+            </p>
+            <div className={styles.tipControls}>
+              <button
+                className={styles.tipButton}
+                onClick={handleNextTip}
+              >
+                {currentTipIndex < (gameData?.tips?.length - 1) ? 'Следующая' : 'Закрыть'}
+              </button>
+              <button
+                className={styles.closeButton}
+                onClick={handleCloseTip}
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

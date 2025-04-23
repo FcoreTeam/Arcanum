@@ -3,7 +3,6 @@ import Player from "./player/Player";
 import GameLine from "./game-line/Game-line";
 import clsx from "clsx";
 import { api } from "../../api/api"
-import { useParams } from "react-router-dom";
 
 import styles from "./leads.module.scss";
 
@@ -16,20 +15,36 @@ const formatTime = (dateString) => {
 
 const Leads = () => {
   const [leaders, setLeaders] = useState([]);
+  const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { gameId } = useParams();
+  const [selectedGameId, setSelectedGameId] = useState(null);
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const response = await api.getGames();
+        if (response.data) {
+          setGames(response.data);
+          // Выбираем первую игру по умолчанию
+          if (response.data.length > 0) {
+            setSelectedGameId(response.data[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки списка игр:", err);
+      }
+    };
+    fetchGames();
+  }, []);
 
   useEffect(() => {
     const fetchLeaders = async () => {
+      if (!selectedGameId) return;
+      
+      setLoading(true);
       try {
-        if (!gameId) {
-          setError("ID игры не указан");
-          setLoading(false);
-          return;
-        }
-
-        const response = await api.getLeaders(gameId);
+        const response = await api.getLeaders(selectedGameId);
         if (response.data) {
           setLeaders(response.data);
         } else {
@@ -43,7 +58,11 @@ const Leads = () => {
       }
     };
     fetchLeaders();
-  }, [gameId]);
+  }, [selectedGameId]);
+
+  const handleGameSelect = (gameId) => {
+    setSelectedGameId(gameId);
+  };
 
   const getUserName = (leader) => {
     if (!leader?.user) return "Игрок";
@@ -57,7 +76,7 @@ const Leads = () => {
           <p className={styles.leads__title}>Таблица лидеров</p>
 
           <div className={styles.game__line}>
-            <GameLine />
+            <GameLine games={games} onGameSelect={handleGameSelect} selectedGameId={selectedGameId} />
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import Games from "../main/games/Games";
 import styles from "./profile.module.scss";
 import { useUser } from "../../store/slices/hooks/useUser";
 import { api } from "../../api/api";
+import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
 
 const Profile = () => {
   const {
@@ -27,7 +28,12 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await api.getCurrentUser();
+        const userId = getUserIdFromAddress();
+        if (!userId) {
+          return;
+        }
+
+        const response = await api.getCurrentUser(userId);
         if (response.data) {
           setUser({
             ...user,
@@ -52,10 +58,20 @@ const Profile = () => {
     setError(null);
 
     try {
-      await api.updateUser({
+      if (!userId) {
+        console.error("user_id не найден в состоянии");
+        return;
+      }
+
+      const updateData = {
+        user_id: userId,
         phone: phone || null,
         email: email || null,
-      });
+      };
+    
+
+      await api.updateUser(updateData);
+      
 
       setUser({
         ...user,

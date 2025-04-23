@@ -1,9 +1,9 @@
 from aiogram.types import Message, CallbackQuery
+
 from aiogram import Router, F, Bot
 
 from ..filters.callback_data import YesNoAction, TipAction, ChatAction
 from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb
-
 from aiogram.filters.command import Command
 
 from games.models import Game, GameTip
@@ -95,7 +95,7 @@ async def preview_photo_handler(message: Message, bot: Bot, state: FSMContext):
         message.from_user.id, 
         message.message_id, 
         f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "image/" + extension
+        "image/png"
     )
     await state.update_data({"photo_message_id":message.message_id})
     response = (
@@ -114,7 +114,7 @@ async def video_handler(message: Message, state: FSMContext):
         message.from_user.id, 
         message.message_id, 
         f"{message.from_user.id}-{message.message_id}.{extension}", 
-        "video/" + extension
+        "video/mp4"
     )
     await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
     await state.update_data({"video_message_id":message.message_id})

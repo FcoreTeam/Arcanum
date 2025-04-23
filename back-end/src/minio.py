@@ -4,6 +4,7 @@ from miniopy_async import Minio
 async def get_minio_instance() -> Minio:
     minio = Minio(
         f"{MinioSettings.host}:{MinioSettings.port}",
+        secure=False,
         access_key=MinioSettings.access_key,
         secret_key=MinioSettings.secret_key, 
         server_url=MinioSettings.server_url,

@@ -6,7 +6,7 @@ import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
 import styles from "./support.module.scss";
 import ImageUploader from "./image-uploader/Image-uploader";
-import { api, chatApi } from "../../api/api";
+import { chatApi } from "../../api/api";
 import { useUser } from "../../store/slices/hooks/useUser";
 
 const Support = () => {
@@ -19,15 +19,18 @@ const Support = () => {
   const [error, setError] = useState(null);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (userId) {
       setupChat();
-      fetchMessages();
     }
     return () => {
       chatApi.disconnect();
+      chatApi.offMessage();
+      chatApi.offConnect();
+      chatApi.offDisconnect();
+      chatApi.offChatStarted();
+      chatApi.offChatEnded();
     };
   }, [userId]);
 
@@ -37,35 +40,37 @@ const Support = () => {
     chatApi.onConnect(() => {
       setIsConnected(true);
       setError(null);
+      setIsLoading(false);
     });
 
     chatApi.onDisconnect(() => {
       setIsConnected(false);
       setError("Соединение с чатом потеряно");
-    });
-
-    chatApi.onMessage((message) => {
-      setMessages(prev => [...prev, message]);
-    });
-  };
-
-  const fetchMessages = async () => {
-    if (!userId) return;
-    
-    try {
-      const response = await api.getMessages(userId);
-      if (response.data) {
-        setMessages(response.data);
-        setIsConnected(true);
-        setError(null);
-      }
-    } catch (error) {
-      console.error("Ошибка при получении сообщений:", error);
-      setIsConnected(false);
-      setError("Ошибка при загрузке сообщений");
-    } finally {
       setIsLoading(false);
-    }
+    });
+
+    chatApi.onChatStarted(() => {
+      setIsConnected(true);
+      setError(null);
+      setIsLoading(false);
+    });
+
+    chatApi.onChatEnded(() => {
+      setIsConnected(false);
+      setError("Чат завершен администратором");
+      setIsLoading(false);
+    });
+
+    chatApi.onMessage((data) => {
+      if (data.content) {
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          message: data.content,
+          is_user_message: false,
+          attachments: []
+        }]);
+      }
+    });
   };
 
   useEffect(() => {
@@ -115,26 +120,20 @@ const Support = () => {
     setImages(prevImages => prevImages.filter((_, i) => i !== index));
   };
 
-  const canSendMessage = !!inputValue.length || !!images.length;
+  const canSendMessage = !!inputValue.trim() || !!images.length;
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!canSendMessage || !userId) return;
 
     try {
-      const formData = new FormData();
-      formData.append('user_id', userId);
-      formData.append('message', inputValue);
-      
-      if (images.length > 0) {
-        images.forEach((image, index) => {
-          formData.append(`attachments[${index}]`, image.file);
-        });
-      }
-
-      await api.makeRequest(formData);
-      
-      // Отправляем сообщение через WebSocket
       chatApi.sendMessage(inputValue);
+      
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        message: inputValue,
+        is_user_message: true,
+        attachments: images.map(img => ({ url: img.fileLink }))
+      }]);
       
       setInputValue("");
       setImages([]);

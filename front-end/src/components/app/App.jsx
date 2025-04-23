@@ -33,12 +33,11 @@ const App = () => {
       try {
         const userId = getUserIdFromAddress();
         if (!userId) {
-          console.error("Ошибка: Не удалось получить user_id из URL");
           setError("Ошибка авторизации");
           return;
         }
 
-        const response = await api.getCurrentUser();
+        const response = await api.getCurrentUser(userId);
 
         if (response.data) {
           setUser({

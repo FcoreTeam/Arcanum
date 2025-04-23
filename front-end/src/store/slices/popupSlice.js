@@ -24,7 +24,15 @@ const popupSlice = createSlice({
       state.generalInfo.isOpen = false;
       state.generalInfo.popupType = "";
     },
+    openPopup: (state, action) => {
+      const { type, name, description } = action.payload;
+      state.generalInfo.isOpen = true;
+      state.generalInfo.popupType = type;
+      state.popupInfo.popupName = name;
+      state.popupInfo.popupDescription = description;
+    },
   },
 });
-export const { closePopup } = popupSlice.actions;
+
+export const { closePopup, openPopup } = popupSlice.actions;
 export default popupSlice.reducer;

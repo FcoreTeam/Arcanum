@@ -1,6 +1,20 @@
 export const getUserIdFromAddress = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  let userId = urlParams.get("user_id");
+  const hash = window.location.hash;
+  if (!hash) return null;
 
-  return userId;
+  const params = new URLSearchParams(hash.substring(1));
+  const tgWebAppData = params.get('tgWebAppData');
+  if (!tgWebAppData) return null;
+
+  try {
+    const decodedData = decodeURIComponent(tgWebAppData);
+    const userMatch = decodedData.match(/"id":(\d+)/);
+    if (userMatch && userMatch[1]) {
+      return userMatch[1];
+    }
+  } catch (error) {
+    console.error('Ошибка при парсинге:', error);
+  }
+
+  return null;
 };

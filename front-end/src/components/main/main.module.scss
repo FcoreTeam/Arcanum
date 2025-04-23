@@ -5,24 +5,34 @@
   display: flex;
   position: relative;
   background: #000;
+  z-index: 1;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
 
   .video__background {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    display: flex;
+    z-index: -1;
+    background-color: #000;
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
 
     video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      object-fit: fill;
-
-      transform: translate(-50%, -50%);
-      z-index: 0;
+      object-fit: cover;
+      z-index: -1;
     }
   }
 
@@ -34,6 +44,7 @@
     flex-flow: column;
     justify-content: space-evenly;
     overflow-y: scroll;
+    z-index: 1;
 
     .main__title {
       font-size: 65px;

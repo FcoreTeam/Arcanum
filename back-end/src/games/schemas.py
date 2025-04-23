@@ -7,6 +7,8 @@ class BaseGame(BaseModel):
     name: str
     description: str
     date: datetime
+    price: int
+    photo_url: str | None = None
 
     class Config:
         from_attributes = True
@@ -20,7 +22,6 @@ class BaseTip(BaseModel):
 
 class FullGameResponse(BaseGame):
     tips: List[BaseTip]
-    photo_url: str | None = None
     video_url: str | None = None
 
 class AnswerIn(BaseModel):
