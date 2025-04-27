@@ -8,8 +8,4 @@ tortoise-orm==0.24.2
 TgCrypto==1.2.5
 miniopy-async==1.22.1
 pydantic-settings==2.8.1
-<<<<<<< HEAD
 python-socketio==5.13.0
-=======
-
->>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a

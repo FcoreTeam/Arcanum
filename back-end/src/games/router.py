@@ -59,12 +59,10 @@ async def read_game(game_id: Annotated[UUID4, Path(description="ID from the game
     return await build_full_game_response(game)
 
 @games_api_router.post("/{game_id}/answer", response_model=AnswerOut)
-<<<<<<< HEAD
 async def answer(
     game_id: Annotated[UUID4, Path(description="ID from the game.")], 
     answer: Annotated[AnswerIn, Body(description="Payload for the game, contains 'telegram_id', 'answer'")]
 ):
-
     user = await User.get_or_none(telegram_id=answer.telegram_id)
     if not user: raise HTTPException(status_code=401, detail="User doesn't exists.")
     game = await Game.get_or_none(id=game_id).prefetch_related("users")
@@ -72,31 +70,6 @@ async def answer(
         raise HTTPException(status_code=404, detail="Game doesn't exists")
     if user not in game.users: raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
-=======
-<<<<<<< HEAD
-async def answer(game_id: str, answer: AnswerIn):
-    game = await Game.get(id=game_id)
-    if not game:
-        raise HTTPException(status_code=404, detail="Game doesn't exists")
-    if game.answer == answer.answer:
-        user = await User.get_or_none(telegram_id=answer.telegram_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User doesn't exists.")
-=======
-async def answer(
-    game_id: Annotated[UUID4, Path(description="ID from the game.")], 
-    answer: Annotated[AnswerIn, Body(description="Payload for the game, contains 'telegram_id', 'answer'")]
-):
-
-    user = await User.get_or_none(telegram_id=answer.telegram_id)
-    if not user: raise HTTPException(status_code=401, detail="User doesn't exists.")
-    game = await Game.get_or_none(id=game_id).prefetch_related("users")
-    if not game:
-        raise HTTPException(status_code=404, detail="Game doesn't exists")
-    if user not in game.users: raise HTTPException(status_code=403, detail="The user did not buy this game")
-    if game.answer.lower() == answer.answer.lower():
->>>>>>> a930943 (chat update and add payment)
->>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
         result = await GameResult.get_or_none(user=user, game=game)
         if result:
             raise HTTPException(status_code=403, detail="The user has already responded to the game")
@@ -106,7 +79,6 @@ async def answer(
         await result.save()
         video_consequences = await game.get_video_consequences_url()
         return AnswerOut(success=True, consequences_video=video_consequences, place=place, points=_get_points_by_place(place))
-<<<<<<< HEAD
     return AnswerOut(success=False)
 
 @games_api_router.post("/stage/{stage_id}/answer", response_model=AnswerOut)
@@ -118,8 +90,6 @@ async def answer_stage(
     if not stage:
         raise HTTPException(status_code=404, detail="Stage not found.")
     if stage.answer.lower() == answer.answer.lower(): return AnswerOut(success=True)
-=======
->>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
     return AnswerOut(success=False)
 
 @games_api_router.get("/{game_id}/leaderboard")

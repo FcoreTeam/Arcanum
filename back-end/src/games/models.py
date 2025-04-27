@@ -15,20 +15,9 @@ class Game(Model):
     description = fields.CharField(max_length=255)
     date = fields.DatetimeField()
     price = fields.DecimalField(max_digits=100, decimal_places=2)
-<<<<<<< HEAD
     photo_path = fields.CharField(max_length=255)
     video_path = fields.CharField(max_length=255)
     video_consequences_path = fields.CharField(max_length=255)
-=======
-<<<<<<< HEAD
-    photo_message_id = fields.BigIntField(max_length=255)
-    video_message_id = fields.BigIntField()
-=======
-    photo_path = fields.CharField(max_length=255)
-    video_path = fields.CharField(max_length=255)
-    video_consequences_path = fields.CharField(max_length=255)
->>>>>>> a930943 (chat update and add payment)
->>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
     answer = fields.CharField(max_length=255)
     is_test = fields.BooleanField()
     owner: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="games")
@@ -36,11 +25,6 @@ class Game(Model):
     results: fields.ReverseRelation["GameResult"]
     users: fields.ManyToManyRelation["User"] = fields.ManyToManyField("models.User", related_name="bougth_games")
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
     async def get_photo_url(self) -> str:
         """
         Generates http url for photo this game.
@@ -69,10 +53,6 @@ class Game(Model):
     def __str__(self):
         return f"<Game: {self.id, self.name}>"
         
-<<<<<<< HEAD
-=======
->>>>>>> a930943 (chat update and add payment)
->>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
     class Meta:
         table = "games"
 
