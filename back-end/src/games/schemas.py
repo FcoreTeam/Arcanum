@@ -41,7 +41,9 @@ class BaseGame(BaseORMModel):
 
 class FullGame(BaseGame):
     tips: List[BaseTip]
+    buy_url: str | None = None
     video_url: HttpUrl | None = None
+
 
 class AnswerInBase(BaseModel):
     answer: str
@@ -51,6 +53,7 @@ class AnswerIn(AnswerInBase):
 
 class AnswerOut(BaseModel):
     success: bool
+    consequences_video: str | None = None 
     place: int | None = None
     points: int | None = None
 

@@ -32,7 +32,7 @@ app = FastAPI(on_startup=[on_startup], root_path="/api")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=Settings.allowed_origins.split(","),
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -17,11 +17,13 @@ class Game(Model):
     price = fields.DecimalField(max_digits=100, decimal_places=2)
     photo_path = fields.CharField(max_length=255)
     video_path = fields.CharField(max_length=255)
+    video_consequences_path = fields.CharField(max_length=255)
     answer = fields.CharField(max_length=255)
     is_test = fields.BooleanField()
     owner: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="games")
     tips: fields.ReverseRelation["GameTip"]
     results: fields.ReverseRelation["GameResult"]
+    users: fields.ManyToManyRelation["User"] = fields.ManyToManyField("models.User", related_name="bougth_games")
 
     async def get_photo_url(self) -> str:
         """
@@ -38,6 +40,15 @@ class Game(Model):
         """
         minio = await get_minio_instance()
         return await minio.presigned_get_object(VIDEOS_BUCKET, self.video_path)
+    
+    async def get_video_consequences_url(self) -> str:
+        """
+        Generates http url for consequences video this game.
+        :return: - http url to minio
+        """
+        minio = await get_minio_instance()
+        return await minio.presigned_get_object(VIDEOS_BUCKET, self.video_consequences_path)
+
 
     def __str__(self):
         return f"<Game: {self.id, self.name}>"

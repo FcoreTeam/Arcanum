@@ -63,13 +63,14 @@ async def answer(
     game_id: Annotated[UUID4, Path(description="ID from the game.")], 
     answer: Annotated[AnswerIn, Body(description="Payload for the game, contains 'telegram_id', 'answer'")]
 ):
-    game = await Game.get_or_none(id=game_id)
+
+    user = await User.get_or_none(telegram_id=answer.telegram_id)
+    if not user: raise HTTPException(status_code=401, detail="User doesn't exists.")
+    game = await Game.get_or_none(id=game_id).prefetch_related("users")
     if not game:
         raise HTTPException(status_code=404, detail="Game doesn't exists")
+    if user not in game.users: raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
-        user = await User.get_or_none(telegram_id=answer.telegram_id)
-        if not user:
-            raise HTTPException(status_code=401, detail="User doesn't exists.")
         result = await GameResult.get_or_none(user=user, game=game)
         if result:
             raise HTTPException(status_code=403, detail="The user has already responded to the game")
@@ -77,7 +78,8 @@ async def answer(
         place = result_count + 1
         result = await GameResult.create(place=place, points=_get_points_by_place(place), user=user, game=game)
         await result.save()
-        return AnswerOut(success=True, place=place, points=_get_points_by_place(place))
+        video_consequences = await game.get_video_consequences_url()
+        return AnswerOut(success=True, consequences_video=video_consequences, place=place, points=_get_points_by_place(place))
     return AnswerOut(success=False)
 
 @games_api_router.post("/stage/{stage_id}/answer", response_model=AnswerOut)

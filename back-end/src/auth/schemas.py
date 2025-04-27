@@ -1,5 +1,7 @@
 from pydantic import BaseModel, UUID4
-from typing import Optional
+from typing import Optional, List
+
+from games.schemas import BaseGame
 
 class UserUpdateRequest(BaseModel):
     user_id: int
@@ -15,6 +17,7 @@ class UserResponse(BaseModel):
     balance: float
     is_admin: bool
     avatar_url: Optional[str]
+    bougth_games: List[BaseGame]
 
     class Config:
         from_attributes: True
