@@ -15,9 +15,14 @@ from auth.models import User
 
 from config import TelegramSettings
 
+<<<<<<< HEAD
 from realtime.chat import sio, chats
 
 from ..mtproto_provider import send_photo_to_minio, send_video_to_minio
+=======
+from minio import PHOTOS_BUCKET, VIDEOS_BUCKET
+from ..mtproto import download_media_to_minio
+>>>>>>> a930943 (chat update and add payment)
 
 from datetime import datetime
 
@@ -32,6 +37,7 @@ class GameCreateStates(StatesGroup):
     description = State()
     preview_photo = State()
     video = State()
+    consequences_video = State()
     price = State()
     tip = State()
     date = State()
@@ -118,6 +124,27 @@ async def video_handler(message: Message, state: FSMContext):
     )
     await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
     await state.update_data({"video_message_id":message.message_id})
+    response = (
+        "🎞 *Отправьте видео последствий*\n"
+        "_Чтобы отменить создание игры нажмите на кнопку снизу_"
+    )
+    await state.set_state(GameCreateStates.consequences_video)
+    await message.answer(response, reply_markup=game_create_cancel())
+
+async def video_consequences_handler(message: Message, state: FSMContext):
+    await message.answer("⏳ Загружаю видео...")
+    filename = message.video.file_name
+    extension = filename.split(".")[-1]
+    minio_filename = f"{message.from_user.id}-{message.message_id}.{extension}"
+    url = await download_media_to_minio(
+        VIDEOS_BUCKET,
+        message.from_user.id, 
+        message.message_id, 
+        minio_filename,
+        "video/" + extension,
+    )
+    await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
+    await state.update_data({"video_consequences_path":minio_filename})
     response = (
         "💸 *Отправьте цену игры*\n"
         "_Чтобы отменить создание игры нажмите на кнопку снизу_"
@@ -240,6 +267,7 @@ def register_admin_handlers(router: Router):
     router.message.register(description_handler, GameCreateStates.description)
     router.message.register(preview_photo_handler, GameCreateStates.preview_photo, F.photo)
     router.message.register(video_handler, GameCreateStates.video, F.video)
+    router.message.register(video_consequences_handler, GameCreateStates.consequences_video, F.video)
     router.message.register(price_handler, GameCreateStates.price)
     router.message.register(tip_handler, GameCreateStates.tip)
     router.message.register(date_handler, GameCreateStates.date)

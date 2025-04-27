@@ -12,6 +12,7 @@ class User(Model):
     avatar_url = fields.CharField(max_length=255, null=True)
     first_name = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=255, null=True)
+    bought_games: fields.ReverseRelation["Game"]
     games: fields.ReverseRelation["Game"]
     results: fields.ReverseRelation["GameResult"]
 

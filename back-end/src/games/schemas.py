@@ -22,15 +22,27 @@ class BaseTip(BaseModel):
 
 class FullGameResponse(BaseGame):
     tips: List[BaseTip]
+<<<<<<< HEAD
     photo_url: str | None = None
     video_url: str | None = None
 
 class AnswerIn(BaseModel):
+=======
+    buy_url: str | None = None
+    video_url: HttpUrl | None = None
+
+
+class AnswerInBase(BaseModel):
+    answer: str
+
+class AnswerIn(AnswerInBase):
+>>>>>>> a930943 (chat update and add payment)
     telegram_id: int
     answer: str
 
 class AnswerOut(BaseModel):
     success: bool
+    consequences_video: str | None = None 
     place: int | None = None
     points: int | None = None
 

@@ -19,7 +19,7 @@ def cancel() -> InlineKeyboardMarkup:
     builder.button(text="Отменить создание игры ☁️", callback_data="cancel")
     return builder.as_markup()
 
-def chat(sid) -> InlineKeyboardMarkup:
+def accept_chat(sid) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="Принять", callback_data=ChatAction(sid=sid))
     return builder.as_markup()
