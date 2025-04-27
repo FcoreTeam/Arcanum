@@ -36,16 +36,40 @@ class BaseGame(BaseORMModel):
     name: str
     description: str
     date: datetime
+<<<<<<< HEAD
     price: Decimal
     photo_url: HttpUrl | None = None
+=======
+    price: int
+    photo_url: str | None = None
+>>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
 
 class FullGame(BaseGame):
     tips: List[BaseTip]
+<<<<<<< HEAD
     buy_url: str | None = None
     video_url: HttpUrl | None = None
 
 
 class AnswerInBase(BaseModel):
+=======
+<<<<<<< HEAD
+    photo_url: str | None = None
+    video_url: str | None = None
+
+class AnswerIn(BaseModel):
+=======
+    buy_url: str | None = None
+    video_url: HttpUrl | None = None
+
+
+class AnswerInBase(BaseModel):
+    answer: str
+
+class AnswerIn(AnswerInBase):
+>>>>>>> a930943 (chat update and add payment)
+    telegram_id: int
+>>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
     answer: str
 
 class AnswerIn(AnswerInBase):

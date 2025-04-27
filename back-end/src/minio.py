@@ -17,4 +17,3 @@ async def get_minio_instance(server_url: str = MinioSettings.server_url) -> Mini
     if not await minio.bucket_exists(PHOTOS_BUCKET):
         await minio.make_bucket(PHOTOS_BUCKET)
     return minio
- 

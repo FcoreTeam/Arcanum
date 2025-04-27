@@ -30,6 +30,10 @@ async def on_startup():
 
 app = FastAPI(on_startup=[on_startup], root_path="/api")
 
+<<<<<<< HEAD
+=======
+app.mount("/", socket_app)
+>>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -42,5 +46,6 @@ api_router.include_router(games_api_router)
 api_router.include_router(auth_api_router)
 app.include_router(api_router)
 app.mount("/", socket_app)
+
 
 

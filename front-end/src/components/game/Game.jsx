@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import blur from "../../img/blur__one.svg";
 import correct from "../../img/Correct.svg";
 import styles from "./game.module.scss";
 import Controlls from "./controlls/Controlls";
 import Input from "../@ui/Input/Input";
 import { api } from "../../api/api";
+import { useUser } from "../../store/slices/hooks/useUser";
 
 const Game = ({ name, video }) => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { userId } = useUser();
   const gameId = searchParams.get('id');
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -21,26 +22,39 @@ const Game = ({ name, video }) => {
   const [gameData, setGameData] = useState(null);
   const [time, setTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [error, setError] = useState(null);
+  const [isTipOpen, setIsTipOpen] = useState(false);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const timerRef = useRef(null);
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
     const fetchGameData = async () => {
       try {
-        const response = await api.getGames();
-        const game = response.data.games.find(g => g.id === parseInt(gameId));
-        if (game) {
-          setGameData(game);
+        if (!gameId) {
+          setError("ID игры не указан");
+          return;
+        }
+
+        const response = await api.getGame(gameId);
+        if (response.data) {
+          setGameData(response.data);
+          setError(null);
         }
       } catch (error) {
         console.error('Ошибка при загрузке данных игры:', error);
+        setError("Ошибка при загрузке игры");
       }
     };
 
-    if (gameId) {
-      fetchGameData();
-    }
+    fetchGameData();
   }, [gameId]);
+
+  useEffect(() => {
+    if (videoRef.current && gameData?.video_url) {
+      videoRef.current.load();
+    }
+  }, [gameData?.video_url]);
 
   useEffect(() => {
     if (isTimerRunning) {
@@ -66,24 +80,41 @@ const Game = ({ name, video }) => {
     setUserAnswer(e.target.value);
   };
 
-  const checkAnswer = () => {
-    if (!gameData?.answer) {
-      alert("Ошибка: ответ не определен");
+  const checkAnswer = async () => {
+    if (!gameId) {
+      setError("ID игры не указан");
+      return;
+    }
+    if (!userId) {
+      setError("Ошибка: пользователь не авторизован");
+      return;
+    }
+    if (!userAnswer) {
+      setError("Введите ответ");
       return;
     }
 
-    const isAnswerCorrect = userAnswer.toLowerCase().trim() === gameData.answer.toLowerCase().trim();
-    setIsCorrect(isAnswerCorrect);
-    if (isAnswerCorrect) {
-      setIsTimerRunning(false);
-      if (videoRef.current) {
-        videoRef.current.pause();
-        setIsPlaying(false);
+    try {
+      const response = await api.sendAnswer({
+        game_id: gameId,
+        answer: userAnswer,
+        telegram_id: userId
+      });
+
+      if (response?.data?.success) {
+        setIsCorrect(true);
+        setIsTimerRunning(false);
+        if (videoRef.current) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        }
+        setError(null);
+      } else {
+        setError("Неправильный ответ, попробуйте еще раз!");
       }
-    }
-    
-    if (!isAnswerCorrect) {
-      alert("Неправильный ответ, попробуйте еще раз!");
+    } catch (error) {
+      console.error('Ошибка при отправке ответа:', error);
+      setError("Ошибка при отправке ответа");
     }
   };
 
@@ -211,6 +242,23 @@ const Game = ({ name, video }) => {
     };
   }, []);
 
+  const handleTipClick = () => {
+    setIsTipOpen(true);
+    setCurrentTipIndex(0);
+  };
+
+  const handleNextTip = () => {
+    if (gameData?.tips && currentTipIndex < gameData.tips.length - 1) {
+      setCurrentTipIndex(prev => prev + 1);
+    } else {
+      setIsTipOpen(false);
+    }
+  };
+
+  const handleCloseTip = () => {
+    setIsTipOpen(false);
+  };
+
   return (
     <div className={styles.game}>
       <img src={blur} alt="" className={styles.blur__image} />
@@ -237,8 +285,21 @@ const Game = ({ name, video }) => {
           muted={isMuted}
           volume={volume}
           controls={false}
+          preload="auto"
+          playsInline
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="true"
+          x5-video-orientation="portraint"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            backgroundColor: '#000'
+          }}
         >
-          <source src={gameData?.video_after_url || video} type="video/mp4" />
+          <source src={gameData?.video_url || video} type="video/mp4" />
         </video>
         <Controlls
           handleVolumeChange={handleVolumeChange}
@@ -250,32 +311,60 @@ const Game = ({ name, video }) => {
           togglePlayPause={togglePlayPause}
           toggleMute={toggleMute}
         />
-        <p className={styles.video__subtitle}>
-          Если вы знаете финальный ответ, введите его.
-        </p>
       </div>
-      <div className={`${styles.game__controlls} ${isCorrect ? styles.hidden : ''}`}>
-        <Input 
-          secondClass="answer__input" 
-          placeholder="Введите ответ"
-          value={userAnswer}
-          onChange={handleAnswerChange}
-        />
-        <button 
-          className={styles.answer__button}
-          onClick={checkAnswer}
-        >
-          Ответить
-        </button>
-      </div>
-      {isCorrect && (
-        <div className={`${styles.back__container} ${styles.active}`}>
-          <button 
-            className={styles.back_button}
-            onClick={() => navigate('/main')}
-          >
-            Вернуться
-          </button>
+      {!isCorrect && (
+        <div className={styles.answerContainer}>
+          {error && <div className={styles.error}>{error}</div>}
+          <Input
+            type="text"
+            placeholder="Введите ответ"
+            value={userAnswer}
+            onChange={handleAnswerChange}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                checkAnswer();
+              }
+            }}
+          />
+          <div className={styles.buttons}>
+            <button
+              className={styles.submitButton}
+              onClick={checkAnswer}
+            >
+              Ответить
+            </button>
+            <button
+              className={styles.tipButton}
+              onClick={handleTipClick}
+            >
+              Об игре
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isTipOpen && (
+        <div className={styles.tipOverlay}>
+          <div className={styles.tipPopup}>
+            <h3 className={styles.tipTitle}>Подсказка</h3>
+            <p className={styles.tipContent}>
+              {gameData?.tips?.[currentTipIndex]?.content}
+            </p>
+            <div className={styles.tipControls}>
+              <button
+                className={styles.tipButton}
+                onClick={handleNextTip}
+              >
+                {currentTipIndex < (gameData?.tips?.length - 1) ? 'Следующая' : 'Закрыть'}
+              </button>
+              <button
+                className={styles.closeButton}
+                onClick={handleCloseTip}
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -5,6 +5,7 @@
   display: flex;
   position: relative;
   background: #000;
+  overflow: hidden;
 
   .video__background {
     position: relative;
@@ -19,12 +20,12 @@
       left: 50%;
       width: 100%;
       height: 100%;
-      object-fit: fill;
-
+      object-fit: cover;
       transform: translate(-50%, -50%);
       z-index: 0;
     }
   }
+
   .intro__page {
     width: 100vw;
     height: 100vh;
@@ -36,6 +37,8 @@
     padding-right: 40px;
     padding-bottom: 20px;
     padding-top: 220px;
+    z-index: 1;
+
     .main__title {
       font-size: 65px;
       font-weight: 500;
@@ -47,6 +50,7 @@
       background-clip: text;
       background-image: linear-gradient(to right, #de8a15b8, #fff);
     }
+
     .main__description {
       width: 100%;
       text-align: center;
@@ -54,6 +58,7 @@
       color: #ffffff99;
       letter-spacing: 0.5px;
     }
+
     .team__info {
       width: 100%;
       display: flex;
@@ -61,11 +66,13 @@
       justify-content: center;
       align-items: center;
       position: relative;
+
       .team__name {
         color: #ffffff8f;
         margin-right: 93px;
         margin-top: 10px;
       }
+
       .team__logo {
         width: 100px;
         height: 100px;

@@ -8,16 +8,21 @@ import Button from "../../@ui/Button/Button";
 import { api } from "../../../api/api";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { openPopup } from "../../../store/slices/popupSlice";
 
 const Games = ({ category }) => {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleDemoClick = (gameId) => {
-    navigate(`/game?id=${gameId}`);
+  const handleTipClick = (game) => {
+    dispatch(openPopup({
+      type: 'tip',
+      name: game.name,
+      description: game.description || 'Описание отсутствует'
+    }));
   };
 
   useEffect(() => {
@@ -26,10 +31,9 @@ const Games = ({ category }) => {
         setLoading(true);
         const response = await api.getGames();
 
-        if (response.data?.success && Array.isArray(response.data.games)) {
-          const cleanedGames = response.data.games.map((game) => ({
+        if (Array.isArray(response.data)) {
+          const cleanedGames = response.data.map((game) => ({
             ...game,
-            preview_url: game.preview_url?.replace(/"/g, ""),
             dateObj: new Date(game.date),
           }));
 
@@ -39,6 +43,7 @@ const Games = ({ category }) => {
         }
       } catch (err) {
         console.error("Ошибка загрузки:", err);
+        setError("Ошибка при загрузке игр");
       } finally {
         setLoading(false);
       }
@@ -52,10 +57,7 @@ const Games = ({ category }) => {
     if (category === "all") return true;
     if (category === "test") return game.is_test;
 
-    const [day, month, year] = game.date.split(".").map(Number);
-    const jsMonth = month - 1;
-
-    const date = new Date(year, jsMonth, day);
+    const date = new Date(game.date);
     const unixTime = date.getTime();
 
     const isPast = unixTime < now;
@@ -73,7 +75,7 @@ const Games = ({ category }) => {
   return (
     <Swiper
       modules={[Navigation, Pagination, Autoplay]}
-      slidesPerView={2}
+      slidesPerView={1}
       spaceBetween={30}
       loop={true}
       navigation={{
@@ -88,9 +90,9 @@ const Games = ({ category }) => {
         },
       }}
       breakpoints={{
-        320: { slidesPerView: 2 },
-        768: { slidesPerView: 3 },
-        1024: { slidesPerView: 4 },
+        320: { slidesPerView: 1 },
+        768: { slidesPerView: 1 },
+        1024: { slidesPerView: 1 },
       }}
       speed={800}
       grabCursor={true}
@@ -103,14 +105,14 @@ const Games = ({ category }) => {
         <SwiperSlide className={styles.slide} key={game.id}>
           <div className={styles.game}>
             <h3 className={styles.game__name}>{game.name}</h3>
-            <p className={styles.game__date}>Дата: {game.date}</p>
+            <p className={styles.game__date}>Дата: {new Date(game.date).toLocaleDateString()}</p>
 
-            {game.preview_url && (
+            {game.photo_url && (
               <img
-                src={game.preview_url}
+                src={game.photo_url}
                 className={styles.game__preview}
-                width="298"
-                height="198"
+                width="100%"
+                height="auto"
                 alt={game.name}
                 loading="lazy"
               />
@@ -122,9 +124,9 @@ const Games = ({ category }) => {
               </Button>
               <Button
                 buttonClass="buy__btn"
-                buttonContent="Демо"
+                buttonContent="Об игре"
                 secondClass="info__btn"
-                onClick={() => handleDemoClick(game.id)}
+                onClick={() => handleTipClick(game)}
               >
                 Описание игры
               </Button>

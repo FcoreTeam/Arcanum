@@ -6,7 +6,7 @@ import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
 import styles from "./support.module.scss";
 import ImageUploader from "./image-uploader/Image-uploader";
-import { api } from "../../api/api";
+import { chatApi } from "../../api/api";
 import { useUser } from "../../store/slices/hooks/useUser";
 
 const Support = () => {
@@ -16,33 +16,61 @@ const Support = () => {
   const [images, setImages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (userId) {
-      fetchMessages();
-      const interval = setInterval(fetchMessages, 5000);
-      return () => clearInterval(interval);
+      setupChat();
     }
+    return () => {
+      chatApi.disconnect();
+      chatApi.offMessage();
+      chatApi.offConnect();
+      chatApi.offDisconnect();
+      chatApi.offChatStarted();
+      chatApi.offChatEnded();
+    };
   }, [userId]);
 
-  const fetchMessages = async () => {
-    if (!userId) return;
-    
-    try {
-      const response = await api.getMessages(userId);
-      if (response.data.success) {
-        setMessages(response.data.messages);
-        setIsConnected(true);
-      }
-    } catch (error) {
-      console.error("Ошибка при получении сообщений:", error);
-      setIsConnected(false);
-    } finally {
+  const setupChat = () => {
+    chatApi.connect(userId);
+
+    chatApi.onConnect(() => {
+      setIsConnected(true);
+      setError(null);
       setIsLoading(false);
-    }
+    });
+
+    chatApi.onDisconnect(() => {
+      setIsConnected(false);
+      setError("Соединение с чатом потеряно");
+      setIsLoading(false);
+    });
+
+    chatApi.onChatStarted(() => {
+      setIsConnected(true);
+      setError(null);
+      setIsLoading(false);
+    });
+
+    chatApi.onChatEnded(() => {
+      setIsConnected(false);
+      setError("Чат завершен администратором");
+      setIsLoading(false);
+    });
+
+    chatApi.onMessage((data) => {
+      if (data.content) {
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          message: data.content,
+          is_user_message: false,
+          attachments: []
+        }]);
+      }
+    });
   };
 
   useEffect(() => {
@@ -88,34 +116,35 @@ const Support = () => {
     }
   };
 
-  const canSendMessage = !!inputValue.length || !!images.length;
+  const handleDeleteImage = (index) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
+  };
 
-  const sendMessage = async () => {
+  const canSendMessage = !!inputValue.trim() || !!images.length;
+
+  const sendMessage = () => {
     if (!canSendMessage || !userId) return;
 
     try {
-      const formData = new FormData();
-      formData.append('user_id', userId);
-      formData.append('msg', inputValue);
+      chatApi.sendMessage(inputValue);
       
-      if (images.length > 0) {
-        images.forEach((image, index) => {
-          formData.append(`image${index}`, image.file);
-        });
-      }
-
-      await api.makeRequest(formData);
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        message: inputValue,
+        is_user_message: true,
+        attachments: images.map(img => ({ url: img.fileLink }))
+      }]);
       
       setInputValue("");
       setImages([]);
+      setError(null);
       
       if (textareaRef.current) {
         textareaRef.current.style.height = "45px";
       }
-
-      fetchMessages();
     } catch (error) {
       console.error("Ошибка при отправке сообщения:", error);
+      setError("Ошибка при отправке сообщения");
     }
   };
 
@@ -128,13 +157,14 @@ const Support = () => {
             {isLoading ? "Загрузка..." : isConnected ? "Агент поддержки" : "Вы не подключены к чату"}
           </p>
         </div>
+        {error && <p className={styles.error}>{error}</p>}
         <section className={styles.body__messages}>
           {messages.map((item) => (
             <Message
               key={item.id}
               message={item.message}
-              isUserMessage={item.isUserMessage}
-              images={item.images}
+              isUserMessage={item.is_user_message}
+              images={item.attachments}
             />
           ))}
           <div ref={messagesEndRef} />
@@ -146,6 +176,7 @@ const Support = () => {
               name={item.fileName}
               size={item.fileSize}
               preview={item.fileLink}
+              onDelete={() => handleDeleteImage(index)}
             />
           ))}
         </div>

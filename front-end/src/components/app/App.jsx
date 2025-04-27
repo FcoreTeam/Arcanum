@@ -17,6 +17,7 @@ import Game from "../game/Game";
 const App = () => {
   const { name, video } = useSelector((state) => state.game);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const {
     userName,
     userAvatar,
@@ -32,29 +33,29 @@ const App = () => {
       try {
         const userId = getUserIdFromAddress();
         if (!userId) {
-          console.error("Ошибка: Не удалось получить user_id из URL");
+          setError("Ошибка авторизации");
           return;
         }
-        const response = await api.getUserInfo(userId);
 
-        if (response.data?.success && response.data.user) {
-          const currentUser = response.data.user;
+        const response = await api.getCurrentUser(userId);
 
+        if (response.data) {
           setUser({
             ...user,
-            userAvatar: currentUser.avatar_url,
-            userName:
-              currentUser.username || currentUser.first_name || "Пользователь",
-            userPhone: currentUser.phone,
-            userEmail: currentUser.email,
-            userPts: currentUser.balance,
+            userAvatar: response.data.avatar_url,
+            userName: response.data.first_name || response.data.username || "Пользователь",
+            userPhone: response.data.phone,
+            userEmail: response.data.email,
+            userPts: response.data.balance,
             userId: userId
           });
 
           sessionStorage.setItem("user_id", userId);
+          setError(null);
         }
       } catch (err) {
         console.error("Ошибка загрузки пользователя:", err);
+        setError("Ошибка при загрузке данных пользователя");
       } finally {
         setIsLoading(false);
       }
@@ -64,7 +65,11 @@ const App = () => {
   }, []);
 
   if (isLoading) {
-    return null;
+    return <div>Загрузка...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
   }
 
   return (

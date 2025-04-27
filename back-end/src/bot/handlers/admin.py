@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 from aiogram.types import Message, CallbackQuery, InlineQuery
 
 from aiogram import Router, F, Bot
 
 from ..filters.callback_data import YesNoAction, TipAction, ChatAction, StagePosition
 from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb, demo_game_kb, stage_position_choose, DEMO_GAME_STAGE_ADD, CANCEL
+=======
+from aiogram.types import Message, CallbackQuery
+
+from aiogram import Router, F, Bot
+
+from ..filters.callback_data import YesNoAction, TipAction, ChatAction
+from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb
+>>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
 from aiogram.filters.command import Command
 
 from games.models import Game, GameTip, DemoGame, Stage
@@ -17,8 +26,19 @@ from auth.models import User
 
 from config import TelegramSettings
 
+<<<<<<< HEAD
 from minio import PHOTOS_BUCKET, VIDEOS_BUCKET
 from ..mtproto import download_media_to_minio
+=======
+<<<<<<< HEAD
+from realtime.chat import sio, chats
+
+from ..mtproto_provider import send_photo_to_minio, send_video_to_minio
+=======
+from minio import PHOTOS_BUCKET, VIDEOS_BUCKET
+from ..mtproto import download_media_to_minio
+>>>>>>> a930943 (chat update and add payment)
+>>>>>>> b4f7617b7762e2ab6f73e15e410d3eb0f5808b9a
 
 from datetime import datetime
 
@@ -124,6 +144,27 @@ async def video_handler(message: Message, state: FSMContext):
     )
     await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
     await state.update_data({"video_path":minio_filename})
+    response = (
+        "🎞 *Отправьте видео последствий*\n"
+        "_Чтобы отменить создание игры нажмите на кнопку снизу_"
+    )
+    await state.set_state(GameCreateStates.consequences_video)
+    await message.answer(response, reply_markup=game_create_cancel())
+
+async def video_consequences_handler(message: Message, state: FSMContext):
+    await message.answer("⏳ Загружаю видео...")
+    filename = message.video.file_name
+    extension = filename.split(".")[-1]
+    minio_filename = f"{message.from_user.id}-{message.message_id}.{extension}"
+    url = await download_media_to_minio(
+        VIDEOS_BUCKET,
+        message.from_user.id, 
+        message.message_id, 
+        minio_filename,
+        "video/" + extension,
+    )
+    await message.answer(f"📥 Видео загрузилось! [Клик чтобы проверить]({url})")
+    await state.update_data({"video_consequences_path":minio_filename})
     response = (
         "🎞 *Отправьте видео последствий*\n"
         "_Чтобы отменить создание игры нажмите на кнопку снизу_"
