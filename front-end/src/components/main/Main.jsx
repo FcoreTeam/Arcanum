@@ -36,7 +36,7 @@ const Main = () => {
       </div>
       <section className={styles.main__page}>
         <div>
-          <p className={styles.main__title}>Arcanum</p>
+          <p className={styles.main__title}>Игра Золтана</p>
           <p className={styles.main__description}>
             Иммерсивный цифровой детектив
           </p>
@@ -51,7 +51,7 @@ const Main = () => {
               )}
               onClick={() => setController("prev")}
             >
-              Прошедшие игры
+              Предстоящие игры
             </div>
             <div
               className={clsx(
@@ -60,7 +60,7 @@ const Main = () => {
               )}
               onClick={() => setController("upcome")}
             >
-              Предстоящие игры
+              Прошедшие игры
             </div>
           </div>
           <div className={styles.games}>

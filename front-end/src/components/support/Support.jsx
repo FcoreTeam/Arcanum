@@ -26,42 +26,64 @@ const Support = () => {
     }
     return () => {
       chatApi.disconnect();
-      chatApi.offMessage();
-      chatApi.offConnect();
-      chatApi.offDisconnect();
-      chatApi.offChatStarted();
-      chatApi.offChatEnded();
+      chatApi.offAll();
     };
   }, [userId]);
 
   const setupChat = () => {
     chatApi.connect(userId);
 
-    chatApi.onConnect(() => {
+    chatApi.onAuthSuccess(() => {
       setIsConnected(true);
       setError(null);
       setIsLoading(false);
+      console.log("Успешная аутентификация!");
     });
 
-    chatApi.onDisconnect(() => {
+    chatApi.onNewMessage((data) => {
+      if (data.text) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            message: data.text,
+            is_user_message: false,
+            attachments: [],
+          },
+        ]);
+      }
+    });
+
+    chatApi.disconnect(() => {
       setIsConnected(false);
       setError("Соединение с чатом потеряно");
       setIsLoading(false);
+      console.log("Отключен")
     });
 
-    chatApi.onChatStarted(() => {
+    chatApi.startSearch(() => {
       setIsConnected(true);
       setError(null);
       setIsLoading(false);
+      console.log("поиск начался")
     });
 
-    chatApi.onChatEnded(() => {
-      setIsConnected(false);
-      setError("Чат завершен администратором");
+    chatApi.onError((error) => {
+      console.error("Ошибка WebSocket:", error);
+      setError("Ошибка соединения");
       setIsLoading(false);
     });
 
-    chatApi.onMessage((data) => {
+    chatApi.onChatClosed(() => {
+      setIsConnected(false);
+      setError("Чат завершен администратором");
+      setIsLoading(false);
+      console.log("Чат закрыт")
+    });
+
+    console.log(isConnected)
+
+    chatApi.sendMessage((data) => {
       if (data.content) {
         setMessages(prev => [...prev, {
           id: Date.now(),
@@ -70,7 +92,7 @@ const Support = () => {
           attachments: []
         }]);
       }
-    });
+    }, [userId]);
   };
 
   useEffect(() => {

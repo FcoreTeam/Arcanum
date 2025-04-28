@@ -8,6 +8,7 @@
   z-index: 1;
   min-height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
+  font-family: 'Playfair Display', serif;
 
   .video__background {
     position: fixed;
@@ -47,9 +48,9 @@
     z-index: 1;
 
     .main__title {
-      font-size: 65px;
+      font-size: 60px;
       font-weight: 500;
-      font-family: "classy";
+      font-family: 'Playfair Display', serif;
       width: 100%;
       text-align: center;
       color: #ECA33D;

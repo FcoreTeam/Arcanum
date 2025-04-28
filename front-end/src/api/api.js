@@ -32,64 +32,63 @@ export const api = {
   }),
 };
 
-export const socket = io("https://zoltansgametma.ru", {
-  path: "/socket.io/",
-  transports: ['websocket'],
-  autoConnect: false
+export const socket = io("ws://31.172.67.162:8000/chat", {
+  path: "/socket.io",
+  autoConnect: false,
 });
 
 export const chatApi = {
   connect: (userId) => {
+    socket.auth = {user_id: userId}; 
     socket.connect();
-    socket.emit('chat', { user_id: userId });
   },
 
   disconnect: () => {
     socket.disconnect();
   },
 
-  sendMessage: (message) => {
-    socket.emit('new-chat-message', { message });
+  startSearch: () => {
+    socket.emit("search");
   },
 
-  onMessage: (callback) => {
-    socket.on('chat-message', callback);
+  sendMessage: (text) => {
+    socket.emit("send_message", { text });
   },
 
-  onConnect: (callback) => {
-    socket.on('connect', callback);
+  closeChat: () => {
+    socket.emit("chat_close");
   },
 
-  onDisconnect: (callback) => {
-    socket.on('disconnect', callback);
+  onAuthSuccess: (callback) => {
+    socket.on("auth-success", callback);
   },
 
-  onChatStarted: (callback) => {
-    socket.on('chat-started', callback);
+  onError: (callback) => {
+    socket.on("error", callback);
   },
 
-  onChatEnded: (callback) => {
-    socket.on('chat-ended', callback);
+  onSearchStarted: (callback) => {
+    socket.on("search-started", callback);
   },
 
-  offMessage: (callback) => {
-    socket.off('chat-message', callback);
+  onChatFound: (callback) => {
+    socket.on("chat-found", callback);
   },
 
-  offConnect: (callback) => {
-    socket.off('connect', callback);
+  onNewMessage: (callback) => {
+    socket.on("new-message", callback);
   },
 
-  offDisconnect: (callback) => {
-    socket.off('disconnect', callback);
+  onChatClosed: (callback) => {
+    socket.on("chat-closed", callback);
   },
 
-  offChatStarted: (callback) => {
-    socket.off('chat-started', callback);
+  offAll: () => {
+    socket.off("auth-success");
+    socket.off("error");
+    socket.off("search-started");
+    socket.off("chat-found");
+    socket.off("new-message");
+    socket.off("chat-closed");
   },
-
-  offChatEnded: (callback) => {
-    socket.off('chat-ended', callback);
-  }
 };
-

@@ -2,16 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import blur from "../../img/blur__one.svg";
 import correct from "../../img/Correct.svg";
+import incorrect from "../../img/incorrect.gif"
 import styles from "./game.module.scss";
 import Controlls from "./controlls/Controlls";
-import Input from "../@ui/Input/Input";
 import { api } from "../../api/api";
 import { useUser } from "../../store/slices/hooks/useUser";
 
 const Game = ({ name, video }) => {
   const [searchParams] = useSearchParams();
   const { userId } = useUser();
-  const gameId = searchParams.get('id');
+  const gameId = searchParams.get("id");
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -42,7 +42,7 @@ const Game = ({ name, video }) => {
           setError(null);
         }
       } catch (error) {
-        console.error('Ошибка при загрузке данных игры:', error);
+        console.error("Ошибка при загрузке данных игры:", error);
         setError("Ошибка при загрузке игры");
       }
     };
@@ -59,7 +59,7 @@ const Game = ({ name, video }) => {
   useEffect(() => {
     if (isTimerRunning) {
       timerRef.current = setInterval(() => {
-        setTime(prevTime => prevTime + 1);
+        setTime((prevTime) => prevTime + 1);
       }, 1000);
     } else {
       clearInterval(timerRef.current);
@@ -73,7 +73,9 @@ const Game = ({ name, video }) => {
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const handleAnswerChange = (e) => {
@@ -98,7 +100,7 @@ const Game = ({ name, video }) => {
       const response = await api.sendAnswer({
         game_id: gameId,
         answer: userAnswer,
-        telegram_id: userId
+        telegram_id: userId,
       });
 
       if (response?.data?.success) {
@@ -113,7 +115,7 @@ const Game = ({ name, video }) => {
         setError("Неправильный ответ, попробуйте еще раз!");
       }
     } catch (error) {
-      console.error('Ошибка при отправке ответа:', error);
+      console.error("Ошибка при отправке ответа:", error);
       setError("Ошибка при отправке ответа");
     }
   };
@@ -249,7 +251,7 @@ const Game = ({ name, video }) => {
 
   const handleNextTip = () => {
     if (gameData?.tips && currentTipIndex < gameData.tips.length - 1) {
-      setCurrentTipIndex(prev => prev + 1);
+      setCurrentTipIndex((prev) => prev + 1);
     } else {
       setIsTipOpen(false);
     }
@@ -272,7 +274,9 @@ const Game = ({ name, video }) => {
           </div>
         </>
       )}
-      <div className={`${styles.game__header} ${isCorrect ? styles.hidden : ''}`}>
+      <div
+        className={`${styles.game__header} ${isCorrect ? styles.hidden : ""}`}
+      >
         <h3 className={styles.game__title}>{gameData?.name || name}</h3>
         <div className={styles.timer}>
           <p>{formatTime(time)}</p>
@@ -293,10 +297,10 @@ const Game = ({ name, video }) => {
           x5-video-player-fullscreen="true"
           x5-video-orientation="portraint"
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            backgroundColor: '#000'
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            backgroundColor: "#000",
           }}
         >
           <source src={gameData?.video_url || video} type="video/mp4" />
@@ -313,34 +317,13 @@ const Game = ({ name, video }) => {
         />
       </div>
       {!isCorrect && (
-        <div className={styles.answerContainer}>
-          {error && <div className={styles.error}>{error}</div>}
-          <Input
-            type="text"
-            placeholder="Введите ответ"
-            value={userAnswer}
-            onChange={handleAnswerChange}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                checkAnswer();
-              }
-            }}
-          />
-          <div className={styles.buttons}>
-            <button
-              className={styles.submitButton}
-              onClick={checkAnswer}
-            >
-              Ответить
-            </button>
-            <button
-              className={styles.tipButton}
-              onClick={handleTipClick}
-            >
-              Об игре
-            </button>
+        <>
+          <div className={`${styles.game__blur} ${styles.active}`} />
+          <div className={`${styles.game__correct} ${styles.active}`}>
+            <img src={incorrect} alt="Неправильный ответ" />
+            <p className={styles.correct_answer}>Ответ неверный!</p>
           </div>
-        </div>
+        </>
       )}
 
       {isTipOpen && (
@@ -351,16 +334,12 @@ const Game = ({ name, video }) => {
               {gameData?.tips?.[currentTipIndex]?.content}
             </p>
             <div className={styles.tipControls}>
-              <button
-                className={styles.tipButton}
-                onClick={handleNextTip}
-              >
-                {currentTipIndex < (gameData?.tips?.length - 1) ? 'Следующая' : 'Закрыть'}
+              <button className={styles.tipButton} onClick={handleNextTip}>
+                {currentTipIndex < gameData?.tips?.length - 1
+                  ? "Следующая"
+                  : "Закрыть"}
               </button>
-              <button
-                className={styles.closeButton}
-                onClick={handleCloseTip}
-              >
+              <button className={styles.closeButton} onClick={handleCloseTip}>
                 ×
               </button>
             </div>
@@ -372,4 +351,3 @@ const Game = ({ name, video }) => {
 };
 
 export default Game;
-

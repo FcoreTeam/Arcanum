@@ -17,7 +17,7 @@ const Intro = () => {
       </div>
       <div className={styles.intro__page}>
         <div>
-          <p className={styles.main__title}>Arcanum</p>
+          <p className={styles.main__title}>Игра Золтана</p>
           <p className={styles.main__description}>
             Иммерсивный цифровой детектив
           </p>
