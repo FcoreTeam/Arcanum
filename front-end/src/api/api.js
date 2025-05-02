@@ -6,7 +6,6 @@ const $api = axios.create({
   timeout: 10000,
   headers: {
     'Accept': 'application/json',
-    'Content-Type': 'application/json'
   }
 });
 
@@ -39,12 +38,16 @@ export const socket = io("ws://31.172.67.162:8000/chat", {
 
 export const chatApi = {
   connect: (userId) => {
-    socket.auth = {user_id: userId}; 
+    socket.emit("auth", { user_id: userId });
     socket.connect();
   },
 
   disconnect: () => {
     socket.disconnect();
+  },
+
+  uploadChatPhoto: (formData, sid) => {
+    return $api.post(`/auth/chat/photo?sid=${sid}`, formData);
   },
 
   startSearch: () => {

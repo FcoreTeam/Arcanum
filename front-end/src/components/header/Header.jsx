@@ -1,6 +1,7 @@
 import { useUser } from "../../store/slices/hooks/useUser";
 import { Link } from "react-router";
 import clsx from "clsx";
+import userDefault from "../../img/userdef.svg";
 
 import styles from "./header.module.scss";
 
@@ -20,7 +21,8 @@ const Header = () => {
             userAvatar === "" ? styles.user__def : ""
           )}
         >
-          {userAvatar !== "" ? <img src={userAvatar} alt="" className={styles.user__img} /> : <></>}
+          <img src={userDefault} alt="" className={styles.user__img} />
+          {/* {userAvatar !== "" ? <img src={userAvatar} alt="" className={styles.user__img} /> : <></>} */}
         </Link>
       </div>
     </header>
