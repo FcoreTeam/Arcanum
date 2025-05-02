@@ -24,6 +24,8 @@ export const api = {
 
   getGames: (params = { until_today: false, limit: 2 }) => $api.get("/games/", { params }),
   getGame: (gameId) => $api.get(`/games/${gameId}`),
+  getDemoGames: () => $api.get(`/games/demo`),
+  getDemoGame: (demoGameId) => $api.get(`/games/demo/${demoGameId}`),
   getLeaders: (gameId) => $api.get(`/games/${gameId}/leaderboard`),
   sendAnswer: (data) => $api.post(`/games/${data.game_id}/answer`, {
     answer: data.answer,

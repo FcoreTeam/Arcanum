@@ -13,6 +13,7 @@ import Intro from "../intro/Intro";
 import Leads from "../leads/Leads";
 import Instruction from "../instruction/Instruction";
 import Game from "../game/Game";
+import DemoGame from "../demoGame/demoGame"
 
 const App = () => {
   const { name, video } = useSelector((state) => state.game);
@@ -82,6 +83,7 @@ const App = () => {
         <Route path="/game" element={<Game name={name} video={video} />} />
         <Route path="/lead/:gameId" element={<Leads />} />
         <Route path="/info" element={<Instruction />} />
+        <Route path="/demo-game/:demoGameId" element={<DemoGame />} />
         <Route path="/main" element={<Main />} />
       </Route>
     </Routes>

@@ -1,0 +1,47 @@
+.container {
+  padding: 20px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.name {
+  font-size: 24px;
+  font-weight: bold;
+}
+.controls {
+  display: flex;
+  gap: 10px;
+}
+.question {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.option {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  &.correct {
+    background: #c6f6d5;
+  }
+  &.incorrect {
+    background: #feb2b2;
+  }
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+.timer {
+  margin-top: 20px;
+  font-weight: bold;
+}
+.finished {
+  font-size: 24px;
+  color: green;
+}

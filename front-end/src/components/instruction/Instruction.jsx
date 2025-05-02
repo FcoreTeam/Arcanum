@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import blur from "../../img/blur__one.svg";
 import styles from "./instruction.module.scss";
+import DemoGames from "./demoGames/demo-games"
+
 
 const Instruction = () => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -226,6 +228,7 @@ const Instruction = () => {
           </div>
         ))}
         <p className={styles.instruction__title}>Демо игры</p>
+        <div><DemoGames /></div>
       </div>
     </div>
   );
