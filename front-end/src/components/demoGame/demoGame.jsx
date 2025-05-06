@@ -1,33 +1,24 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
-
-
-import styles from "./demoGame.module.scss"
-import clsx from "clsx";
-
-
-import { useDispatch } from "react-redux";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/api";
-import Button from "../@ui/Button/Button";
-import { openPopup } from "../../store/slices/popupSlice";
+import { useParams } from "react-router-dom";
+import styles from "./demoGame.module.scss";
+import blur from "../../img/blur__one.svg";
 
 const DemoGame = () => {
+  const [gameData, setGameData] = useState(null);
+  const [currentStageId, setCurrentStageId] = useState(null);
+  const [answer, setAnswer] = useState("");
+  const videoRef = useRef(null);
   const { demoGameId } = useParams();
-  const dispatch = useDispatch();
-  const containerRef = useRef(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const [game, setGame] = useState(null);
-  const [stageIndex, setStageIndex] = useState(0);
-  const [timer, setTimer] = useState(30);
-  const [isAnswered, setIsAnswered] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
 
   useEffect(() => {
     const fetchGame = async () => {
       try {
         const res = await api.getDemoGame(demoGameId);
-        setGame(res.data);
+        setGameData(res.data);
+
+        const startStage = res.data.stages.find((s) => s.start);
+        if (startStage) setCurrentStageId(startStage.id);
       } catch (err) {
         console.error("Ошибка загрузки демо-игры", err);
       }
@@ -36,82 +27,68 @@ const DemoGame = () => {
     fetchGame();
   }, [demoGameId]);
 
+  const currentStage = gameData?.stages.find((s) => s.id === currentStageId);
+
   useEffect(() => {
-    if (!game || isAnswered) return;
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev === 1) {
-          handleAnswer(null);
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (videoRef.current && currentStage?.video_url) {
+      videoRef.current.load();
+    }
+  }, [currentStage?.video_url]);
 
-    return () => clearInterval(interval);
-  }, [game, stageIndex, isAnswered]);
+  const handleAnswer = () => {
+    const trimmed = answer.trim().toLowerCase();
+    const correct = trimmed === "правильный ответ"; // Здесь подставь свою логику проверки
 
-  const handleAnswer = (optionIndex) => {
-    setIsAnswered(true);
-    setSelectedOption(optionIndex);
-    setTimeout(() => {
-      setStageIndex((prev) => prev + 1);
-      setTimer(30);
-      setIsAnswered(false);
-      setSelectedOption(null);
-    }, 1000);
-  };
+    const nextId = correct
+      ? currentStage?.next_correct_answer?.id
+      : currentStage?.next_wrong_answer?.id;
 
-  const handleTipClick = () => {
-    if (game) {
-      dispatch(
-        openPopup({
-          type: "tip",
-          name: game.name,
-          description: game.description || "Описание отсутствует",
-        })
-      );
+    if (nextId) {
+      setAnswer("");
+      setCurrentStageId(nextId);
+    } else {
+      alert("Игра завершена или нет следующего этапа.");
     }
   };
 
-  if (!game) return <div className={styles.loading}>Загрузка демо-игры...</div>;
-
-  const currentStage = game.stages[stageIndex];
-  const isFinished = stageIndex >= game.stages.length;
-
   return (
-    <div className={styles.container} ref={containerRef}>
-      <div className={styles.header}>
-        <h2 className={styles.name}>{game.name}</h2>
-        <div className={styles.controls}>
-          <Button onClick={setIsFullscreen} buttonContent="⛶" />
-          <Button onClick={handleTipClick} buttonContent="Описание" />
-        </div>
+    <div className={styles.demogame}>
+      <img src={blur} alt="" className={styles.demoGame__blur} />
+      <img src={blur} alt="" className={styles.blur__image__sec} />
+
+      <div className={styles.game__title}>{gameData?.name}</div>
+
+      <div className={styles.videoContainer}>
+        <video
+          ref={videoRef}
+          className={styles.game__video}
+          preload="auto"
+          playsInline
+          controls
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            backgroundColor: "#000",
+          }}
+        >
+          <source src={currentStage?.video_url} type="video/mp4" />
+        </video>
       </div>
 
-      {isFinished ? (
-        <div className={styles.finished}>Игра завершена!</div>
-      ) : (
-        <div className={styles.stage}>
-          <div className={styles.question}>{currentStage.question}</div>
-          <div className={styles.options}>
-            {currentStage.options.map((option, index) => (
-              <button
-                key={index}
-                className={clsx(styles.option, {
-                  [styles.correct]: isAnswered && index === currentStage.correct_option,
-                  [styles.incorrect]: isAnswered && selectedOption === index && index !== currentStage.correct_option,
-                  [styles.disabled]: isAnswered,
-                })}
-                onClick={() => handleAnswer(index)}
-                disabled={isAnswered}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          <div className={styles.timer}>{timer} сек</div>
+      <div className={styles.tipButton}></div>
+
+      {!currentStage?.end && (
+        <div className={styles.answerContainer}>
+          <input
+            type="text"
+            placeholder="Введите ответ"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+          />
+          <button className={styles.sumbitButton} onClick={handleAnswer}>
+            Ответить
+          </button>
         </div>
       )}
     </div>

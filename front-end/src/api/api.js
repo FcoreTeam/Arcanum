@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "https://zoltansgametma.ru/api",
+  baseURL: "http://31.172.67.162:8000/api",
   timeout: 10000,
   headers: {
     'Accept': 'application/json',
@@ -33,7 +33,7 @@ export const api = {
   }),
 };
 
-export const socket = io("wss://zoltansgametma.ru/chat", {
+export const socket = io("ws://31.172.67.162:8000/chat", {
   path: "/socket.io",
   autoConnect: false,
 });

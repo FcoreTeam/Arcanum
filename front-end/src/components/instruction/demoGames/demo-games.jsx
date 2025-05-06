@@ -4,7 +4,6 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/scss";
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
-import { Link } from "react-router-dom";
 
 import styles from "./demo-games.module.scss";
 import { api } from "../../../api/api";

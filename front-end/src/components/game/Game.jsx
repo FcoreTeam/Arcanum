@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import blur from "../../img/blur__one.svg";
 import correct from "../../img/Correct.svg";
-import incorrect from "../../img/incorrect.gif"
+import incorrect from "../../img/incorrect.gif";
 import styles from "./game.module.scss";
 import Controlls from "./controlls/Controlls";
 import { api } from "../../api/api";
@@ -85,24 +85,27 @@ const Game = ({ name, video }) => {
   const checkAnswer = async () => {
     if (!gameId) {
       setError("ID игры не указан");
+      setIsCorrect(false);
       return;
     }
     if (!userId) {
       setError("Ошибка: пользователь не авторизован");
+      setIsCorrect(false);
       return;
     }
     if (!userAnswer) {
       setError("Введите ответ");
+      setIsCorrect(false);
       return;
     }
-
+  
     try {
       const response = await api.sendAnswer({
         game_id: gameId,
         answer: userAnswer,
         telegram_id: userId,
       });
-
+  
       if (response?.data?.success) {
         setIsCorrect(true);
         setIsTimerRunning(false);
@@ -112,11 +115,13 @@ const Game = ({ name, video }) => {
         }
         setError(null);
       } else {
+        setIsCorrect(false);
         setError("Неправильный ответ, попробуйте еще раз!");
       }
     } catch (error) {
       console.error("Ошибка при отправке ответа:", error);
       setError("Ошибка при отправке ответа");
+      setIsCorrect(false);
     }
   };
 
@@ -265,12 +270,17 @@ const Game = ({ name, video }) => {
     <div className={styles.game}>
       <img src={blur} alt="" className={styles.blur__image} />
       <img src={blur} alt="" className={styles.blur__image__sec} />
-      {isCorrect && (
+      {isCorrect !== null && (
         <>
           <div className={`${styles.game__blur} ${styles.active}`} />
           <div className={`${styles.game__correct} ${styles.active}`}>
-            <img src={correct} alt="Правильный ответ" />
-            <p className={styles.correct_answer}>Верно!</p>
+            <img
+              src={isCorrect ? correct : incorrect}
+              alt={isCorrect ? "Правильный ответ" : "Неправильный ответ"}
+            />
+            <p className={styles.correct_answer}>
+              {isCorrect ? "Верно!" : "Ответ неверный!"}
+            </p>
           </div>
         </>
       )}
@@ -316,7 +326,7 @@ const Game = ({ name, video }) => {
           toggleMute={toggleMute}
         />
       </div>
-      {!isCorrect && (
+      {isCorrect && (
         <>
           <div className={`${styles.game__blur} ${styles.active}`} />
           <div className={`${styles.game__correct} ${styles.active}`}>

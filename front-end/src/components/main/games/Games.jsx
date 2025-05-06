@@ -10,20 +10,27 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { openPopup } from "../../../store/slices/popupSlice";
+import { useNavigate } from "react-router-dom"; // убрать
 
 const Games = ({ category }) => {
+  const navigate = useNavigate(); // убрать
   const dispatch = useDispatch();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const handleTipClick = (game) => {
-    dispatch(openPopup({
-      type: 'tip',
-      name: game.name,
-      description: game.description || 'Описание отсутствует'
-    }));
+    dispatch(
+      openPopup({
+        type: "tip",
+        name: game.name,
+        description: game.description || "Описание отсутствует",
+      })
+    );
   };
+
+  const handleDemoClick = (gameId) => {
+     navigate(`/game?id=${gameId}`);} // убрать
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -50,6 +57,21 @@ const Games = ({ category }) => {
     };
     fetchGames();
   }, []);
+
+  const handleBuyClick = async (gameId) => {
+    try {
+      const response = await api.getGame(gameId);
+      const buyUrl = response.data.buy_url;
+      if (buyUrl) {
+        window.location.href = buyUrl;
+      } else {
+        alert("Ссылка для покупки недоступна.");
+      }
+    } catch (error) {
+      console.error("Ошибка при получении игры:", error);
+      alert("Не удалось получить ссылку на игру.");
+    }
+  };
 
   const now = new Date().getTime();
 
@@ -105,7 +127,9 @@ const Games = ({ category }) => {
         <SwiperSlide className={styles.slide} key={game.id}>
           <div className={styles.game}>
             <h3 className={styles.game__name}>{game.name}</h3>
-            <p className={styles.game__date}>Дата: {new Date(game.date).toLocaleDateString()}</p>
+            <p className={styles.game__date}>
+              Дата: {new Date(game.date).toLocaleDateString()}
+            </p>
 
             {game.photo_url && (
               <img
@@ -119,8 +143,17 @@ const Games = ({ category }) => {
             )}
 
             <div className={styles.buttons}>
-              <Button buttonContent={game.price + " ₽"} buttonClass="buy__btn">
+              <Button
+                buttonContent={game.price + " ₽"}
+                buttonClass="buy__btn"
+                onClick={() => handleBuyClick(game.id)}
+              >
                 {category === "prev" ? "Перепройти" : "Играть"}
+              </Button>
+              <Button
+              buttonClass="buy__btn"
+              onClick={() => handleDemoClick(game.id)}>
+                123
               </Button>
               <Button
                 buttonClass="buy__btn"
