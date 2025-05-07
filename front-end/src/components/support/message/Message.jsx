@@ -9,14 +9,20 @@ const Message = ({ message, isUserMessage, images }) => {
 
         {images && images.length > 0 && (
           <div className={styles.message__images}>
-            {images.map((img, index) => (
-              <img
-                key={index}
-                src={img.fileLink}
-                alt={`image-${index}`}
-                className={styles.message_image}
-              />
-            ))}
+            {images.map((img, index) =>
+              img?.url ? (
+                <img
+                  key={index}
+                  src={img.url}
+                  alt={`image-${index}`}
+                  className={styles.message_image}
+                />
+              ) : (
+                <span key={index} className={styles.image_error}>
+                  Ошибка изображения
+                </span>
+              )
+            )}
           </div>
         )}
       </div>

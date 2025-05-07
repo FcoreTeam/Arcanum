@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import pencil from "../../img/pencil.svg";
-import Games from "../main/games/Games";
+
 import styles from "./profile.module.scss";
+import userDefault from "../../img/userdef.svg";
 import { useUser } from "../../store/slices/hooks/useUser";
 import { api } from "../../api/api";
 import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
@@ -15,6 +16,7 @@ const Profile = () => {
     setUser,
     userPhone,
     userEmail,
+    userGames,
     ...user
   } = useUser();
 
@@ -24,6 +26,7 @@ const Profile = () => {
   const [email, setEmail] = useState(userEmail || "");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [subscribe, setSubscribe] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -40,7 +43,10 @@ const Profile = () => {
             userPhone: response.data.phone || null,
             userEmail: response.data.email || null,
             userAvatar: response.data.avatar_url || null,
-            userName: response.data.first_name || response.data.username || "Пользователь"
+            userName:
+              response.data.first_name ||
+              response.data.username ||
+              "Пользователь",
           });
           setPhone(response.data.phone || "");
           setEmail(response.data.email || "");
@@ -68,10 +74,8 @@ const Profile = () => {
         phone: phone || null,
         email: email || null,
       };
-    
 
       await api.updateUser(updateData);
-      
 
       setUser({
         ...user,
@@ -104,9 +108,7 @@ const Profile = () => {
             !userAvatar && styles.user__def
           )}
         >
-          {userAvatar && (
-            <img src={userAvatar} alt="" className={styles.profile__avatar} /> 
-          )}
+          <img src={userDefault} alt="" className={styles.profile__avatar} />
         </div>
         <p className={styles.user__name}>{userName}</p>
 
@@ -132,8 +134,12 @@ const Profile = () => {
           </>
         ) : (
           <>
-            <div className={styles.user__info}>{phone || "Номер не указан"}</div>
-            <div className={styles.user__info}>{email || "Email не указан"}</div>
+            <div className={styles.user__info}>
+              {phone || "Номер не указан"}
+            </div>
+            <div className={styles.user__info}>
+              {email || "Email не указан"}
+            </div>
           </>
         )}
 
@@ -146,6 +152,11 @@ const Profile = () => {
             <img src={pencil} alt="" className={styles.edit__img} />
           )}
         </div>
+        {!subscribe ? (
+          <button className={styles.buy__btn}>Купить подписку</button>
+        ) : (
+          <></>
+        )}
 
         <p className={styles.games__title}>Список игр</p>
         <div className={styles.games__controller}>
@@ -168,7 +179,9 @@ const Profile = () => {
             Пройденные
           </div>
         </div>
-        <Games category={filter} />
+        <div className={styles.userGames}>
+          {userGames || "Нет купленных игр"}
+        </div>
       </div>
     </div>
   );

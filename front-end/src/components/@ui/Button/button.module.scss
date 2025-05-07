@@ -1,7 +1,8 @@
 .button {
   border: 0;
   outline: none;
-  font-family: "mont";
+  font-family: 'Playfair Display', serif;
+  transition: transform 0.2s ease;
 
   &.buy__btn,
   &.buy__btn__w,
@@ -13,6 +14,13 @@
     background: linear-gradient(to right, #de8a15b8, #463f3a39);
     color: #fff;
     font-size: 18px;
+    text-align: center;
+    padding: 6px;
+    text-decoration: none;
+
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 
   &.buy__btn__w {

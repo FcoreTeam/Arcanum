@@ -2,18 +2,22 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "http://31.172.67.162:8000/api",
+  baseURL: "https://zoltansgametma.ru/api/",
   timeout: 10000,
   headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
+    Accept: "application/json",
+  },
 });
 
 $api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.config.url, error.response?.status, error.response?.data);
+    console.error(
+      "API Error:",
+      error.config.url,
+      error.response?.status,
+      error.response?.data
+    );
     return Promise.reject(error);
   }
 );
@@ -23,73 +27,81 @@ export const api = {
   syncUser: () => $api.patch("/auth/me/sync"),
   updateUser: (data) => $api.patch("/auth/me/update", data),
 
-  getGames: (params = { until_today: false, limit: 2 }) => $api.get("/games/", { params }),
+  getGames: (params = { until_today: false, limit: 2 }) =>
+    $api.get("/games/", { params }),
   getGame: (gameId) => $api.get(`/games/${gameId}`),
+  getDemoGames: () => $api.get(`/games/demo`),
+  getDemoGame: (demoGameId) => $api.get(`/games/demo/${demoGameId}`),
   getLeaders: (gameId) => $api.get(`/games/${gameId}/leaderboard`),
-  sendAnswer: (data) => $api.post(`/games/${data.game_id}/answer`, {
-    answer: data.answer,
-    telegram_id: data.telegram_id
-  }),
+  sendAnswer: (data) =>
+    $api.post(`/games/${data.game_id}/answer`, {
+      answer: data.answer,
+      telegram_id: data.telegram_id,
+    }),
 };
 
-export const socket = io("https://zoltansgametma.ru", {
-  path: "/socket.io/",
-  transports: ['websocket'],
-  autoConnect: false
+export const socket = io("wss://zoltansgametma.ru/chat", {
+  path: "/socket.io",
+  autoConnect: false,
 });
 
 export const chatApi = {
   connect: (userId) => {
+    socket.emit("auth", { user_id: userId });
     socket.connect();
-    socket.emit('chat', { user_id: userId });
+    console.log("connected");
   },
 
   disconnect: () => {
     socket.disconnect();
   },
 
-  sendMessage: (message) => {
-    socket.emit('new-chat-message', { message });
+  uploadChatPhoto: (formData, sid) => {
+    return $api.post(`/auth/chat/photo?sid=${sid}`, formData);
   },
 
-  onMessage: (callback) => {
-    socket.on('chat-message', callback);
+  startSearch: () => {
+    socket.emit("search");
   },
 
-  onConnect: (callback) => {
-    socket.on('connect', callback);
+  sendMessage: (text) => {
+    socket.emit("send_message", { text });
   },
 
-  onDisconnect: (callback) => {
-    socket.on('disconnect', callback);
+  closeChat: () => {
+    socket.emit("chat_close");
   },
 
-  onChatStarted: (callback) => {
-    socket.on('chat-started', callback);
+  onAuthSuccess: (callback) => {
+    socket.on("auth-success", callback);
   },
 
-  onChatEnded: (callback) => {
-    socket.on('chat-ended', callback);
+  onError: (callback) => {
+    socket.on("error", callback);
   },
 
-  offMessage: (callback) => {
-    socket.off('chat-message', callback);
+  onSearchStarted: (callback) => {
+    socket.on("search-started", callback);
   },
 
-  offConnect: (callback) => {
-    socket.off('connect', callback);
+  onChatFound: (callback) => {
+    socket.on("chat-found", callback);
   },
 
-  offDisconnect: (callback) => {
-    socket.off('disconnect', callback);
+  onNewMessage: (callback) => {
+    socket.on("new-message", callback);
   },
 
-  offChatStarted: (callback) => {
-    socket.off('chat-started', callback);
+  onChatClosed: (callback) => {
+    socket.on("chat-closed", callback);
   },
 
-  offChatEnded: (callback) => {
-    socket.off('chat-ended', callback);
-  }
+  offAll: () => {
+    socket.off("auth-success");
+    socket.off("error");
+    socket.off("search-started");
+    socket.off("chat-found");
+    socket.off("new-message");
+    socket.off("chat-closed");
+  },
 };
-

@@ -14,6 +14,7 @@ const GameLine = ({ games, onGameSelect, selectedGameId }) => {
     <Swiper
       spaceBetween={20}
       slidesPerView="2"
+
       loop={true}
       scrollbar={{ draggable: true }}
       className={styles.game__swiper}
