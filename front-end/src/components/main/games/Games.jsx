@@ -30,7 +30,8 @@ const Games = ({ category }) => {
   };
 
   const handleDemoClick = (gameId) => {
-     navigate(`/game?id=${gameId}`);} // убрать
+    navigate(`/game?id=${gameId}`);
+  }; // убрать
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -150,11 +151,7 @@ const Games = ({ category }) => {
               >
                 {category === "prev" ? "Перепройти" : "Играть"}
               </Button>
-              <Button
-              buttonClass="buy__btn"
-              onClick={() => handleDemoClick(game.id)}>
-                123
-              </Button>
+
               <Button
                 buttonClass="buy__btn"
                 buttonContent="Об игре"

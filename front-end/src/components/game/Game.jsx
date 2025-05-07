@@ -98,14 +98,14 @@ const Game = ({ name, video }) => {
       setIsCorrect(false);
       return;
     }
-  
+
     try {
       const response = await api.sendAnswer({
         game_id: gameId,
         answer: userAnswer,
         telegram_id: userId,
       });
-  
+
       if (response?.data?.success) {
         setIsCorrect(true);
         setIsTimerRunning(false);
@@ -281,6 +281,9 @@ const Game = ({ name, video }) => {
             <p className={styles.correct_answer}>
               {isCorrect ? "Верно!" : "Ответ неверный!"}
             </p>
+            <button onClick={() => setIsCorrect(null)} className={styles.retry}>
+              Попробовать ещё раз
+            </button>
           </div>
         </>
       )}
@@ -325,17 +328,20 @@ const Game = ({ name, video }) => {
           togglePlayPause={togglePlayPause}
           toggleMute={toggleMute}
         />
+        <p className={styles.game__description}>{gameData?.description}</p>
       </div>
-      {isCorrect && (
-        <>
-          <div className={`${styles.game__blur} ${styles.active}`} />
-          <div className={`${styles.game__correct} ${styles.active}`}>
-            <img src={incorrect} alt="Неправильный ответ" />
-            <p className={styles.correct_answer}>Ответ неверный!</p>
-          </div>
-        </>
-      )}
 
+      <div className={styles.game__controlls}>
+        <input
+          type="text"
+          className={styles.answer__input}
+          value={userAnswer}
+          onChange={(e) => handleAnswerChange(e)}
+        />
+        <button className={styles.answer__button} onClick={checkAnswer}>
+          Ответить
+        </button>
+      </div>
       {isTipOpen && (
         <div className={styles.tipOverlay}>
           <div className={styles.tipPopup}>

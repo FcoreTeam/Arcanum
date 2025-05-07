@@ -26,6 +26,7 @@ const Profile = () => {
   const [email, setEmail] = useState(userEmail || "");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [subscribe, setSubscribe] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -151,6 +152,11 @@ const Profile = () => {
             <img src={pencil} alt="" className={styles.edit__img} />
           )}
         </div>
+        {!subscribe ? (
+          <button className={styles.buy__btn}>Купить подписку</button>
+        ) : (
+          <></>
+        )}
 
         <p className={styles.games__title}>Список игр</p>
         <div className={styles.games__controller}>

@@ -5,179 +5,163 @@ import sendImage from "../../img/send.svg";
 import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
 import styles from "./support.module.scss";
-import ImageUploader from "./image-uploader/Image-uploader";
-import { chatApi, socket } from "../../api/api";
+import { chatApi } from "../../api/api";
 import { useUser } from "../../store/slices/hooks/useUser";
 
 const Support = () => {
   const { userId } = useUser();
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [images, setImages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isChatConfirmed, setIsChatConfirmed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const chatStateRef = useRef({ isConnected: false, isChatConfirmed: false, messages: [] });
+  const chatStateRef = useRef({
+    isConnected: false,
+    isChatConfirmed: false,
+    messages: [],
+  });
 
   useEffect(() => {
     if (!userId) return;
 
     const chatState = JSON.parse(localStorage.getItem("chat_state"));
-
-    if (chatState?.isChatConfirmed) {
+    if (chatState) {
       setIsConnected(chatState.isConnected);
-      setIsChatConfirmed(true);
+      setIsChatConfirmed(chatState.isChatConfirmed);
       setMessages(chatState.messages || []);
       setIsLoading(false);
     } else {
+      setIsLoading(true);
       chatApi.connect(userId);
     }
 
-    chatApi.onAuthSuccess(() => {
+    const handleAuthSuccess = () => {
       setIsConnected(true);
       setIsLoading(false);
-  
-      saveChatState({ isConnected: true, isChatConfirmed, messages });
-  
-      if (!isChatConfirmed) {
-        chatApi.startSearch();
-      }
-    });
+      saveChatState({
+        isConnected: true,
+        isChatConfirmed: false,
+        messages: chatStateRef.current.messages,
+      });
+    };
 
-    chatApi.onNewMessage((data) => {
-      if (data.text || data.photo) {
-        setMessages((prev) => {
-          const cleaned = prev.filter(msg => !msg.id?.toString().startsWith("temp"));
-          const updated = [
-            ...cleaned,
-            {
-              id: Date.now(),
-              message: data.text || "",
-              is_user_message: false,
-              attachments: data.photo ? [{ url: data.photo }] : [],
-            },
-          ];
-
-          saveChatState({
-            isConnected: true,
-            isChatConfirmed: true,
-            messages: updated,
-          });
-      
-
-          chatStateRef.current.messages = updated;
-          return updated;
+    const handleNewMessage = (data) => {
+      setMessages((prev) => {
+        const cleaned = prev.filter(
+          (msg) => !msg.id?.toString().startsWith("temp")
+        );
+        const newMessage = {
+          id: Date.now(),
+          message: data.text || "",
+          is_user_message: false,
+          attachments: data.photo ? [{ url: data.photo }] : [],
+        };
+        const updated = [...cleaned, newMessage];
+        saveChatState({
+          isConnected: true,
+          isChatConfirmed: true,
+          messages: updated,
         });
-      }
-    });
+        return updated;
+      });
+    };
 
-    chatApi.onChatFound(() => {
+    const handleChatFound = () => {
       setIsChatConfirmed(true);
-      chatStateRef.current.isChatConfirmed = true;
+      setIsSearching(false);
       saveChatState({
         isConnected: true,
         isChatConfirmed: true,
         messages: chatStateRef.current.messages,
       });
-    });
+    };
 
-    chatApi.onChatClosed(() => {
+    const handleChatClosed = () => {
       setIsConnected(false);
       setIsChatConfirmed(false);
+      setIsSearching(false);
       setMessages([]);
-      setImages([]);
-      chatStateRef.current = { isConnected: false, isChatConfirmed: false, messages: [] };
       localStorage.removeItem("chat_state");
-    });
+    };
+
+    chatApi.onAuthSuccess(handleAuthSuccess);
+    chatApi.onNewMessage(handleNewMessage);
+    chatApi.onChatFound(handleChatFound);
+    chatApi.onChatClosed(handleChatClosed);
 
     return () => {
       chatApi.offAll();
     };
   }, [userId]);
 
+  const handleStartSearch = () => {
+    if (!isConnected) return;
+    chatApi.startSearch();
+    setIsSearching(true);
+  };
+
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleInputChange = (event) => {
-    const value = event.target.value;
+  const handleInputChange = (e) => {
+    const value = e.target.value;
     setInputValue(value);
-    event.target.style.height = "auto";
-    event.target.style.height = `${Math.max(event.target.scrollHeight, 45)}px`;
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.max(e.target.scrollHeight, 45)}px`;
   };
 
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
     if (!file || !userId) return;
 
-    const previewUrl = URL.createObjectURL(file);
     const tempId = `temp-${Date.now()}`;
+    const previewUrl = URL.createObjectURL(file);
 
-    const tempMessage = {
-      id: tempId,
-      message: "",
-      is_user_message: true,
-      attachments: [{ url: previewUrl }],
-    };
-
-    setMessages((prev) => {
-      const updated = [...prev, tempMessage];
-      saveChatState({ isConnected, isChatConfirmed, messages: updated });
-      return updated;
-    });
-
-    const formData = new FormData();
-    formData.append("photo", file);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        message: "",
+        is_user_message: true,
+        attachments: [{ url: previewUrl }],
+      },
+    ]);
 
     try {
-      await chatApi.uploadChatPhoto(formData, socket.id);
+      const formData = new FormData();
+      formData.append("photo", file);
+      await chatApi.uploadChatPhoto(formData);
     } catch (err) {
-      console.error("Ошибка при отправке изображения:", err);
       setError("Ошибка при отправке изображения");
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
     }
-
-    event.target.value = null;
+    e.target.value = null;
   };
-
-  const handleDeleteImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const canSendMessage =
-    (!!inputValue.trim() || images.length > 0) && isConnected && isChatConfirmed;
 
   const sendMessage = () => {
-    if (!canSendMessage) return;
+    if (!inputValue.trim() || !isChatConfirmed) return;
 
     chatApi.sendMessage(inputValue);
-
-    const newMsg = {
-      id: Date.now(),
-      message: inputValue,
-      is_user_message: true,
-      attachments: images.map((img) => ({ url: img.fileLink })),
-    };
-
-    setMessages((prev) => {
-      const updated = [...prev, newMsg];
-      saveChatState({ isConnected, isChatConfirmed, messages: updated });
-      return updated;
-    });
-
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        message: inputValue,
+        is_user_message: true,
+        attachments: [],
+      },
+    ]);
     setInputValue("");
-    setImages([]);
-    setError(null);
-    if (textareaRef.current) textareaRef.current.style.height = "45px";
+    textareaRef.current.style.height = "45px";
   };
 
-  const saveChatState = ({ isConnected, isChatConfirmed, messages }) => {
-    const state = { isConnected, isChatConfirmed, messages };
+  const saveChatState = (state) => {
     chatStateRef.current = state;
     localStorage.setItem("chat_state", JSON.stringify(state));
   };
@@ -190,61 +174,68 @@ const Support = () => {
           <p className={styles.support__title}>
             {isLoading
               ? "Загрузка..."
-              : !isConnected
-              ? "Вы не подключены к чату"
-              : !isChatConfirmed
-              ? "Ожидание администратора..."
-              : "Агент поддержки"}
+              : isChatConfirmed
+              ? "Агент поддержки"
+              : isSearching
+              ? "Поиск администратора..."
+              : "Техническая поддержка"}
           </p>
         </div>
-        {error && <p className={styles.error}>{error}</p>}
+
+        {error && <div className={styles.error}>{error}</div>}
+
         <section className={styles.body__messages}>
-          {messages.map((item) => (
+          {messages.map((msg) => (
             <Message
-              key={item.id}
-              message={item.message}
-              isUserMessage={item.is_user_message}
-              images={item.attachments}
+              key={msg.id}
+              message={msg.message}
+              isUserMessage={msg.is_user_message}
+              images={msg.attachments}
             />
           ))}
           <div ref={messagesEndRef} />
         </section>
-        <div className={styles.image__wrap}>
-          {images.map((item, index) => (
-            <ImageUploader
-              key={index}
-              name={item.fileName}
-              size={item.fileSize}
-              preview={item.fileLink}
-              onDelete={() => handleDeleteImage(index)}
+
+        {!isChatConfirmed && isConnected && (
+          <div className={styles.searchContainer}>
+            <button
+              onClick={handleStartSearch}
+              disabled={isSearching}
+              className={styles.connectButton}
+            >
+              {isSearching ? "Поиск..." : "Начать чат с поддержкой"}
+            </button>
+          </div>
+        )}
+
+        {isConnected && isChatConfirmed && (
+          <div className={styles.support__footer}>
+            <Input
+              ref={textareaRef}
+              placeholder="Введите сообщение"
+              secondClass="chat__input"
+              isTextArea={true}
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyPress={(e) =>
+                e.key === "Enter" && !e.shiftKey && sendMessage()
+              }
             />
-          ))}
-        </div>
-        <div className={styles.support__footer}>
-          <Input
-            ref={textareaRef}
-            placeholder="Введите сообщение"
-            secondClass="chat__input"
-            isTextArea={true}
-            value={inputValue}
-            onChange={handleInputChange}
-          />
-          {canSendMessage && (
             <img
               src={sendImage}
-              alt=""
+              alt="Send"
               className={styles.send}
               onClick={sendMessage}
             />
-          )}
-          <Input
-            type="file"
-            secondClass="upload"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-          <img src={clipImage} alt="" className={styles.clip} />
-        </div>
+            <Input
+              type="file"
+              secondClass="upload"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            <img src={clipImage} alt="Attach" className={styles.clip} />
+          </div>
+        )}
       </div>
     </div>
   );

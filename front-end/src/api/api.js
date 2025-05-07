@@ -2,17 +2,22 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "http://31.172.67.162:8000/api",
+  baseURL: "https://zoltansgametma.ru/api/",
   timeout: 10000,
   headers: {
-    'Accept': 'application/json',
-  }
+    Accept: "application/json",
+  },
 });
 
 $api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.config.url, error.response?.status, error.response?.data);
+    console.error(
+      "API Error:",
+      error.config.url,
+      error.response?.status,
+      error.response?.data
+    );
     return Promise.reject(error);
   }
 );
@@ -22,18 +27,20 @@ export const api = {
   syncUser: () => $api.patch("/auth/me/sync"),
   updateUser: (data) => $api.patch("/auth/me/update", data),
 
-  getGames: (params = { until_today: false, limit: 2 }) => $api.get("/games/", { params }),
+  getGames: (params = { until_today: false, limit: 2 }) =>
+    $api.get("/games/", { params }),
   getGame: (gameId) => $api.get(`/games/${gameId}`),
   getDemoGames: () => $api.get(`/games/demo`),
   getDemoGame: (demoGameId) => $api.get(`/games/demo/${demoGameId}`),
   getLeaders: (gameId) => $api.get(`/games/${gameId}/leaderboard`),
-  sendAnswer: (data) => $api.post(`/games/${data.game_id}/answer`, {
-    answer: data.answer,
-    telegram_id: data.telegram_id
-  }),
+  sendAnswer: (data) =>
+    $api.post(`/games/${data.game_id}/answer`, {
+      answer: data.answer,
+      telegram_id: data.telegram_id,
+    }),
 };
 
-export const socket = io("ws://31.172.67.162:8000/chat", {
+export const socket = io("wss://zoltansgametma.ru/chat", {
   path: "/socket.io",
   autoConnect: false,
 });
@@ -42,6 +49,7 @@ export const chatApi = {
   connect: (userId) => {
     socket.emit("auth", { user_id: userId });
     socket.connect();
+    console.log("connected");
   },
 
   disconnect: () => {
