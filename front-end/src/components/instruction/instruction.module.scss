@@ -9,6 +9,7 @@
     background: #030404;
     padding-top: 50px;
     padding-bottom: 90px;
+    font-family: 'Playfair Display', serif;
 
     .blur__image,
     .blur__image__sec {
@@ -28,7 +29,7 @@
     .body {
         overflow-y: scroll;
         overflow-x: hidden;
-        height: 90vh;
+        height: 100vh;
         z-index: 4;
 
         .instruction__title {
@@ -101,7 +102,8 @@
             }
 
             &.active {
-                max-height: 1000px;
+                max-height: none;
+                height: auto;
                 margin-top: 20px;
                 opacity: 1;
             }
@@ -115,7 +117,8 @@
             opacity: 0;
 
             &.active {
-                max-height: 1000px; // Максимальная высота для анимации
+                max-height: none;
+                height: auto;
                 opacity: 1;
             }
         }

@@ -9,6 +9,7 @@
   background: #030404;
   padding-top: 50px;
   padding-bottom: 90px;
+  font-family: 'Playfair Display', serif;
 
   .leads__body {
     border: 2px solid #ffffff25;
@@ -29,11 +30,12 @@
         width: 100%;
         display: flex;
         justify-content: space-between;
+        padding: 5px;
 
         .table__place {
           color: #ffffff7a;
           text-align: center;
-          font-family: "mont";
+          font-family: 'Playfair Display', serif;
           font-size: 13px;
           width: fit-content;
 

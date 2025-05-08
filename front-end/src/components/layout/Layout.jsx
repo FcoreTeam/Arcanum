@@ -6,6 +6,7 @@ import { Outlet } from "react-router-dom";
 import TipPopup from "../@popups/tip-popup/Tip-popup";
 
 import styles from "./layout.module.scss";
+import RulesPopup from "../@popups/rules-popup/Rules-popup";
 
 const Layout = () => {
   const locate = useLocation();
@@ -23,6 +24,9 @@ const Layout = () => {
         {locate.pathname !== "/intro" ? <Navigation /> : ""}
       </div>
       {isOpen && popupType === "tip" && <TipPopup />}
+      {isOpen && popupType === "rules" && !localStorage.getItem("before") && (
+        <RulesPopup />
+      )}
     </div>
   );
 };

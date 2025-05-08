@@ -4,94 +4,166 @@ import Input from "../@ui/Input/Input";
 import sendImage from "../../img/send.svg";
 import clipImage from "../../img/clip.svg";
 import supportAvatar from "../../img/support.png";
-
 import styles from "./support.module.scss";
-import ImageUploader from "./image-uploader/Image-uploader";
+import { chatApi } from "../../api/api";
+import { useUser } from "../../store/slices/hooks/useUser";
 
 const Support = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      isUserMessage: false,
-      message: "Текст сообщения",
-    },
-    {
-      id: 2,
-      isUserMessage: true,
-      message: "Здравствуйте!",
-    },
-  ]);
+  const { userId } = useUser();
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [images, setImages] = useState([]); // Состояние для хранения загруженных изображений
+  const [isConnected, setIsConnected] = useState(false);
+  const [isChatConfirmed, setIsChatConfirmed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null); // Реф для input type="file"
 
-  // Автоматическая прокрутка вниз при изменении сообщений
+  const chatStateRef = useRef({
+    isConnected: false,
+    isChatConfirmed: false,
+    messages: [],
+  });
+
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (!userId) return;
+
+    const chatState = JSON.parse(localStorage.getItem("chat_state"));
+    if (chatState) {
+      setIsConnected(chatState.isConnected);
+      setIsChatConfirmed(chatState.isChatConfirmed);
+      setMessages(chatState.messages || []);
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+      chatApi.connect(userId);
     }
-  }, [messages]);
 
-  // Автоматическое изменение высоты textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "45px";
-      const currentScrollHeight = textareaRef.current.scrollHeight;
-      if (currentScrollHeight > 45) {
-        textareaRef.current.style.height = `${currentScrollHeight}px`;
-      }
-    }
-  }, []);
-
-  // Обработчик изменения текста в textarea
-  const handleInputChange = (event) => {
-    const { value } = event.target;
-    setInputValue(value);
-
-    event.target.style.height = "auto";
-    const newHeight = Math.max(event.target.scrollHeight, 45);
-    event.target.style.height = `${newHeight}px`;
-  };
-
-  // Обработчик загрузки изображений
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
-      setImages((prevImages) => [
-        ...prevImages,
-        {
-          fileName: file.name,
-          fileLink: fileURL,
-          fileSize: (file.size / 1024).toFixed(2),
-        },
-      ]);
-
-      event.target.value = null;
-    }
-  };
-
-  const canSendMessage = !!inputValue.length || !!images.length;
-
-  const sendMessage = (text) => {
-    if (!canSendMessage) return;
-
-    const newMessage = {
-      id: messages.length + 1,
-      isUserMessage: true,
-      message: text,
-      images: [...images],
+    const handleAuthSuccess = () => {
+      setIsConnected(true);
+      setIsLoading(false);
+      saveChatState({
+        isConnected: true,
+        isChatConfirmed: false,
+        messages: chatStateRef.current.messages,
+      });
     };
 
-    setMessages([...messages, newMessage]);
-    setInputValue("");
-    setImages([]);
+    const handleNewMessage = (data) => {
+      setMessages((prev) => {
+        const cleaned = prev.filter(
+          (msg) => !msg.id?.toString().startsWith("temp")
+        );
+        const newMessage = {
+          id: Date.now(),
+          message: data.text || "",
+          is_user_message: false,
+          attachments: data.photo ? [{ url: data.photo }] : [],
+        };
+        const updated = [...cleaned, newMessage];
+        saveChatState({
+          isConnected: true,
+          isChatConfirmed: true,
+          messages: updated,
+        });
+        return updated;
+      });
+    };
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "45px";
+    const handleChatFound = () => {
+      setIsChatConfirmed(true);
+      setIsSearching(false);
+      saveChatState({
+        isConnected: true,
+        isChatConfirmed: true,
+        messages: chatStateRef.current.messages,
+      });
+    };
+
+    const handleChatClosed = () => {
+      setIsConnected(false);
+      setIsChatConfirmed(false);
+      setIsSearching(false);
+      setMessages([]);
+      localStorage.removeItem("chat_state");
+    };
+
+    chatApi.onAuthSuccess(handleAuthSuccess);
+    chatApi.onNewMessage(handleNewMessage);
+    chatApi.onChatFound(handleChatFound);
+    chatApi.onChatClosed(handleChatClosed);
+
+    return () => {
+      chatApi.offAll();
+    };
+  }, [userId]);
+
+  const handleStartSearch = () => {
+    if (!isConnected) return;
+    chatApi.startSearch();
+    setIsSearching(true);
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.max(e.target.scrollHeight, 45)}px`;
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !userId) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const previewUrl = URL.createObjectURL(file);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        message: "",
+        is_user_message: true,
+        attachments: [{ url: previewUrl }],
+      },
+    ]);
+
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+      await chatApi.uploadChatPhoto(formData);
+    } catch (err) {
+      setError("Ошибка при отправке изображения");
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
     }
+    e.target.value = null;
+  };
+
+  const sendMessage = () => {
+    if (!inputValue.trim() || !isChatConfirmed) return;
+
+    chatApi.sendMessage(inputValue);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        message: inputValue,
+        is_user_message: true,
+        attachments: [],
+      },
+    ]);
+    setInputValue("");
+    textareaRef.current.style.height = "45px";
+  };
+
+  const saveChatState = (state) => {
+    chatStateRef.current = state;
+    localStorage.setItem("chat_state", JSON.stringify(state));
   };
 
   return (
@@ -99,55 +171,71 @@ const Support = () => {
       <div className={styles.support__body}>
         <div className={styles.support__header}>
           <img src={supportAvatar} alt="" className={styles.header__avatar} />
-          <p className={styles.support__title}>Агент поддержки</p>
+          <p className={styles.support__title}>
+            {isLoading
+              ? "Загрузка..."
+              : isChatConfirmed
+              ? "Агент поддержки"
+              : isSearching
+              ? "Поиск администратора..."
+              : "Техническая поддержка"}
+          </p>
         </div>
+
+        {error && <div className={styles.error}>{error}</div>}
+
         <section className={styles.body__messages}>
-          {messages.map((item) => (
+          {messages.map((msg) => (
             <Message
-              key={item.id}
-              message={item.message}
-              isUserMessage={item.isUserMessage}
-              images={item.images}
+              key={msg.id}
+              message={msg.message}
+              isUserMessage={msg.is_user_message}
+              images={msg.attachments}
             />
           ))}
           <div ref={messagesEndRef} />
         </section>
-        <div className={styles.image__wrap}>
-          {images.map((item, index) => (
-            <ImageUploader
-              key={index}
-              name={item.fileName}
-              size={item.fileSize}
-              preview={item.fileLink}
-            />
-          ))}
-        </div>
 
-        <div className={styles.support__footer}>
-          <Input
-            ref={textareaRef}
-            placeholder="Введите сообщение"
-            secondClass="chat__input"
-            isTextArea={true}
-            value={inputValue}
-            onChange={handleInputChange}
-          />
-          {canSendMessage && (
+        {!isChatConfirmed && isConnected && (
+          <div className={styles.searchContainer}>
+            <button
+              onClick={handleStartSearch}
+              disabled={isSearching}
+              className={styles.connectButton}
+            >
+              {isSearching ? "Поиск..." : "Начать чат с поддержкой"}
+            </button>
+          </div>
+        )}
+
+        {isConnected && isChatConfirmed && (
+          <div className={styles.support__footer}>
+            <Input
+              ref={textareaRef}
+              placeholder="Введите сообщение"
+              secondClass="chat__input"
+              isTextArea={true}
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyPress={(e) =>
+                e.key === "Enter" && !e.shiftKey && sendMessage()
+              }
+            />
             <img
               src={sendImage}
-              alt=""
+              alt="Send"
               className={styles.send}
-              onClick={() => sendMessage(inputValue)}
+              onClick={sendMessage}
             />
-          )}
-          <Input
-            type="file"
-            secondClass="upload"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-          <img src={clipImage} alt="" className={styles.clip} />
-        </div>
+            <Input
+              type="file"
+              secondClass="upload"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            <img src={clipImage} alt="Attach" className={styles.clip} />
+          </div>
+        )}
       </div>
     </div>
   );

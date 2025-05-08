@@ -1,46 +1,33 @@
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useState } from "react";
 import clsx from "clsx";
 
 import styles from "./game-line.module.scss";
 
-const INITIAL_GAMES = [
-  { gameName: "Игра 1", isActive: false },
-  { gameName: "Игра 2", isActive: false },
-  { gameName: "Игра 3", isActive: false },
-  { gameName: "Игра 4", isActive: false },
-  { gameName: "Игра 5", isActive: true },
-]
-
-const GameLine = () => {
-  const [gameNav, setGameNav] = useState(INITIAL_GAMES);
-
-  const handleSlideClick = (index) => {
-    const updatedGameNav = gameNav.map((item, i) => ({
-      ...item,
-      isActive: i === index,
-    }));
-    setGameNav(updatedGameNav);
-  };
+const GameLine = ({ games, onGameSelect, selectedGameId }) => {
+  if (!games || games.length === 0) {
+    return <div className={styles.empty}>Нет доступных игр</div>;
+  }
 
   return (
     <Swiper
       spaceBetween={20}
       slidesPerView="2"
+
       loop={true}
       scrollbar={{ draggable: true }}
-      onSwiper={(swiper) => console.log(swiper)}
       className={styles.game__swiper}
     >
-      {[...gameNav].reverse().map((item, index) => (
+      {games.map((game) => (
         <SwiperSlide
-          key={index}
-          className={clsx(styles.game, item.isActive ? styles.active : "")}
-          onClick={() => handleSlideClick(gameNav.length - 1 - index)}
+          key={game.id}
+          className={clsx(styles.game, {
+            [styles.selected]: game.id === selectedGameId
+          })}
+          onClick={() => onGameSelect(game.id)}
         >
-          {item.gameName}
+          {game.name}
         </SwiperSlide>
       ))}
     </Swiper>

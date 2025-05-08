@@ -1,48 +1,99 @@
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
 import pencil from "../../img/pencil.svg";
-import Games from "../main/games/Games";
-import { api } from "../../api/api";
+
 import styles from "./profile.module.scss";
+import userDefault from "../../img/userdef.svg";
+import { useUser } from "../../store/slices/hooks/useUser";
+import { api } from "../../api/api";
+import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
 
 const Profile = () => {
-  const dispatch = useDispatch();
-  const { userAvatar, userName } = useSelector((state) => state.user);
+  const {
+    userName,
+    userAvatar,
+    userId,
+    setUser,
+    userPhone,
+    userEmail,
+    userGames,
+    ...user
+  } = useUser();
+
   const [filter, setFilter] = useState("not_passed");
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState(userPhone || "");
+  const [email, setEmail] = useState(userEmail || "");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [subscribe, setSubscribe] = useState(false);
 
   useEffect(() => {
-    api
-      .getUserInfo()
-      .then(({ data }) => {
-        setPhone(data.userPhone);
-        setEmail(data.userEmail);
-        dispatch({
-          type: "SET_USER",
-          payload: data,
-        });
-      })
-      .catch((err) => console.error("Ошибка загрузки пользователя:", err));
-  }, [dispatch]);
+    const fetchUserData = async () => {
+      try {
+        const userId = getUserIdFromAddress();
+        if (!userId) {
+          return;
+        }
+
+        const response = await api.getCurrentUser(userId);
+        if (response.data) {
+          setUser({
+            ...user,
+            userPhone: response.data.phone || null,
+            userEmail: response.data.email || null,
+            userAvatar: response.data.avatar_url || null,
+            userName:
+              response.data.first_name ||
+              response.data.username ||
+              "Пользователь",
+          });
+          setPhone(response.data.phone || "");
+          setEmail(response.data.email || "");
+        }
+      } catch (err) {
+        console.error("Ошибка при загрузке данных пользователя:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      await api.setSettings({ userPhone: phone, userEmail: email });
-      dispatch({
-        type: "UPDATE_USER",
-        payload: { userPhone: phone, userEmail: email },
+      if (!userId) {
+        console.error("user_id не найден в состоянии");
+        return;
+      }
+
+      const updateData = {
+        user_id: userId,
+        phone: phone || null,
+        email: email || null,
+      };
+
+      await api.updateUser(updateData);
+
+      setUser({
+        ...user,
+        userPhone: phone || null,
+        userEmail: email || null,
       });
+
       setIsEditing(false);
     } catch (err) {
-      console.error("Ошибка сохранения настроек:", err);
+      setError("Ошибка сохранения настроек");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
+
     if (/^\d*$/.test(value) && value.length <= 11) {
       setPhone(value);
     }
@@ -57,9 +108,7 @@ const Profile = () => {
             !userAvatar && styles.user__def
           )}
         >
-          {userAvatar && (
-            <img src={userAvatar} alt="" className={styles.user__img} />
-          )}
+          <img src={userDefault} alt="" className={styles.profile__avatar} />
         </div>
         <p className={styles.user__name}>{userName}</p>
 
@@ -85,8 +134,12 @@ const Profile = () => {
           </>
         ) : (
           <>
-            <div className={styles.user__info}>{phone}</div>
-            <div className={styles.user__info}>{email}</div>
+            <div className={styles.user__info}>
+              {phone || "Номер не указан"}
+            </div>
+            <div className={styles.user__info}>
+              {email || "Email не указан"}
+            </div>
           </>
         )}
 
@@ -99,6 +152,11 @@ const Profile = () => {
             <img src={pencil} alt="" className={styles.edit__img} />
           )}
         </div>
+        {!subscribe ? (
+          <button className={styles.buy__btn}>Купить подписку</button>
+        ) : (
+          <></>
+        )}
 
         <p className={styles.games__title}>Список игр</p>
         <div className={styles.games__controller}>
@@ -121,7 +179,9 @@ const Profile = () => {
             Пройденные
           </div>
         </div>
-        <Games category={filter} />
+        <div className={styles.userGames}>
+          {userGames || "Нет купленных игр"}
+        </div>
       </div>
     </div>
   );
