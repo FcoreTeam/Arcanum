@@ -1,15 +1,12 @@
-from fastapi import APIRouter, Header, HTTPException, Path, Query, Body
+from fastapi import APIRouter, HTTPException, Path, Query, Body
 from .models import Game, GameResult, DemoGame, Stage
 from auth.models import User
-from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 from typing import List, Annotated
-from tortoise import Tortoise
 from .schemas import BaseGame, FullGame, AnswerInBase, AnswerOut, GameResultOut, BaseDemo, FullDemo, FullStage, UUID4, AnswerIn
 from .services import build_game_response, build_full_game_response, build_demo_game_response
 from datetime import datetime
 
 import asyncio
-import logging
 
 games_api_router = APIRouter(prefix="/games")
 
@@ -68,7 +65,8 @@ async def answer(
     game = await Game.get_or_none(id=game_id).prefetch_related("users")
     if not game:
         raise HTTPException(status_code=404, detail="Game doesn't exists")
-    if user not in game.users: raise HTTPException(status_code=403, detail="The user did not buy this game")
+    if user not in game.users and user.subscription.expire < datetime.now(): 
+        raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
         result = await GameResult.get_or_none(user=user, game=game)
         if result:

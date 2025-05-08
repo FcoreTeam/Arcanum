@@ -5,9 +5,7 @@ from datetime import datetime
 
 from minio import get_minio_instance, VIDEOS_BUCKET, PHOTOS_BUCKET
 
-from typing import Optional
 from minio import VIDEOS_BUCKET, PHOTOS_BUCKET, get_minio_instance
-from fastapi import HTTPException
 
 class Game(Model):
     id = fields.UUIDField(default=uuid4, primary_key=True)

@@ -283,7 +283,7 @@ async def chat_message(message: Message, state: FSMContext):
 async def check_game(message: Message, command: CommandObject):
     game_id = command.args
     if not game_id:
-        return await message.answer("Укажите уникальный индетификатор игры: /checkgame :game_id:")
+        return await message.answer("Укажите уникальный индетификатор игры: /checkgame :gameid:")
     game = await Game.get_or_none(id=game_id).prefetch_related("results", "owner")
     if not game:
         return await message.answer("Такой игры не существует.")
