@@ -1,13 +1,12 @@
 from aiogram import Router, Bot, F
-from aiogram.methods import UnbanChatSenderChat
-from aiogram.types import Message, WebAppInfo, LabeledPrice, PreCheckoutQuery, message
-from aiogram.filters.command import CommandStart, CommandObject
+from aiogram.types import Message, WebAppInfo, LabeledPrice, PreCheckoutQuery
+from aiogram.filters.command import CommandStart, CommandObject, Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder 
 
 from auth.models import User, Promo
 from games.models import Game
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from config import TelegramSettings
 
@@ -43,21 +42,27 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         prices=prices
     )
 
-async def enter_promo(message: Message, user: User):
-    promo = await Promo.get_or_none(code=message.text)
+async def enter_promo(message: Message, user: User, command: CommandObject):
+    code = command.args
+    if not code:
+        return await message.answer("Введите промокод!")
+    promo = await Promo.get_or_none(code=code)
+    await user.fetch_related("promos_used")
     if not promo: return await message.answer("Не существует!")
-    if promo in user.promos_used: await message.answer("Вы уже использовали этот промокод.")
+    if promo in await user.promos.all(): return await message.answer("Вы уже использовали этот промокод.")
+    if promo in await user.promos_used.all(): return await message.answer("Вы уже использовали этот промокод.")
     await user.promos.add(promo)
     await message.answer("Вы успешно активировали промокод!")
 
 async def buy_subscription(message: Message, user: User):
-    if user.subscription.expire >= datetime.now():
-        return await message.answer("Вы уже имеете подписку")
+    subscription = await user.subscription.first()
+    if subscription.expire >= datetime.now(timezone.utc):
+        return await message.answer("Вы уже имеете подписку!")
     prices = [LabeledPrice(label="Подписка", amount=100000)]
     await message.answer_invoice(
         title=f"Покупка подписки на 7 дней",
         description=f"Покупка подписки на 7 дней",
-        payload=f"buy-subscription",
+        payload="buy-subscription",
         provider_token="381764678:TEST:121786",
         currency="RUB",
         prices=prices
@@ -67,11 +72,12 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: 
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 async def process_successfull_payment_subscription(message: Message, user: User):
-    user.subscription.expire += timedelta(days=7)
-    await user.save()
+    subscription = await user.subscription.first()
+    subscription.expire += timedelta(days=7)
+    await subscription.save()
     builder = InlineKeyboardBuilder()
     builder.button(text="Открыть и начать играть! 🚀", web_app=WebAppInfo(url=TelegramSettings.app_url))
-    await message.answer("✅ Вы успешно купили игру! Зайдите в игру!", reply_markup=builder.as_markup())
+    await message.answer("✅ Вы успешно оформили подписку! Зайдите в игру!", reply_markup=builder.as_markup())
 
 async def process_successfull_payment(message: Message, user: User):
     game_id = message.successful_payment.invoice_payload.split(":")[-1]
@@ -87,12 +93,20 @@ def register_user_handlers(router: Router):
     router.message.register(
         process_successfull_payment,
         F.successful_payment, 
-        F.successful_payment.payload.startswith("buy-game")
+        F.successful_payment.invoice_payload.startswith("buy-game")
     )
     router.message.register(
         process_successfull_payment_subscription,
         F.successful_payment, 
-        F.successful_payment.payload.startswith("buy-susbcription")
+        F.successful_payment.invoice_payload.startswith("buy-subscription")
+    )
+    router.message.register(
+        buy_subscription,
+        Command("sub")
+    )
+    router.message.register(
+        enter_promo,
+        Command("promo")
     )
     router.pre_checkout_query.register(process_pre_checkout_query)
 

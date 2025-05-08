@@ -1,9 +1,10 @@
-from aiogram.types import Message, CallbackQuery, InlineQuery
+from aiogram.types import Message, CallbackQuery, message
+from typing import cast
 
 from aiogram import Router, F, Bot
 
-from ..filters.callback_data import YesNoAction, TipAction, ChatAction, StagePosition
-from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb, demo_game_kb, stage_position_choose, DEMO_GAME_STAGE_ADD, CANCEL
+from ..filters.callback_data import YesNoAction, TipAction, ChatAction
+from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb, CANCEL
 
 from aiogram import Router, F, Bot
 
@@ -11,7 +12,7 @@ from ..filters.callback_data import YesNoAction, TipAction, ChatAction
 from ..kbs.games import is_test_kb, cancel as game_create_cancel, tip_kb
 from aiogram.filters.command import Command
 
-from games.models import Game, GameTip, DemoGame, Stage
+from games.models import Game, GameTip
 from aiogram.filters.command import CommandObject
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
@@ -19,8 +20,6 @@ from aiogram.fsm.context import FSMContext
 from .commands.create_demo import register_create_demo_command
 
 from auth.models import User
-
-from config import TelegramSettings
 
 from minio import PHOTOS_BUCKET, VIDEOS_BUCKET
 from ..mtproto import download_media_to_minio

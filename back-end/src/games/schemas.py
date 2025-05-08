@@ -38,7 +38,6 @@ class BaseGame(BaseORMModel):
     date: datetime
     price: Decimal
     photo_url: HttpUrl | None = None
-    price: int
     photo_url: str | None = None
 
 class FullGame(BaseGame):

@@ -20,8 +20,9 @@ GetUserIdDeps = Annotated[WebAppUser, Depends(get_user_id)]
 
 @auth_api_router.get("/me", response_model=UserResponse)
 async def read_user(user_id: GetUserIdDeps):
-    return await User.get(telegram_id=user_id).prefetch_related("bougth_games")
-    
+    user = await User.get(telegram_id=user_id).prefetch_related("bougth_games")
+    return UserResponse(**user.__dict__, bougth_games=user.bougth_games, avatar_url=await user.get_avatar_url())
+
 #@auth_api_router.patch("/me/sync", response_model=UserResponse)
 #async def sync_user(webapp_user: WebAppUserDep):
 #    await User.filter(telegram_id=webapp_user.id).update(
@@ -32,7 +33,7 @@ async def read_user(user_id: GetUserIdDeps):
 #    return await User.get(telegram_id=webapp_user.id)
 
 @auth_api_router.post("/chat/photo")
-async def send_chat_photo(\
+async def send_chat_photo(
     sid: Annotated[str, Query(description="Id user from socket.io")],
     photo: UploadFile
 ):
@@ -48,6 +49,6 @@ async def update_user(payload: UserUpdateRequest):
     await queryset.update(email=payload.email)
     if payload.phone:
         await queryset.update(phone=payload.phone)
-    return await User.get(telegram_id=payload.user_id)
+    return await User.get(telegram_id=payload.user_id).prefetch_related("bougth_games")
 
 
