@@ -36,6 +36,8 @@ class _Settings(BaseSettings):
     pgsql_password: str
     pgsql_port: int
 
+    provider_token: str
+
 class _TelegramSettings(_Settings):
     """
     Telegram tokens and api's secrets for mtproto

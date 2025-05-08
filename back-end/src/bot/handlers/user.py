@@ -37,7 +37,7 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         title=f"Покупка игры: {game.name}",
         description=f"Описание игры: {game.description}",
         payload=f"buy-game:{game.id}",
-        provider_token="381764678:TEST:121786",
+        provider_token=TelegramSettings.provider_token,
         currency="RUB",
         prices=prices
     )
@@ -63,7 +63,7 @@ async def buy_subscription(message: Message, user: User):
         title=f"Покупка подписки на 7 дней",
         description=f"Покупка подписки на 7 дней",
         payload="buy-subscription",
-        provider_token="381764678:TEST:121786",
+        provider_token=TelegramSettings.provider_token,
         currency="RUB",
         prices=prices
     )

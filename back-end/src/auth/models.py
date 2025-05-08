@@ -1,3 +1,4 @@
+from types import NoneType
 from typing import Self
 from tortoise import Model, fields
 from aiogram.types import User as TelegramUser, file
@@ -10,6 +11,8 @@ from bot.bot import bot
 from uuid import uuid4
 
 from minio import get_minio_instance, PHOTOS_BUCKET
+
+import logging
 
 class Promo(Model):
     id = fields.UUIDField(default=uuid4, primary_key=True)
@@ -78,7 +81,8 @@ class User(Model):
                 "first_name":telegram_user.first_name,
             }
         )
-        if not hasattr(user[0], "subscription"):
+        logging.critical(user[0].subscription.exists())
+        if user[0].subscription.exists():
             await Subscription.create(user=user[0])
         return user[0]
 
