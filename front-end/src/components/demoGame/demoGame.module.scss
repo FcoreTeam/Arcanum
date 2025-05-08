@@ -1,4 +1,4 @@
-.demogame {
+.demo__game {
   max-width: 100%;
   width: 100vw;
   height: 100vh;
@@ -12,30 +12,6 @@
 
   .game__title {
     color: #fff;
-  }
-
-
-  &__blur {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    z-index: 2;
-  }
-
-  &__title {
-    color: #fff;
-    font-size: 20px;
-    font-family: "mont";
-    margin: 0;
-    z-index: 1;
-  }
-
-  &__image {
-    width: 200px;
   }
 
   .blur__image,
@@ -169,59 +145,4 @@
     font-size: 16px;
     border: 2px solid #ffbc5f;
   }
-}
-
-.tipContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
-  width: 100%;
-  z-index: 999;
-}
-
-.hint {
-  background: linear-gradient(to top, #1c1d20, #1c1d20) padding-box, linear-gradient(to bottom, rgba(255, 188, 95, 0.87), rgba(153, 113, 57, 0.47)) border-box;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  max-width: 90%;
-  text-align: center;
-  font-size: 16px;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 1s ease, transform 1s ease;
-  pointer-events: none;
-  max-height: 0;
-  overflow: hidden;
-  font-family: 'Playfair Display', serif;
-}
-
-.hintToggle {
-  background: linear-gradient(to top, #1c1d20, #1c1d20) padding-box, linear-gradient(to bottom, rgba(255, 188, 95, 0.87), rgba(153, 113, 57, 0.47)) border-box;
-  color: #fff;
-  border: 1px solid transparent;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  font-family: 'Playfair Display', serif;
-  width: 50%;
-}
-
-.hintVisible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  max-height: 300px;
-}
-
-.hintHidden {
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  max-height: 0;
 }
