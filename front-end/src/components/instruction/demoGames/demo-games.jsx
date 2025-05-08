@@ -1,21 +1,19 @@
-import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { useState } from "react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/scss";
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
 
 import styles from "./demo-games.module.scss";
-import { api } from "../../../api/api";
 import Button from "../../@ui/Button/Button";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openPopup } from "../../../store/slices/popupSlice";
+import { setOpen } from "../../../store/slices/demoSlice";
 
 const DemoGames = () => {
   const dispatch = useDispatch();
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { games } = useSelector((state) => state.demo);
 
   const handleTipClick = (game) => {
     dispatch(
@@ -26,27 +24,6 @@ const DemoGames = () => {
       })
     );
   };
-
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const res = await api.getDemoGames();
-        setGames(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error("Ошибка загрузки демо-игр", err);
-        setError("Ошибка при загрузке демо-игр");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGames();
-  }, []);
-
-  if (loading)
-    return <div className={styles.loading}>Загрузка демо-игр...</div>;
-  if (error) return <div className={styles.error}>{error}</div>;
-  if (games.length === 0) return <div className={styles.empty}></div>;
 
   return (
     <Swiper
@@ -65,21 +42,20 @@ const DemoGames = () => {
         <SwiperSlide className={styles.slide} key={game.id}>
           <div className={styles.game}>
             <h3 className={styles.game__name}>{game.name}</h3>
-            {game.photo_url && (
-              <img
-                src={game.photo_url}
-                className={styles.game__preview}
-                alt={game.name}
-                width="100%"
-                height="auto"
-                loading="lazy"
-              />
-            )}
+            <img
+              src={game.preview}
+              className={styles.game__preview}
+              alt={game.name}
+              width="100%"
+              height="auto"
+              loading="lazy"
+            />
             <div className={styles.buttons}>
               <Button
                 buttonClass="buy__btn"
                 buttonContent="Играть"
-                to={`/demo-game/${game.id}`}
+                onClick={() => dispatch(setOpen(true))}
+                to="/demo-game"
               >
                 Играть
               </Button>

@@ -13,7 +13,7 @@ import Intro from "../intro/Intro";
 import Leads from "../leads/Leads";
 import Instruction from "../instruction/Instruction";
 import Game from "../game/Game";
-import DemoGame from "../demoGame/demoGame"
+import DemoGame from "../demoGame/demoGame";
 
 const App = () => {
   const { name, video } = useSelector((state) => state.game);
@@ -26,7 +26,7 @@ const App = () => {
     userPhone,
     userEmail,
     UserPts,
-    ...user 
+    ...user
   } = useUser();
 
   useEffect(() => {
@@ -44,11 +44,14 @@ const App = () => {
           setUser({
             ...user,
             userAvatar: response.data.avatar_url,
-            userName: response.data.first_name || response.data.username || "Пользователь",
+            userName:
+              response.data.first_name ||
+              response.data.username ||
+              "Пользователь",
             userPhone: response.data.phone,
             userEmail: response.data.email,
             userPts: response.data.balance,
-            userId: userId
+            userId: userId,
           });
 
           sessionStorage.setItem("user_id", userId);
@@ -83,7 +86,7 @@ const App = () => {
         <Route path="/game" element={<Game name={name} video={video} />} />
         <Route path="/lead/:gameId" element={<Leads />} />
         <Route path="/info" element={<Instruction />} />
-        <Route path="/demo-game/:demoGameId" element={<DemoGame />} />
+        <Route path="/demo-game" element={<DemoGame />} />
         <Route path="/main" element={<Main />} />
       </Route>
     </Routes>
