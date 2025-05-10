@@ -8,6 +8,7 @@ const userState = {
   userEmail: "",
   userGames: [],
   userId: "",
+  subscription: null,
 };
 
 const userSlice = createSlice({
