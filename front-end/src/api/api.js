@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "https://zoltansgametma.ru/api/",
+  baseURL: "https://zoltansgametma.ru/api",
   timeout: 10000,
   headers: {
     Accept: "application/json",
@@ -40,7 +40,7 @@ export const api = {
     }),
 };
 
-export const socket = io("wss://zoltansgametma.ru/chat", {
+export const socket = io("ws://31.172.67.162:8000/chat", {
   path: "/socket.io",
   autoConnect: false,
 });
@@ -49,7 +49,6 @@ export const chatApi = {
   connect: (userId) => {
     socket.emit("auth", { user_id: userId });
     socket.connect();
-    console.log("connected");
   },
 
   disconnect: () => {
@@ -65,11 +64,11 @@ export const chatApi = {
   },
 
   sendMessage: (text) => {
-    socket.emit("send_message", { text });
+    socket.emit("sent-message", { text });
   },
 
   closeChat: () => {
-    socket.emit("chat_close");
+    socket.emit("chat-close");
   },
 
   onAuthSuccess: (callback) => {

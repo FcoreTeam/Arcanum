@@ -37,7 +37,7 @@ const Profile = () => {
         }
 
         const response = await api.getCurrentUser(userId);
-        console.log(response.data);
+        console.log("API Response:", response.data.subscription);
         if (response.data) {
           setUser({
             ...user,
@@ -48,7 +48,7 @@ const Profile = () => {
               response.data.first_name ||
               response.data.username ||
               "Пользователь",
-            subscription: response.data.subscription,
+            subscription: response.data.subscription || null,
           });
           setPhone(response.data.phone || "");
           setEmail(response.data.email || "");
@@ -101,8 +101,11 @@ const Profile = () => {
     }
   };
 
-  console.log(subscription);
-  const unixTime = Math.floor(new Date(subscription.expire).getTime());
+  console.log(subscription)
+
+  const unixTime = subscription
+    ? Math.floor(new Date(subscription.expire).getTime())
+    : 0;
   const currentDate = new Date().getTime();
 
   return (
@@ -158,13 +161,11 @@ const Profile = () => {
             <img src={pencil} alt="" className={styles.edit__img} />
           )}
         </div>
-        {unixTime < currentDate ? (
+        {subscription && unixTime < currentDate ? (
           <a href="https://t.me/Zoltansgame_bot" className={styles.buy__btn}>
             Купить подписку
           </a>
-        ) : (
-          <></>
-        )}
+        ) : null}
 
         <p className={styles.games__title}>Список игр</p>
         <div className={styles.games__controller}>
