@@ -66,7 +66,7 @@ const Support = () => {
             (msg) => !msg.id?.toString().startsWith("temp")
           );
           const updated = [
-            ...cleaned,
+            ...prev,
             {
               id: Date.now(),
               message: data.text || "",
