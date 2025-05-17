@@ -40,7 +40,7 @@ export const api = {
     }),
 };
 
-export const socket = io("wss://zoltansgametma.ru/chat", {
+export const socket = io("ws://31.172.67.162:8000/chat", {
   path: "/socket.io",
   autoConnect: false,
 });
