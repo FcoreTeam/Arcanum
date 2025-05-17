@@ -42,6 +42,15 @@ class ChatNamespace(AsyncNamespace):
         self.bot = bot
         super().__init__(*args, **kwargs)
 
+    async def disconnect_by_id(self, admin_id: int) -> None:
+        await self.bot.send_message(chat_id=admin_id, text="🦺 Юзер закрыл текущий чат!")
+        state = await self.dp.fsm.get_context(
+            bot=self.bot,
+            chat_id=admin_id,
+            user_id=admin_id,
+        )
+        await state.clear()
+
     async def on_auth(self, sid: str, data) -> None:
         logging.critical(data)
         user_id = data.get("user_id")
@@ -91,9 +100,14 @@ class ChatNamespace(AsyncNamespace):
         await state.clear()
         session.pop("chat")
         await self.save_session(sid, session)
-        await self.bot.send_message(chat_id=admin_id, text="🦺 Юзер закрыл текущий чат!")
-        await self.emit(CHAT_CLOSED, {"message":"Chat successfully closed!"}, to=sid)
-            
+        await self.disconnect_by_id(admin_id)
+
+    async def on_disconnect(self, sid: str) -> None:
+        session = await self.get_session(sid)
+        chat = session.get("chat")
+        if chat:
+            await self.disconnect_by_id(chat.get("admin_id"))
+           
 chat_name_space = ChatNamespace(namespace="/chat", bot=bot, dp=dp)
 
 sio.register_namespace(chat_name_space)
@@ -101,7 +115,7 @@ sio.register_namespace(chat_name_space)
 class ChatState(StatesGroup):
     chat = State()
 
-async def on_accept(callback_query: CallbackQuery, callback_data: ChatAction, state: FSMContext, user: User):
+async def on_accept(callback_query: CallbackQuery, callback_data: ChatAction, state: FSMContext):
     await callback_query.message.answer("🎯 *Вы успешно начали чат с юзером* \n_Чтобы остановить чат пропишите *exit*_")
     session = await chat_name_space.get_session(callback_data.sid)
     if not session:
@@ -114,7 +128,7 @@ async def on_accept(callback_query: CallbackQuery, callback_data: ChatAction, st
     await state.set_data({"sid":callback_data.sid})
     session["chat"] = {"admin_id":callback_query.from_user.id}
     await chat_name_space.save_session(callback_data.sid, session)
-    await sio.emit(CHAT_FOUND, {"admin_id":callback_query.from_user.id}, to=callback_data.sid)
+    await chat_name_space.emit(CHAT_FOUND, {"admin_id":callback_query.from_user.id}, to=callback_data.sid)
     await callback_query.message.delete()
 
 async def on_message(message: Message, state: FSMContext, bot: Bot):

@@ -54,7 +54,6 @@ class AnswerIn(BaseModel):
     buy_url: str | None = None
     video_url: HttpUrl | None = None
 
-
 class AnswerInBase(BaseModel):
     answer: str
 
