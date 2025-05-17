@@ -1,11 +1,11 @@
 from pydantic import BaseModel, UUID4
 from typing import Optional, List
-from datetime import date, datetime
-from games.schemas import BaseGame, GameResultUserOut
+from datetime import datetime
+from games.schemas import BaseGame
 
 class UserResult(BaseModel):
     id: UUID4
-    point: int
+    points: int
     place: int
     created_at: datetime
     game: BaseGame
@@ -33,7 +33,6 @@ class UserResponse(BaseModel):
     subscription: UserSubscriptionResponse
     avatar_url: Optional[str] = None
     bougth_games: List[BaseGame]
-    resulsts: List[UserResult]
 
     class Config:
         from_attributes = True
