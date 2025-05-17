@@ -49,7 +49,9 @@ const Incorrect = ({ video, setCorrect, isFinalStage, onComplete }) => {
       )}
 
       <p className={styles.incorrect__title}>Ответ неверный!</p>
-      <button onClick={() => setCorrect(true)}>Попробовать ещё</button>
+      <button onClick={() => setCorrect(true)} style={{ color: "#000" }}>
+        Попробовать ещё
+      </button>
     </div>
   );
 };

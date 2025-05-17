@@ -1,5 +1,4 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useState } from "react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/scss";
 import "swiper/scss/navigation";

@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 const $api = axios.create({
-  baseURL: "https://zoltansgametma.ru/api/",
+  baseURL: "https://zoltansgametma.ru/api",
   timeout: 10000,
   headers: {
     Accept: "application/json",
@@ -49,7 +49,6 @@ export const chatApi = {
   connect: (userId) => {
     socket.emit("auth", { user_id: userId });
     socket.connect();
-    console.log("connected");
   },
 
   disconnect: () => {
@@ -69,7 +68,7 @@ export const chatApi = {
   },
 
   closeChat: () => {
-    socket.emit("chat_close");
+    socket.emit("chat-close");
   },
 
   onAuthSuccess: (callback) => {

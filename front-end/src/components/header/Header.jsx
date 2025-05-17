@@ -21,8 +21,19 @@ const Header = () => {
             userAvatar === "" ? styles.user__def : ""
           )}
         >
-          <img src={userDefault} alt="" className={styles.user__img} />
-          {/* {userAvatar !== "" ? <img src={userAvatar} alt="" className={styles.user__img} /> : <></>} */}
+          {userAvatar ? (
+            <img
+              src={userAvatar}
+              alt="User avatar"
+              className={styles.user__img}
+            />
+          ) : (
+            <img
+              src={userDefault}
+              alt="Default avatar"
+              className={styles.user__img}
+            />
+          )}
         </Link>
       </div>
     </header>

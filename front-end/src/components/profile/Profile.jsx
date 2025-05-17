@@ -17,6 +17,7 @@ const Profile = () => {
     userPhone,
     userEmail,
     userGames,
+    subscription,
     ...user
   } = useUser();
 
@@ -26,7 +27,6 @@ const Profile = () => {
   const [email, setEmail] = useState(userEmail || "");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [subscribe, setSubscribe] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -37,6 +37,7 @@ const Profile = () => {
         }
 
         const response = await api.getCurrentUser(userId);
+        console.log("API Response:", response.data.subscription);
         if (response.data) {
           setUser({
             ...user,
@@ -47,6 +48,7 @@ const Profile = () => {
               response.data.first_name ||
               response.data.username ||
               "Пользователь",
+            subscription: response.data.subscription || null,
           });
           setPhone(response.data.phone || "");
           setEmail(response.data.email || "");
@@ -98,6 +100,13 @@ const Profile = () => {
       setPhone(value);
     }
   };
+
+  console.log(subscription)
+
+  const unixTime = subscription
+    ? Math.floor(new Date(subscription.expire).getTime())
+    : 0;
+  const currentDate = new Date().getTime();
 
   return (
     <div className={styles.profile}>
@@ -152,11 +161,11 @@ const Profile = () => {
             <img src={pencil} alt="" className={styles.edit__img} />
           )}
         </div>
-        {!subscribe ? (
-          <button className={styles.buy__btn}>Купить подписку</button>
-        ) : (
-          <></>
-        )}
+        {subscription && unixTime < currentDate ? (
+          <a href="https://t.me/Zoltansgame_bot" className={styles.buy__btn}>
+            Купить подписку
+          </a>
+        ) : null}
 
         <p className={styles.games__title}>Список игр</p>
         <div className={styles.games__controller}>

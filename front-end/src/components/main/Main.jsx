@@ -6,6 +6,7 @@ import styles from "./main.module.scss";
 
 const Main = () => {
   const [currentController, setController] = useState("prev");
+  
 
   return (
     <div className={styles.main}>

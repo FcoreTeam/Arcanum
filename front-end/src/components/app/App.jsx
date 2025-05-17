@@ -52,6 +52,7 @@ const App = () => {
             userEmail: response.data.email,
             userPts: response.data.balance,
             userId: userId,
+            subscription: response.data.subscription,
           });
 
           sessionStorage.setItem("user_id", userId);
