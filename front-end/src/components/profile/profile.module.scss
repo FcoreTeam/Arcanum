@@ -6,7 +6,7 @@
   position: relative;
   background: #030404;
   overflow-x: hidden;
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
 
   .blur__image {
     position: absolute;
@@ -157,4 +157,73 @@
   color: #fff;
   cursor: pointer;
   text-align: center;
+}
+
+.game {
+  width: 100%;
+  height: fit-content;
+  background: #0f0f0f37;
+  border-radius: 20px;
+  backdrop-filter: blur(34px);
+  padding: 10px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  margin: 0 10px;
+  transition: transform 0.3s ease;
+
+  &__name {
+    color: #fff;
+    width: 100%;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  &__date {
+    margin-top: 5px;
+    width: 100%;
+    text-align: center;
+    color: #ffffff7a;
+    font-size: 12px;
+  }
+
+  &__preview {
+    background: #1a1c1db5;
+    width: 100%;
+    margin-top: 5px;
+    height: 300px;
+    border: 0;
+    border-radius: 10px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    background-color: #1c1d20;
+  }
+
+  &__price {
+    margin-top: 5px;
+    width: 100%;
+    text-align: center;
+    color: #ffffff7a;
+    font-size: 12px;
+  }
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  padding-bottom: 20px;
+  height: fit-content;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gameDesc {
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.games {
+  width: 100%;
+  height: 500px;
 }

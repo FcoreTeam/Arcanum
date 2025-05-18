@@ -24,6 +24,7 @@ $api.interceptors.response.use(
 
 export const api = {
   getCurrentUser: (user_id) => $api.get(`/auth/me?user_id=${user_id}`),
+  getUserResults: (user_id) => $api.get(`/auth/me/results?user_id=${user_id}`),
   syncUser: () => $api.patch("/auth/me/sync"),
   updateUser: (data) => $api.patch("/auth/me/update", data),
 

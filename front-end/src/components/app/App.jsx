@@ -39,6 +39,7 @@ const App = () => {
         }
 
         const response = await api.getCurrentUser(userId);
+        const resultsResponse = await api.getUserResults(userId);
 
         if (response.data) {
           setUser({
@@ -53,6 +54,8 @@ const App = () => {
             userPts: response.data.balance,
             userId: userId,
             subscription: response.data.subscription,
+            bougth_games: response.data.bougth_games,
+            results: resultsResponse.data
           });
 
           sessionStorage.setItem("user_id", userId);

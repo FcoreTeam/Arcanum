@@ -7,6 +7,8 @@ import userDefault from "../../img/userdef.svg";
 import { useUser } from "../../store/slices/hooks/useUser";
 import { api } from "../../api/api";
 import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
+import Button from "../@ui/Button/Button";
+import ProfileGames from "./profileGames/ProfileGames";
 
 const Profile = () => {
   const {
@@ -18,6 +20,8 @@ const Profile = () => {
     userEmail,
     userGames,
     subscription,
+    bougth_games,
+    results,
     ...user
   } = useUser();
 
@@ -36,22 +40,21 @@ const Profile = () => {
           return;
         }
 
-        const response = await api.getCurrentUser(userId);
-        console.log("API Response:", response.data.subscription);
-        if (response.data) {
+        const userResponse = await api.getCurrentUser(userId);
+        if (userResponse.data) {
           setUser({
             ...user,
-            userPhone: response.data.phone || null,
-            userEmail: response.data.email || null,
-            userAvatar: response.data.avatar_url || null,
+            userPhone: userResponse.data.phone || null,
+            userEmail: userResponse.data.email || null,
+            userAvatar: userResponse.data.avatar_url || null,
             userName:
-              response.data.first_name ||
-              response.data.username ||
+              userResponse.data.first_name ||
+              userResponse.data.username ||
               "Пользователь",
-            subscription: response.data.subscription || null,
+            subscription: userResponse.data.subscription || null,
           });
-          setPhone(response.data.phone || "");
-          setEmail(response.data.email || "");
+          setPhone(userResponse.data.phone || "");
+          setEmail(userResponse.data.email || "");
         }
       } catch (err) {
         console.error("Ошибка при загрузке данных пользователя:", err);
@@ -100,8 +103,6 @@ const Profile = () => {
       setPhone(value);
     }
   };
-
-  console.log(subscription)
 
   const unixTime = subscription
     ? Math.floor(new Date(subscription.expire).getTime())
@@ -167,29 +168,41 @@ const Profile = () => {
           </a>
         ) : null}
 
-        <p className={styles.games__title}>Список игр</p>
-        <div className={styles.games__controller}>
-          <div
-            className={clsx(
-              styles.controller,
-              filter === "not_passed" && styles.active
-            )}
-            onClick={() => setFilter("not_passed")}
-          >
-            Не пройденные
+        <div className={styles.games}>
+          <p className={styles.games__title}>Список игр</p>
+          <div className={styles.games__controller}>
+            <div
+              className={clsx(
+                styles.controller,
+                filter === "not_passed" && styles.active
+              )}
+              onClick={() => setFilter("not_passed")}
+            >
+              Не пройденные
+            </div>
+            <div
+              className={clsx(
+                styles.controller,
+                filter === "passed" && styles.active
+              )}
+              onClick={() => setFilter("passed")}
+            >
+              Пройденные
+            </div>
           </div>
-          <div
-            className={clsx(
-              styles.controller,
-              filter === "passed" && styles.active
-            )}
-            onClick={() => setFilter("passed")}
-          >
-            Пройденные
-          </div>
-        </div>
-        <div className={styles.userGames}>
-          {userGames || "Нет купленных игр"}
+
+          {filter === "not_passed" && (
+            <ProfileGames
+              games={bougth_games.filter(
+                (g) => !results.some((r) => r.game.id === g.id)
+              )}
+              category="not_passed"
+            />
+          )}
+
+          {filter === "passed" && (
+            <ProfileGames games={results.map((r) => r.game)} category="prev" />
+          )}
         </div>
       </div>
     </div>
