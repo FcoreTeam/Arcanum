@@ -9,10 +9,11 @@ from games.models import Game
 from datetime import datetime, timedelta, timezone
 
 from config import TelegramSettings
+import json
 
 
 def _get_provider_data(amount: int, description: str):
-    return {
+    return json.dumps({
         "receipt" : {
             "customer" : {
                 "full_name" : "Слабинский Максим Сергеевич",
@@ -27,15 +28,12 @@ def _get_provider_data(amount: int, description: str):
                     "amount" : {
                         "value" : amount,
                         "currency" : "RUB"
+                    },
+                    "vat_code" : 1
                 },
-                    "vat_code" : 1,
-                    "payment_mode" : "full_payment",
-                    "payment_subject" : "commodity"
-                }
             ],
-            "tax_system_code" : 1
         }
-    }
+    })
 
 
 
@@ -104,7 +102,11 @@ async def buy_subscription(message: Message, user: User):
     )
 
 async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
-    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+    try:
+        print("PreCheckoutQuery")
+        await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)  # всегда отвечаем утвердительно
+    except Exception as e:
+        print(f"Ошибка при обработке апдейта типа PreCheckoutQuery: {e}")
 
 async def process_successfull_payment_subscription(message: Message, user: User):
     subscription = await user.subscription.first()
