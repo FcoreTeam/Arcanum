@@ -82,7 +82,7 @@ class User(Model):
             }
         )
         logging.critical(user[0].subscription.exists())
-        if user[0].subscription.exists():
+        if not user[0].subscription.exists():
             await Subscription.create(user=user[0])
         return user[0]
 
