@@ -26,7 +26,7 @@ def _get_provider_data(amount: int, description: str):
                     "description" : description,
                     "quantity" : 1,
                     "amount" : {
-                        "value" : amount,
+                        "value" : float(amount),
                         "currency" : "RUB"
                     },
                     "vat_code" : 1
