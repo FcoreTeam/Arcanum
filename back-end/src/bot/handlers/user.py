@@ -10,6 +10,35 @@ from datetime import datetime, timedelta, timezone
 
 from config import TelegramSettings
 
+
+def _get_provider_data(amount: int, description: str):
+    return {
+        "receipt" : {
+            "customer" : {
+                "full_name" : "Слабинский Максим Сергеевич",
+                "email" : "ivan.pritula@zoltansgame.ru",
+                "phone" : "79166361122",
+                "inn" : "772645107000"
+            },
+            "items" : [
+                {
+                    "description" : description,
+                    "quantity" : 1,
+                    "amount" : {
+                        "value" : amount,
+                        "currency" : "RUB"
+                },
+                    "vat_code" : 1,
+                    "payment_mode" : "full_payment",
+                    "payment_subject" : "commodity"
+                }
+            ],
+            "tax_system_code" : 1
+        }
+    }
+
+
+
 async def start(message: Message):
     builder = InlineKeyboardBuilder()
     builder.button(text="Начать! 🧩", web_app=WebAppInfo(url=TelegramSettings.app_url))
@@ -42,6 +71,7 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         prices=prices,
         need_email=True,
         send_email_to_provider=True,
+        provider_data=_get_provider_data(game.price, f"Покупка игры: {game.name}")
     )
 
 async def enter_promo(message: Message, user: User, command: CommandObject):
@@ -70,6 +100,7 @@ async def buy_subscription(message: Message, user: User):
         prices=prices,
         need_email=True,
         send_email_to_provider=True,
+        provider_data=_get_provider_data(100000, "Покупка подписки")
     )
 
 async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
