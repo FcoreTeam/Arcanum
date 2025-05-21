@@ -1,7 +1,14 @@
 from pydantic import BaseModel, UUID4
 from typing import Optional, List
-from datetime import date, datetime
+from datetime import datetime
 from games.schemas import BaseGame
+
+class UserResult(BaseModel):
+    id: UUID4
+    points: int
+    place: int
+    created_at: datetime
+    game: BaseGame = None
 
 class UserUpdateRequest(BaseModel):
     user_id: int
@@ -29,4 +36,11 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+
+
+
+
 
