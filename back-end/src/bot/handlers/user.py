@@ -41,6 +41,7 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         currency="RUB",
         prices=prices,
         need_email=True,
+        send_email_to_provider=True,
     )
 
 async def enter_promo(message: Message, user: User, command: CommandObject):
@@ -68,6 +69,7 @@ async def buy_subscription(message: Message, user: User):
         currency="RUB",
         prices=prices,
         need_email=True,
+        send_email_to_provider=True,
     )
 
 async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
