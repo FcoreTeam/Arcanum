@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile
-from typing import Annotated
+from typing import Annotated, List
 
-from .schemas import UserResponse, UserUpdateRequest
+from .schemas import UserResponse, UserUpdateRequest, UserResult
 
 from realtime.chat import chat_name_space
 
@@ -9,10 +9,13 @@ from aiogram.utils.web_app import WebAppUser
 from aiogram.types import BufferedInputFile
 
 from .models import User
+from games.models import GameResult
 
 from bot.bot import bot
 
-from .depends import get_user_by_init_data, get_user_id
+from .depends import get_user_id
+
+from games.services import build_game_response
 
 auth_api_router = APIRouter(prefix="/auth")
 
@@ -21,7 +24,17 @@ GetUserIdDeps = Annotated[WebAppUser, Depends(get_user_id)]
 @auth_api_router.get("/me", response_model=UserResponse)
 async def read_user(user_id: GetUserIdDeps):
     user = await User.get(telegram_id=user_id).prefetch_related("bougth_games", "subscription")
-    return UserResponse.from_orm(user).copy(update={"avatar_url":await user.get_avatar_url()})   
+    bought_games = [await build_game_response(game) for game in user.bougth_games]
+    return UserResponse.from_orm(user).copy(update={
+        "avatar_url":await user.get_avatar_url(),
+        "bougth_games":bought_games,
+    }) 
+
+@auth_api_router.get("/me/results")
+async def read_user_results(user_id: GetUserIdDeps) -> List[UserResult]:
+    results = await GameResult.filter(user__telegram_id=user_id).all()
+    await GameResult.fetch_for_list(results, "game")
+    return results 
 
 @auth_api_router.post("/chat/photo")
 async def send_chat_photo(
