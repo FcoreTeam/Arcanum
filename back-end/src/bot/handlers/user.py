@@ -39,7 +39,8 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         payload=f"buy-game:{game.id}",
         provider_token=TelegramSettings.provider_token,
         currency="RUB",
-        prices=prices
+        prices=prices,
+        need_email=True,
     )
 
 async def enter_promo(message: Message, user: User, command: CommandObject):
@@ -65,7 +66,8 @@ async def buy_subscription(message: Message, user: User):
         payload="buy-subscription",
         provider_token=TelegramSettings.provider_token,
         currency="RUB",
-        prices=prices
+        prices=prices,
+        need_email=True,
     )
 
 async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
