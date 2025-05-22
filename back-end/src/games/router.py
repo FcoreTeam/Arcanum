@@ -71,7 +71,7 @@ async def answer(
     print(user)
     subscription = await user.subscription
     print(subscription)
-    print(subscription.expire.__dict__)
+    print(subscription.expire.tzinfo)
 
     if user not in game.users and utc.localize(subscription.expire)  < utc.localize(datetime.now()):
         raise HTTPException(status_code=403, detail="The user did not buy this game")
