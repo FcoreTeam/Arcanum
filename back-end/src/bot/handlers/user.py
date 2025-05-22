@@ -13,7 +13,7 @@ import json
 
 
 def _get_provider_data(amount: int, description: str):
-    return {
+    return json.dumps({
         "receipt" : {
             "customer" : {
                 "full_name" : "Слабинский Максим Сергеевич",
@@ -33,7 +33,7 @@ def _get_provider_data(amount: int, description: str):
                 },
             ],
         }
-    }
+    })
 
 
 
