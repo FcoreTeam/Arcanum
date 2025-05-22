@@ -1,3 +1,5 @@
+import decimal
+
 from aiogram import Router, Bot, F
 from aiogram.types import Message, WebAppInfo, LabeledPrice, PreCheckoutQuery
 from aiogram.filters.command import CommandStart, CommandObject, Command
@@ -26,7 +28,7 @@ def _get_provider_data(amount: int, description: str):
                     "description" : description,
                     "quantity" : 1,
                     "amount" : {
-                        "value" : float(amount),
+                        "value" : "{:.2f}".format(amount),
                         "currency" : "RUB"
                     },
                     "vat_code" : 1
