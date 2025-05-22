@@ -13,7 +13,7 @@ import json
 
 
 def _get_provider_data(amount: int, description: str):
-    return json.dumps({
+    return {
         "receipt" : {
             "customer" : {
                 "full_name" : "Слабинский Максим Сергеевич",
@@ -33,7 +33,7 @@ def _get_provider_data(amount: int, description: str):
                 },
             ],
         }
-    })
+    }
 
 
 
@@ -68,6 +68,7 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         currency="RUB",
         prices=prices,
         need_email=True,
+        is_flexible=False,
         send_email_to_provider=True,
         provider_data=_get_provider_data(game.price, f"Покупка игры: {game.name}")
     )
@@ -97,6 +98,7 @@ async def buy_subscription(message: Message, user: User):
         currency="RUB",
         prices=prices,
         need_email=True,
+        is_flexible=False,
         send_email_to_provider=True,
         provider_data=_get_provider_data(100000, "Покупка подписки")
     )
