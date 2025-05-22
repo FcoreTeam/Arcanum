@@ -69,7 +69,7 @@ async def answer(
     print(user)
     subscription = await user.subscription
     print(subscription)
-    if user not in game.users and subscription < datetime.now():
+    if user not in game.users and subscription.expire < datetime.now():
         raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
         result = await GameResult.get_or_none(user=user, game=game)
