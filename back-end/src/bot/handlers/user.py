@@ -26,7 +26,7 @@ def _get_provider_data(amount: int, description: str):
             "items" : [
                 {
                     "description" : description,
-                    "quantity" : 1,
+                    "quantity" : "{:.2f}".format(1),
                     "amount" : {
                         "value" : "{:.2f}".format(amount),
                         "currency" : "RUB"
