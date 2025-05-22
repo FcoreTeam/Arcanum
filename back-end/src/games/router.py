@@ -73,7 +73,7 @@ async def answer(
     print(subscription)
     print(subscription.expire.tzinfo)
 
-    if user not in game.users and utc.localize(subscription.expire)  < utc.localize(datetime.now()):
+    if user not in game.users and subscription.expire  < datetime.now(tz=pytz.UTC):
         raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
         result = await GameResult.get_or_none(user=user, game=game)
