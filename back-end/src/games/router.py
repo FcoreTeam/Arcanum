@@ -65,7 +65,7 @@ async def answer(
     game = await Game.get_or_none(id=game_id).prefetch_related("users")
     if not game:
         raise HTTPException(status_code=404, detail="Game doesn't exists")
-    if user not in game.users and user.subscription.expire < datetime.now(): 
+    if user not in game.users and user.subscription.first().expire < datetime.now():
         raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
         result = await GameResult.get_or_none(user=user, game=game)
