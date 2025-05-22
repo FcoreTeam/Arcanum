@@ -5,7 +5,9 @@ from typing import List, Annotated
 from .schemas import BaseGame, FullGame, AnswerInBase, AnswerOut, GameResultOut, BaseDemo, FullDemo, FullStage, UUID4, AnswerIn
 from .services import build_game_response, build_full_game_response, build_demo_game_response
 from datetime import datetime
+import pytz
 
+utc=pytz.UTC
 import asyncio
 
 games_api_router = APIRouter(prefix="/games")
@@ -69,7 +71,8 @@ async def answer(
     print(user)
     subscription = await user.subscription
     print(subscription)
-    if user not in game.users and subscription.expire < datetime.now():
+
+    if user not in game.users and utc.localize(subscription.expire)  < utc.localize(datetime.now()):
         raise HTTPException(status_code=403, detail="The user did not buy this game")
     if game.answer.lower() == answer.answer.lower():
         result = await GameResult.get_or_none(user=user, game=game)
