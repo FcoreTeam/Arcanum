@@ -51,7 +51,7 @@ class ChatNamespace(AsyncNamespace):
         await self.save_session(sid, {"user":user, "searching":False})
         await self.emit(AUTH_SUCCESS, {"message":"Successfully authenticated!", "username":user.username, "id":user.telegram_id}, to=sid)
 
-    async def on_search(self, sid: str, data) -> None:
+    async def on_search(self, sid: str) -> None:
         session = await self.get_session(sid)
         logging.critical(session)
         if not session: return await self.emit(ERROR, {"message":"Forbidden not authenticated"}, to=sid)
