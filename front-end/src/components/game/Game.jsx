@@ -99,11 +99,12 @@ const Game = ({ name, video }) => {
       return;
     }
 
+    console.log(+userId);
     try {
       const response = await api.sendAnswer({
         game_id: gameId,
         answer: userAnswer,
-        telegram_id: userId,
+        telegram_id: +userId,
       });
 
       if (response?.data?.success) {

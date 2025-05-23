@@ -1,6 +1,6 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import styles from "./ProfileGames.module.scss";
+import styles from "./profileGames.module.scss";
 import Button from "../../@ui/Button/Button";
 import { useDispatch } from "react-redux";
 import { openPopup } from "../../../store/slices/popupSlice";

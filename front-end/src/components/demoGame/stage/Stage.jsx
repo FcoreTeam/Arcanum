@@ -38,9 +38,10 @@ const Stage = ({
   };
 
   const checkAnswer = () => {
+    const trimmedAnswer = stageAnswer.replace(/\s/g, ""); // Удаляем пробелы только при проверке
     if (
-      answer.toLowerCase() === stageAnswer.toLowerCase() &&
-      stageAnswer !== ""
+      answer.toLowerCase() === trimmedAnswer.toLowerCase() &&
+      trimmedAnswer !== ""
     ) {
       setStage((prev) => ++prev);
     } else {
@@ -118,7 +119,6 @@ const Stage = ({
         <button
           className={styles.answer__button}
           onClick={currentStage === 4 ? endGame : checkAnswer}
-          // disabled={!stageAnswer.trim() }
         >
           {currentStage === 4 ? "Завершить" : "Ответить"}
         </button>

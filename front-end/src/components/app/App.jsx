@@ -55,7 +55,7 @@ const App = () => {
             userId: userId,
             subscription: response.data.subscription,
             bougth_games: response.data.bougth_games,
-            results: resultsResponse.data
+            results: resultsResponse.data,
           });
 
           sessionStorage.setItem("user_id", userId);

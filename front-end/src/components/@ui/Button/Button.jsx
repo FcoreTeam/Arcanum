@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import styles from "./button.module.scss";
-
 const Button = ({
   buttonContent,
   buttonClass,
   secondClass,
   onClick,
   to,
+  isHtml = false,
 }) => {
   const classNames = clsx(
     styles.button,
@@ -15,17 +15,23 @@ const Button = ({
     styles[secondClass]
   );
 
+  const content = isHtml ? (
+    <p dangerouslySetInnerHTML={{ __html: buttonContent }} />
+  ) : (
+    buttonContent
+  );
+
   if (to) {
     return (
       <Link to={to} className={classNames}>
-        {buttonContent}
+        {content}
       </Link>
     );
   }
 
   return (
     <button className={classNames} onClick={onClick}>
-      {buttonContent}
+      {content}
     </button>
   );
 };
