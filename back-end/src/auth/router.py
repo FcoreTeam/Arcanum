@@ -27,6 +27,7 @@ GetUserIdDeps = Annotated[WebAppUser, Depends(get_user_id)]
 async def read_user(user_id: GetUserIdDeps):
     user = await User.get(telegram_id=user_id).prefetch_related("bougth_games", "subscription")
     subscription = await user.subscription.first()
+    print([i for i in await user.subscription.first()])
     print(subscription.expire)
     print(subscription.expire >= datetime.now(timezone.utc))
     if subscription.expire >= datetime.now(timezone.utc):
