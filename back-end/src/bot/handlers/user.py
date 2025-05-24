@@ -31,7 +31,9 @@ def _get_provider_data(amount: int, description: str):
                         "value" : "{:.2f}".format(amount),
                         "currency" : "RUB"
                     },
-                    "vat_code" : 1
+                    "vat_code" : 1,
+                    "payment_mode": "full_payment",
+                    "payment_subject": "service"
                 },
             ],
         }
@@ -66,8 +68,8 @@ async def start_buy_game(message: Message, command: CommandObject, user: User, b
         chat_id=message.from_user.id,
         title=f"Покупка игры: {game.name}",
         description=f"Описание игры: {game.description}",
-        payload=f"buy-game:{game.id}",
         provider_token=TelegramSettings.provider_token,
+        payload=f"buy-game:{game.id}",
         currency="RUB",
         prices=prices,
         need_email=True,
