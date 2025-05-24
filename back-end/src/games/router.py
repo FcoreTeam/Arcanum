@@ -116,6 +116,7 @@ async def read_game_leaderboard(
             id=game_result.id,
             place=game_result.place,
             points=game_result.points,
+            created_at=game_result.created_at
         )
         for game_result in game_results
     ]

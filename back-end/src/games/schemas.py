@@ -81,3 +81,4 @@ class GameResultOut(BaseORMModel):
     place: int
     points: int
     user: GameResultUserOut
+    created_at: datetime
