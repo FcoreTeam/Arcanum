@@ -74,7 +74,7 @@ class AnswerOut(BaseModel):
 class GameResultUserOut(BaseModel):
     first_name: str
     username: str
-    avatar_url: str
+    avatar_url: str | None = None
 
 class GameResultOut(BaseORMModel):
     id: UUID4
