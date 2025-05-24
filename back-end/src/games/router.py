@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Path, Query, Body
 from .models import Game, GameResult, DemoGame, Stage
 from auth.models import User
 from typing import List, Annotated
-from .schemas import BaseGame, FullGame, AnswerInBase, AnswerOut, GameResultOut, BaseDemo, FullDemo, FullStage, UUID4, AnswerIn
+from .schemas import BaseGame, FullGame, AnswerInBase, AnswerOut, GameResultOut, BaseDemo, FullDemo, FullStage, UUID4, AnswerIn, GameResultUserOut
 from .services import build_game_response, build_full_game_response, build_demo_game_response
 from datetime import datetime
 import pytz
@@ -106,4 +106,16 @@ async def read_game_leaderboard(
     if not game:
         raise HTTPException(status_code=404, detail="Game doesn't exists")
     game_results = await GameResult.filter(game=game).all().prefetch_related("user")
-    return game_results
+    return [
+        GameResultOut(
+            user=GameResultUserOut(
+                first_name=game_result.user.first_name,
+                username=game_result.user.username,
+                avatar_url=await game_result.user.get_avatar_url()
+            ),
+            id=game_result.id,
+            place=game_result.place,
+            points=game_result.points,
+        )
+        for game_result in game_results
+    ]

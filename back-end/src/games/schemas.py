@@ -81,9 +81,3 @@ class GameResultOut(BaseORMModel):
     place: int
     points: int
     user: GameResultUserOut
-
-    @field_validator("user", mode="before")
-    async def get_user(cls, value):
-        return GameResultUserOut.from_orm(value).copy(update={
-            "avatar_url":await value.get_avatar_url(),
-        })
