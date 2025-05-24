@@ -31,7 +31,7 @@ async def read_user(user_id: GetUserIdDeps):
     print(subscription.expire >= datetime.now(timezone.utc))
     if subscription.expire >= datetime.now(timezone.utc):
         print(subscription.expire)
-        bought_games = [await build_game_response(game) for game in Game.all()]
+        bought_games = [await build_game_response(game) for game in await Game.all()]
     else:
         bought_games = [await build_game_response(game) for game in user.bougth_games]
     return UserResponse.from_orm(user).copy(update={
