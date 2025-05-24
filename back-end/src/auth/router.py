@@ -9,13 +9,15 @@ from aiogram.utils.web_app import WebAppUser
 from aiogram.types import BufferedInputFile
 
 from .models import User
-from games.models import GameResult
+from games.models import GameResult, Game
 
 from bot.bot import bot
 
 from .depends import get_user_id
 
 from games.services import build_game_response
+from datetime import datetime, timedelta, timezone
+
 
 auth_api_router = APIRouter(prefix="/auth")
 
@@ -24,7 +26,11 @@ GetUserIdDeps = Annotated[WebAppUser, Depends(get_user_id)]
 @auth_api_router.get("/me", response_model=UserResponse)
 async def read_user(user_id: GetUserIdDeps):
     user = await User.get(telegram_id=user_id).prefetch_related("bougth_games", "subscription")
-    bought_games = [await build_game_response(game) for game in user.bougth_games]
+    subscription = await user.subscription.first()
+    if subscription.expire >= datetime.now(timezone.utc):
+        bought_games = [await build_game_response(game) for game in Game.all()]
+    else:
+        bought_games = [await build_game_response(game) for game in user.bougth_games]
     return UserResponse.from_orm(user).copy(update={
         "avatar_url":await user.get_avatar_url(),
         "bougth_games":bought_games,

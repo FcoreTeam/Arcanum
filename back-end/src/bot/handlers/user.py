@@ -95,7 +95,8 @@ async def buy_subscription(message: Message, user: User):
     if subscription.expire >= datetime.now(timezone.utc):
         return await message.answer("Вы уже имеете подписку!")
     prices = [LabeledPrice(label="Подписка", amount=100000)]
-    await message.answer_invoice(
+    await bot.send_invoice(
+        chat_id=message.from_user.id,
         title=f"Покупка подписки на 7 дней",
         description=f"Покупка подписки на 7 дней",
         payload="buy-subscription",
@@ -104,8 +105,6 @@ async def buy_subscription(message: Message, user: User):
         prices=prices,
         need_email=True,
         is_flexible=False,
-        start_parameter='start_parameter',
-        invoice_payload='coupon',
         send_email_to_provider=True,
         provider_data=_get_provider_data(100000, "Покупка подписки")
     )
