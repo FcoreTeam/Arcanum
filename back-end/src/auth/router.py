@@ -28,6 +28,7 @@ async def read_user(user_id: GetUserIdDeps):
     user = await User.get(telegram_id=user_id).prefetch_related("bougth_games", "subscription")
     subscription = await user.subscription.first()
     if subscription.expire >= datetime.now(timezone.utc):
+        print(subscription.expire)
         bought_games = [await build_game_response(game) for game in Game.all()]
     else:
         bought_games = [await build_game_response(game) for game in user.bougth_games]
