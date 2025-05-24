@@ -72,8 +72,8 @@ class AnswerOut(BaseModel):
     points: int | None = None
 
 class GameResultUserOut(BaseModel):
-    first_name: str
-    username: str
+    first_name: str | None = None
+    username: str | None = None
     avatar_url: str | None = None
 
 class GameResultOut(BaseORMModel):
