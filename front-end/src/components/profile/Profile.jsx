@@ -7,8 +7,7 @@ import userDefault from "../../img/userdef.svg";
 import { useUser } from "../../store/slices/hooks/useUser";
 import { api } from "../../api/api";
 import { getUserIdFromAddress } from "../../helpers/getUserIdFromAddress";
-import Button from "../@ui/Button/Button";
-import ProfileGames from "./profileGames/ProfileGames";
+import ProfileGames from "./profileGames/profileGames";
 
 const Profile = () => {
   const {

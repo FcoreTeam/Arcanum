@@ -6,14 +6,13 @@ import styles from "./main.module.scss";
 
 const Main = () => {
   const [currentController, setController] = useState("prev");
-  
 
   return (
     <div className={styles.main}>
       <div className={styles.video__background}>
-        <video 
-          autoPlay 
-          loop 
+        <video
+          autoPlay
+          loop
           muted
           playsInline
           webkit-playsinline="true"
@@ -22,13 +21,13 @@ const Main = () => {
           x5-video-player-fullscreen="false"
           x5-video-orientation="portraint"
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            position: 'absolute',
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            position: "absolute",
             top: 0,
             left: 0,
-            zIndex: -1
+            zIndex: -1,
           }}
         >
           <source src={intro} type="video/mp4" />

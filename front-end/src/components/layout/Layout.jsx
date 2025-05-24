@@ -7,6 +7,7 @@ import TipPopup from "../@popups/tip-popup/Tip-popup";
 
 import styles from "./layout.module.scss";
 import RulesPopup from "../@popups/rules-popup/Rules-popup";
+import InfoPopup from "../@popups/info-popup/Info-popup";
 
 const Layout = () => {
   const locate = useLocation();
@@ -27,6 +28,7 @@ const Layout = () => {
       {isOpen && popupType === "rules" && !localStorage.getItem("before") && (
         <RulesPopup />
       )}
+      {isOpen && popupType === "sub" && <InfoPopup />}
     </div>
   );
 };

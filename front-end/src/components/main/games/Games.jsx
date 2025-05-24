@@ -7,13 +7,10 @@ import styles from "./games.module.scss";
 import Button from "../../@ui/Button/Button";
 import { api } from "../../../api/api";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import React from "react";
 import { useDispatch } from "react-redux";
 import { openPopup } from "../../../store/slices/popupSlice";
-import { useNavigate } from "react-router-dom"; // убрать
 
 const Games = ({ category }) => {
-  const navigate = useNavigate(); // убрать
   const dispatch = useDispatch();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,10 +25,6 @@ const Games = ({ category }) => {
       })
     );
   };
-
-  const handleDemoClick = (gameId) => {
-    navigate(`/game?id=${gameId}`);
-  }; // убрать
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -83,7 +76,7 @@ const Games = ({ category }) => {
     const date = new Date(game.date);
     const unixTime = date.getTime();
 
-    const isPast = unixTime < now;
+    const isPast = unixTime > now;
     return category === "prev"
       ? isPast && !game.is_test
       : !isPast && !game.is_test;
@@ -124,7 +117,7 @@ const Games = ({ category }) => {
       observer={true}
       observeParents={true}
     >
-      {filteredGames.map((game) => (
+      {filteredGames.map((game, index) => (
         <SwiperSlide className={styles.slide} key={game.id}>
           <div className={styles.game}>
             <h3 className={styles.game__name}>{game.name}</h3>
@@ -145,21 +138,21 @@ const Games = ({ category }) => {
 
             <div className={styles.buttons}>
               <Button
-                buttonContent={game.price + " ₽"}
+                buttonContent={
+                  index === 2
+                    ? `${game.price} ₽ <span>1000 ₽</span>`
+                    : `${game.price} ₽`
+                }
                 buttonClass="buy__btn"
                 onClick={() => handleBuyClick(game.id)}
-              >
-                {category === "prev" ? "Перепройти" : "Играть"}
-              </Button>
-
+                isHtml={true}
+              />
               <Button
                 buttonClass="buy__btn"
                 buttonContent="Об игре"
                 secondClass="info__btn"
                 onClick={() => handleTipClick(game)}
-              >
-                Описание игры
-              </Button>
+              />
             </div>
           </div>
         </SwiperSlide>
