@@ -73,7 +73,6 @@ async def start_buy_game(message: Message, command: CommandObject, user: User, b
         need_email=True,
         is_flexible=False,
         start_parameter='start_parameter',
-        invoice_payload='coupon',
         send_email_to_provider=True,
         provider_data=_get_provider_data(game.price, f"Покупка игры: {game.name}")
     )
