@@ -74,7 +74,6 @@ async def start_buy_game(message: Message, command: CommandObject, user: User, b
         prices=prices,
         need_email=True,
         is_flexible=False,
-        start_parameter='start_parameter',
         send_email_to_provider=True,
         provider_data=_get_provider_data(game.price, f"Покупка игры: {game.name}")
     )
