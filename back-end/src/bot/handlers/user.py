@@ -48,7 +48,7 @@ async def start(message: Message):
     )
     await message.answer(response, reply_markup=builder.as_markup())
 
-async def start_buy_game(message: Message, command: CommandObject, user: User):
+async def start_buy_game(message: Message, command: CommandObject, user: User, bot: Bot):
     game_id = command.args
     game = await Game.get_or_none(id=game_id).prefetch_related("users")
     if not game:
@@ -62,7 +62,8 @@ async def start_buy_game(message: Message, command: CommandObject, user: User):
         await user.promos_used.add(promo[0])
         await user.promos.remove(promo[0])
     prices = [LabeledPrice(label=game.name, amount=int(price * 100))]
-    await message.answer_invoice(
+    await bot.send_invoice(
+        chat_id=message.from_user.id,
         title=f"Покупка игры: {game.name}",
         description=f"Описание игры: {game.description}",
         payload=f"buy-game:{game.id}",
